@@ -268,10 +268,56 @@ function hexBoardDefinition(params) {
     this.onCellDataChanged = function(event) {
         //TODO Allow transition animations to be implimented for various changes, with examples.
         
-        //Currentlly cell moves are done by re-adding an itme with new cell co-ordinates, no z-index param, need to add/re-add all items in the desired order
+        //Currentlly cell moves are done by re-adding an item with new cell co-ordinates, no z-index param, need to add/re-add all items in the desired order
         //Can do removes individually though
 
-        
+        for (var i = 0; i < event.removed.length; i++) {
+            var item = event.removed[i];
+            var groupKey = item.u+":"+item.v;
+            var cellGroup;
+            if (cellGroupsMap.hasOwnProperty(groupKey)) {
+                cellGroup = cellGroupsMap[groupKey];
+            }
+            if (!cellGroup) {
+                //Invalid item! Throw a hissy fit!
+                continue;
+            }
+            var itemGroup = cellGroup[item.key];
+            //Clean up the reference
+            //delete cellGroup[item.key];
+            var parentGroup = itemGroup.parent;
+            if (itemGroup.children.length == 2) {
+                //The itemGroup has both an item and a child,
+                itemGroup.children[1].position = itemGroup.position;
+                parentGroup.addChild(itemGroup.children[1]);
+                itemGroup.remove();
+                
+            } else {
+                //This item had been the tail group
+                cellGroup.tailGroup = parentGroup;
+                itemGroup.remove();
+            }
+            
+            cellGroup.drawnItemCount--;
+            //TODO Hard coding the windowing here. It will work with my example drawn item factory, but might not work with other's customizations
+            if (cellGroup.drawnItemCount > 5) {
+            	cellGroup.maxDy = 5 * (cellGroup.drawnItemCount - 5); //allow to scroll 5 px for each item.outside the allowed window of 5 items
+                board.windowCell(cellGroup);
+                if (cellGroup.dy > cellGroup.maxDy) {
+                   cellGroup.baseGroup.position.y = cellGroup.baseGroup.position.y - (cellGroup.dy - cellGroup.maxDy);
+                   cellGroup.dy = cellGroup.maxDy;
+                }
+            } else if (cellGroup.drawnItemCount == 5) {
+            	//We can no longer scroll the items,
+            	cellGroup.maxDy = 0;
+            	if (cellGroup.dy > cellGroup.maxDy) {
+		    cellGroup.baseGroup.position.y = cellGroup.baseGroup.position.y - (cellGroup.dy - cellGroup.maxDy);
+		    cellGroup.dy = cellGroup.maxDy;
+                }
+            } 
+            board.windowCell(cellGroup);
+            
+        }
 
         for (var i = 0; i < event.added.length; i++) {
             var item = event.added[i];
@@ -297,22 +343,21 @@ function hexBoardDefinition(params) {
                 cellGroup.telescopePoint = new paper.Point(0, 0);
                 
                 var pixelCoordinates = hexDimensions.getPixelCoordinates(item.u, item.v);
-                pixelCoordinates.y = pixelCoordinates.y/2
-                cellGroup.position = new paper.Point(pixelCoordinates.x, pixelCoordinates.y);
+                cellGroup.position = new paper.Point(pixelCoordinates.x + dx, pixelCoordinates.y/2 + dy);
                 cellGroupsMap[groupKey] = cellGroup;
                 //decorate the cell group with various information we'll need
                 cellGroup.mouseDown = false;
-                cellGroup.originalYPosition = cellGroup.position.y;
+                cellGroup.originalYPosition = pixelCoordinates.y/2;
                 cellGroup.dy = 0;
                 cellGroup.maxDy = 0;
                 cellGroup.drawnItemCount = 0;
-                cellGroup.baseGroup = itemGroup;
+                
                 //Set an on click to the cellGroup to allow for cell item paging/scrolling
                 cellGroup.onMouseDown = function(e) {
 		    clickedGroup = this;
                 };
 
-                //Use a search tree with the Y co-ord as primary index, node could have second search tree with X co-ord as secondary
+                //Use a search tree with the unmodified Y co-ord as primary index, and unmodified X coordinate as the secondary
                 zindex = parseFloat(pixelCoordinates.y +"."+pixelCoordinates.x);
                 zindexSplayTree.insert(zindex, cellGroup);
                 //Insert group into cellsGroup before the found child
@@ -330,9 +375,16 @@ function hexBoardDefinition(params) {
                 cellGroup.overHex = instance;
             }
             
+            //add the itemGroup with the item's key to the cellgroup so it can be removed easily
+            cellGroup[item.key] = itemGroup;
+            
             //add the drawnItem, to the tail of the telescope chain,
             cellGroup.tailGroup.addChild(itemGroup);
             cellGroup.drawnItemCount++;
+            
+            if (cellGroup.drawnItemCount == 1) {
+                cellGroup.baseGroup = itemGroup;
+            }
 
             //set the position to where the telescope group says it should go. Paper.js positions aren't relative, though further translation will be applied to both parent and child
             itemGroup.position = new paper.Point(cellGroup.tailGroup.telescopePoint.x + cellGroup.tailGroup.position.x, 
@@ -369,7 +421,13 @@ function baseCellDataSource() {
     
     this.addItems = function(items) {
         for (var i = 0; i < listeners.length; i++) {
-	    listeners[i].onCellDataChanged({added:items});
+	    listeners[i].onCellDataChanged({added:items, removed:[]});
+        }
+    }
+
+    this.removeItems = function(items) {
+        for (var i = 0; i < listeners.length; i++) {
+	    listeners[i].onCellDataChanged({added:[], removed:items});
         }
     }
 };
