@@ -147,8 +147,7 @@ function hexBoardDefinition(params) {
              var dragDy = e.point.y - clickedY;
              var eventDy = e.point.y - latestY;
              latestY = e.point.y;
-             
-             
+
              //If trying to scroll upwards past original position, stop at original position
              if (dragDy < minGroupDy || clickedGroup.dy + eventDy <= 0) {
                  clickedGroup.baseGroup.position.y = clickedGroup.originalYPosition + dy; //Still setting the position absolutely, not relative to the cell group's group
@@ -158,17 +157,15 @@ function hexBoardDefinition(params) {
                  clickedGroup.dy = clickedGroup.maxDy;
              } else {
                 //Neither too hot, or too cold. Drag the group up or down, and set the item visibillity
-             	clickedGroup.baseGroup.position.y = clickedGroup.baseGroup.position.y + eventDy;
-             	clickedGroup.dy = clickedGroup.dy + eventDy;
-
-             	board.windowCell(clickedGroup);
+                 clickedGroup.baseGroup.position.y = clickedGroup.baseGroup.position.y + eventDy;
+                 clickedGroup.dy = clickedGroup.dy + eventDy;
              }
-             
+             board.windowCell(clickedGroup);
          } else {
             //general dragging, translate all cell groups. Position the grid to look infinite
              dx = dx + e.point.x - latestX;
-	     dy = dy + e.point.y - latestY;
-	     latestX = e.point.x;
+             dy = dy + e.point.y - latestY;
+             latestX = e.point.x;
              latestY = e.point.y;
              //document.getElementById("result").innerHTML += "dx:"+dx+" dy:"+dy;
              //TODO The modulo operations assume a pointy side up orientation
