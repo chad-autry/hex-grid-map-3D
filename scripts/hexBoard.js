@@ -134,6 +134,7 @@ function hexBoardDefinition(params) {
 
     //TODO Impliment configurable isometric/diametric angles. The division by 2 is to support traditional game diametric (nearly isometric)
     var dyModulo = (hexDimensions.hexagon_wide_width + hexDimensions.edgeSize)/2;
+    var dxModulo = hexDimensions.hexagon_height;
     tool.onMouseMove = function(e) {
          if (down == false) {
              return;
@@ -167,16 +168,32 @@ function hexBoardDefinition(params) {
              dy = dy + e.point.y - latestY;
              latestX = e.point.x;
              latestY = e.point.y;
-             //document.getElementById("result").innerHTML += "dx:"+dx+" dy:"+dy;
-             //TODO The modulo operations assume a pointy side up orientation
-             gridGroup.position.x = dx%hexDimensions.hexagon_height;
-             gridGroup.position.y = dy%dyModulo;
-             cellsGroup.position.x = dx;
-             cellsGroup.position.y = dy;
+             board.updatePostion()
          }
          //paper.view.update();
      };
      
+     /**
+      * Update x/y positions based on the current dx and dy
+      * Will call into the background and foreground update functions
+      */
+     this.updatePostion = function() {
+         gridGroup.position.x = dx%dxModulo;
+         gridGroup.position.y = dy%dyModulo;
+         cellsGroup.position.x = dx;
+         cellsGroup.position.y = dy;
+     }
+     
+     /**
+      * Utility function to center the board on a cell
+      */
+     this.centerOnCell = function(u, v) {
+         var pixelCoordinates = hexDimensions.getPixelCoordinates(u, v);
+         dx = pixelCoordinates.x + paper.view.size.width/2;
+         dy = pixelCoordinates.y/2 + paper.view.size.height/2; //TODO Dynamic scaling based on perspective
+         this.updatePostion();
+         paper.view.update();
+     }
      
      /**
       * If someone wants to make a fancier windowing function, this is where to do it
