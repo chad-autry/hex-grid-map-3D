@@ -29,11 +29,12 @@ function hexBoardDefinition(params) {
 
      var canvas = document.getElementById(params.containerId);
 
-    var board = this;
+     var board = this;
 
      paper.setup(canvas);
 
      //Instantiate the groups in the desired z-index order
+     var backgroundGroup = new paper.Group;
      var gridGroup = new paper.Group;
      var cellsGroup = new paper.Group;
 
@@ -104,6 +105,12 @@ function hexBoardDefinition(params) {
         }
     }
     
+    var raster = gridGroup.rasterize();
+    //Normalize the raster's pivot to be the current 0,0 position
+    raster.pivot = new paper.Point(0 - raster.position.x, 0 - raster.position.y);
+
+    gridGroup.remove();
+    gridGroup = raster;
     paper.view.draw();
     
     
@@ -182,6 +189,7 @@ function hexBoardDefinition(params) {
          gridGroup.position.y = dy%dyModulo;
          cellsGroup.position.x = dx;
          cellsGroup.position.y = dy;
+         this.updateBackgroundPosition();
      }
      
      /**
@@ -192,7 +200,12 @@ function hexBoardDefinition(params) {
          dx = pixelCoordinates.x + paper.view.size.width/2;
          dy = pixelCoordinates.y/2 + paper.view.size.height/2; //TODO Dynamic scaling based on perspective
          this.updatePostion();
+         var date1 = new Date().getTime();
+
          paper.view.update();
+         var date2 = new Date().getTime();
+          document.getElementById("result").innerHTML = "Draw Time: " + (date2 - date1) + " ms";
+
      }
      
      /**
