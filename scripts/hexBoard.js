@@ -94,13 +94,11 @@ function hexBoardDefinition(params) {
     var bottomRight = hexDimensions.getReferencePoint( paper.view.size.width,2*paper.view.size.height);
     var topRight = hexDimensions.getReferencePoint(paper.view.size.width, 0);
 
-    
-    
     //TODO This loop is assuming default orientation of the grid
 
     //Note: The (+2) and (-2) values are to give extra slack around the edges for scrolling, don't want to see an incomplete grid appear
     for (var i =  -2; i <= bottomRight.u + 2; i++) {
-        for (var j =  -Math.abs(Math.round(i/2)) - 2; j < topRight.v - Math.ceil(i/2) + 2; j++) {
+        for (var j =  -Math.abs(Math.round(i/2)) - 2; j <= topRight.v - Math.ceil(i/2) + 2; j++) {
             var pixelCoordinates = hexDimensions.getPixelCoordinates(i, j);
             pixelCoordinates.y = pixelCoordinates.y*verticalScaling;
             var instance = halfHexSymbol.place();
@@ -109,7 +107,7 @@ function hexBoardDefinition(params) {
             gridGroup.addChild(instance);
         }
     }
-    
+
     //Rasterize the grid to improve performance.
     var raster = gridGroup.rasterize();
     //Normalize the raster's pivot to be the current 0,0 position
@@ -118,11 +116,9 @@ function hexBoardDefinition(params) {
     gridGroup.remove();
     gridGroup = raster;
     paper.view.draw();
-    
-    
+
     var tool = new paper.Tool();
 
-    
      //Set up the psuedo drag for the grid
      var down = false;
      var mousemoved = false;
