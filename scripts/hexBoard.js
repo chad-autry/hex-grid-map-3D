@@ -7,40 +7,45 @@
   * Constructor for the hex board, accepts all options as a map of parameters
   */
 function hexBoardDefinition(params) {
+    //Get all the variables which come from the parameters
+    
+    //The factory which will provide the paper.js Item to draw
+    var drawnItemFactory = params.drawnItemFactory;
+    var canvas = document.getElementById(params.containerId);
+    var hexDimensions = new hexDefinition(params.edgeSize);
+    var gridLineWidth = params.edgeWidth;
 
     //Add this board as a listener to the cell dataSource. this.onCellDataChanged will be called when items change.
     params.cellDataSource.addListener(this);
+    var gridColor = params.hasOwnProperty('gridColor') ? paramas.gridColor:'silver';
+    var stackStep = params.hasOwnProperty('stackStep') ? paramas.gridColor:5; // the number of pixels to leave between stack items
+    var verticalScaling = params.hasOwnProperty('verticalScaling') ? paramas.verticalScaling:.5; // The amount to scale the grid by vertically (.5 is traditional "near isometric")
+
+    //Now the board variables which do not comes from the initial params
+    var dx = 0; //The current translation in x of the map
+    var dy = 0; // the current translation in y of the map
     
-    //Get the factory which will provide the paper.js Item to draw
-    var drawnItemFactory = params.drawnItemFactory;
 
-     // having an edge width be a multiple of 5 makes for integer co-ordinates
-     var hexDimensions = new hexDefinition(params.edgeSize)
-     var rotation = 0;
-     var dx = 0; //The current translation in x of the map
-     var dy = 0; // the current translation in y of the map
-     var stackStep = 5;// the number of pixels to leave between stack items //TODO let the spacing be specified by instantiating app, modify for perspective
-     var gridLineWidth = params.edgeWidth;
-     var cellData;
-     var gridColor='silver'; //TODO let let style be supplied by instantiating app
-     var paths; //Paths which can be drawn on the board
-     var cellGroupsMap = {}; //empty map object to reference the cell groups from
-     var zindexSplayTree = new SplayTree(); // A search tree used to keep the s groups sorted for insertion into the cell group
+    var cellGroupsMap = {}; //empty map object to reference the individual cell groups by co-ordinate
+    var zindexSplayTree = new SplayTree(); // A search tree used to keep the individual cell groups sorted for insertion into the parent cell group
 
-     var canvas = document.getElementById(params.containerId);
+    //A reference to the board for functions
+    var board = this;
 
-     var board = this;
+    //Setup paper.js
+    paper.setup(canvas);
 
-     paper.setup(canvas);
+    //Instantiate the groups in the desired z-index order
+    var backgroundGroup = new paper.Group;
+    var gridGroup = new paper.Group;
+    var cellsGroup = new paper.Group;
+    var foregroundGroup = new paper.Group;
 
-     //Instantiate the groups in the desired z-index order
-     var backgroundGroup = new paper.Group;
-     var gridGroup = new paper.Group;
-     var cellsGroup = new paper.Group;
-
-     //Set the pivot points, else paper.js will try to re-compute it to the center
-     gridGroup.pivot = new paper.Point(0, 0);
-     cellsGroup.pivot = new paper.Point(0, 0);
+    //Set the group pivot points, else paper.js will try to re-compute it to the center
+    backgroundGroup.pivot = new paper.Point(0, 0);
+    gridGroup.pivot = new paper.Point(0, 0);
+    cellsGroup.pivot = new paper.Point(0, 0);
+    foregroundGroup.pivot = new paper.Point(0, 0);
 
     //TODO Migrate re-setable orientation, perspective, and grid line style to its own method
 
@@ -97,7 +102,7 @@ function hexBoardDefinition(params) {
     for (var i =  -2; i <= bottomRight.u + 2; i++) {
         for (var j =  -Math.abs(Math.round(i/2)) - 2; j < topRight.v - Math.ceil(i/2) + 2; j++) {
             var pixelCoordinates = hexDimensions.getPixelCoordinates(i, j);
-            pixelCoordinates.y = pixelCoordinates.y/2
+            pixelCoordinates.y = pixelCoordinates.y*verticalScaling;
             var instance = halfHexSymbol.place();
             instance.pivot = new paper.Point(0,0); //Set the pivot point, Instances do not inherit the parent symbol's pivot!
             instance.position = new paper.Point(pixelCoordinates.x, pixelCoordinates.y);
@@ -105,6 +110,7 @@ function hexBoardDefinition(params) {
         }
     }
     
+    //Rasterize the grid to improve performance.
     var raster = gridGroup.rasterize();
     //Normalize the raster's pivot to be the current 0,0 position
     raster.pivot = new paper.Point(0 - raster.position.x, 0 - raster.position.y);
@@ -139,8 +145,7 @@ function hexBoardDefinition(params) {
          }
      };
 
-    //TODO Impliment configurable isometric/diametric angles. The division by 2 is to support traditional game diametric (nearly isometric)
-    var dyModulo = (hexDimensions.hexagon_wide_width + hexDimensions.edgeSize)/2;
+    var dyModulo = (hexDimensions.hexagon_wide_width + hexDimensions.edgeSize)*verticalScaling;
     var dxModulo = hexDimensions.hexagon_height;
     tool.onMouseMove = function(e) {
          if (down == false) {
@@ -189,7 +194,7 @@ function hexBoardDefinition(params) {
          gridGroup.position.y = dy%dyModulo;
          cellsGroup.position.x = dx;
          cellsGroup.position.y = dy;
-         this.updateBackgroundPosition();
+         this.updateBackgroundPosition(backgroundGroup, dx, dy);
      }
      
      /**
@@ -198,99 +203,65 @@ function hexBoardDefinition(params) {
      this.centerOnCell = function(u, v) {
          var pixelCoordinates = hexDimensions.getPixelCoordinates(u, v);
          dx = pixelCoordinates.x + paper.view.size.width/2;
-         dy = pixelCoordinates.y/2 + paper.view.size.height/2; //TODO Dynamic scaling based on perspective
+         dy = pixelCoordinates.y*verticalScaling + paper.view.size.height/2;
          this.updatePostion();
          var date1 = new Date().getTime();
 
          paper.view.update();
          var date2 = new Date().getTime();
-          document.getElementById("result").innerHTML = "Draw Time: " + (date2 - date1) + " ms";
+         document.getElementById("result").innerHTML = "Draw Time: " + (date2 - date1) + " ms";
 
      }
-     
-     /**
-      * If someone wants to make a fancier windowing function, this is where to do it
-      * Maybe have items split apart on the edges of windowing, maybe have them shrink and grow,
-      */
-     this.windowCell = function(cellGroup) {
-             	
-	//TODO hard coded windowing for the hard coded 5 px split
-	//re-set items visibillity and opacity
-	var windowStartIndex = Math.floor(cellGroup.dy / 5);
-	var itemGroup = cellGroup.childGroup;
-	for (var i = 0; i < cellGroup.drawnItemCount; i++) {
-	    if (i < windowStartIndex - 5) {
-		//Below the window, and the transition
-		itemGroup.drawnItem.visible = false;
-	    } else if (i == windowStartIndex - 1) {
-		//Single translucent item below the window
-		itemGroup.drawnItem.visible = true;
-		itemGroup.drawnItem.opacity = .9;
-	    } else if (i == windowStartIndex - 2) {
-		//Single translucent item below the window
-		itemGroup.drawnItem.visible = true;
-		itemGroup.drawnItem.opacity = .7;
-	    } else if (i == windowStartIndex - 3) {
-		//Single translucent item below the window
-		itemGroup.drawnItem.visible = true;
-		itemGroup.drawnItem.opacity = .5;
-	    } else if (i == windowStartIndex - 4) {
-		//Single translucent item below the window
-		itemGroup.drawnItem.visible = true;
-		itemGroup.drawnItem.opacity = .3;
-	    } else if (i == windowStartIndex - 5) {
-		//Single translucent item below the window
-		itemGroup.drawnItem.visible = true;
-		itemGroup.drawnItem.opacity = .1;
-	    } else if (i > windowStartIndex + 10) {
-		//Above the window
-		itemGroup.drawnItem.visible = false;
-	    } else if (i == windowStartIndex + 6) {
-		//Single translucent item above the window
-		itemGroup.drawnItem.visible = true;
-		itemGroup.drawnItem.opacity = .9;
-	    } else if (i == windowStartIndex + 7) {
-		//Single translucent item above the window
-		itemGroup.drawnItem.visible = true;
-		itemGroup.drawnItem.opacity = .7;
-	    } else if (i == windowStartIndex + 8) {
-		//Single translucent item above the window
-		itemGroup.drawnItem.visible = true;
-		itemGroup.drawnItem.opacity = .5;
-	    } else if (i == windowStartIndex + 9) {
-		//Single translucent item above the window
-		itemGroup.drawnItem.visible = true;
-		itemGroup.drawnItem.opacity = .3;
-	    } else if (i == windowStartIndex + 10) {
-		//Single translucent item above the window
-		itemGroup.drawnItem.visible = true;
-		itemGroup.drawnItem.opacity = .1;
-	    } else {
-		//Inside the window
-		itemGroup.drawnItem.visible = true;
-		itemGroup.drawnItem.opacity = 1;
-	    }
-	    itemGroup = itemGroup.childGroup;
-	}
-     };
-     
-     //TODO onMouseOut does not seem to work. However, mouse events still seem to happen when outside of the paper.js view. So the annoying effects onMouseOut was intended to fix don't show up anyways
-     tool.onMouseLeave = function(e) {
-         if (down == false) {
-             return;
-         } 
-         down = false;
-         clickedGroup = null;
-         if (mousemoved) {
-             return;
-         }
-     };
-     tool.onMouseUp = tool.onMouseLeave;
-     
+
+    /**
+     * If someone wants to make a fancier windowing function, this is where to do it
+     * Maybe have items split apart on the edges of windowing, maybe have them shrink and grow,
+     */
+    this.windowCell = function(cellGroup) {
+        //re-set items visibillity and opacity
+        var windowStartIndex = Math.floor(cellGroup.dy / stackStep);
+        var itemGroup = cellGroup.childGroup;
+        for (var i = 0; i < cellGroup.drawnItemCount; i++) {
+            if (i < windowStartIndex - 5) {
+                 //Below the window, and the transition
+                itemGroup.drawnItem.visible = false;
+            } else if (i > windowStartIndex + 9) {
+                //Above the window
+                itemGroup.drawnItem.visible = false;
+            } else if (i < windowStartIndex) {
+                //Calculate opacity as a percentage of the pixels till out of the window
+                itemGroup.drawnItem.visible = true;
+                itemGroup.drawnItem.opacity = (1 - ((cellGroup.dy - i * stackStep) / (stackStep * 7))); // the 7 term is 5 translucent items + 2, the 2 are "false" items at 0 and 1
+            } else if (i > windowStartIndex + 4) {
+                //Calculate opacity as a percentage of the pixels till out of the window
+                itemGroup.drawnItem.visible = true;
+                itemGroup.drawnItem.opacity = (1 - (((i-4) * stackStep - cellGroup.dy) / (stackStep * 7))); // the 7 term is 5 translucent items + 2, the 2 are "false" items at 0 and 1
+            } else {
+                //Inside the window
+                itemGroup.drawnItem.visible = true;
+                itemGroup.drawnItem.opacity = 1;
+            }
+            itemGroup = itemGroup.childGroup;
+        }
+    };
+
+    //TODO onMouseOut does not seem to work. However, mouse events still seem to happen when outside of the paper.js view. So the annoying effects onMouseOut was intended to fix don't show up anyways
+    tool.onMouseLeave = function(e) {
+        if (down == false) {
+            return;
+        } 
+        down = false;
+        clickedGroup = null;
+        if (mousemoved) {
+            return;
+        }
+    };
+    tool.onMouseUp = tool.onMouseLeave;
 
 
     /**
-     *Called when objects are added to cells, removed from cells, re-ordered in cells, 
+     * Called when objects are added to cells, removed from cells, re-ordered in cells,
+     * Implement a telescoping-linked list strategy so individual adds, removes, and cell scrolling are all fast
      */
     this.onCellDataChanged = function(event) {
         //TODO Allow transition animations to be implimented for various changes, with examples.
@@ -341,6 +312,9 @@ function hexBoardDefinition(params) {
 		    cellGroup.baseGroup.position.y = cellGroup.baseGroup.position.y - (cellGroup.dy - cellGroup.maxDy);
 		    cellGroup.dy = cellGroup.maxDy;
                 }
+                //Reomove the hex component being drawn over items
+                cellGroup.overHex.remove();
+                delete cellGroup.overHex;
             } 
             board.windowCell(cellGroup);
             
@@ -354,7 +328,7 @@ function hexBoardDefinition(params) {
             itemGroup.addChild(drawnItem);
             itemGroup.drawnItem = drawnItem;
             //Save where the next item in the cell should go relative to this item
-            //TODO Add in the item's height. Do so according to the perspective (the items from the test all have 0 height)
+            //TODO Add in the item's height. Do so according to the perspective (my exampleDrawnItemFactory items from the test all have 0 height)
             itemGroup.telescopePoint = new paper.Point(0, -stackStep);
             
             //Get the cell group the drawn item should be a part of
@@ -370,11 +344,11 @@ function hexBoardDefinition(params) {
                 cellGroup.telescopePoint = new paper.Point(0, 0);
                 
                 var pixelCoordinates = hexDimensions.getPixelCoordinates(item.u, item.v);
-                cellGroup.position = new paper.Point(pixelCoordinates.x + dx, pixelCoordinates.y/2 + dy);
+                cellGroup.position = new paper.Point(pixelCoordinates.x + dx, pixelCoordinates.y*verticalScaling + dy);
                 cellGroupsMap[groupKey] = cellGroup;
                 //decorate the cell group with various information we'll need
                 cellGroup.mouseDown = false;
-                cellGroup.originalYPosition = pixelCoordinates.y/2;
+                cellGroup.originalYPosition = pixelCoordinates.y*verticalScaling;
                 cellGroup.dy = 0;
                 cellGroup.maxDy = 0;
                 cellGroup.drawnItemCount = 0;
@@ -394,12 +368,7 @@ function hexBoardDefinition(params) {
                 } else {
                    cellsGroup.insertChild(0, cellGroup);
                 }
-                
-                var instance = overHexSymbol.place();
-		instance.pivot = new paper.Point(0,0); //Set the pivot point, Instances do not inherit the parent symbol's pivot!
-                instance.position = cellGroup.position;
-                cellGroup.addChild(instance);
-                cellGroup.overHex = instance;
+
             }
             
             //add the itemGroup with the item's key to the cellgroup so it can be removed easily
@@ -420,19 +389,30 @@ function hexBoardDefinition(params) {
             cellGroup.tailGroup.childGroup = itemGroup;
             cellGroup.tailGroup = itemGroup;
             
-            //TODO Hard coding the windowing here. It will work with my example drawn item factory, but might not work with other's customizations
+            //Set up the windowing, allow for 5 fully visible items
             if (cellGroup.drawnItemCount > 5) {
-            	cellGroup.maxDy = 5 * (cellGroup.drawnItemCount - 5); //allow to scroll 5 px for each item.outside the allowed window of 5 items
+            	cellGroup.maxDy = stackStep * (cellGroup.drawnItemCount - 5); //allow to scroll stackStep px for each item.outside the allowed window of 5 fully visible items
                 board.windowCell(cellGroup);
+                
+                if (!cellGroup.hasOwnProperty('overHex')) {
+                    var instance = overHexSymbol.place();
+                    instance.pivot = new paper.Point(0,0); //Set the pivot point, Instances do not inherit the parent symbol's pivot!
+                    instance.position = cellGroup.position;
+                    cellGroup.addChild(instance);
+                    cellGroup.overHex = instance;
+                }
+                cellGroup.overHex.bringToFront();
             } else {
-                cellGroup.maxDy = 0;   
+                cellGroup.maxDy = 0;
             }
-            cellGroup.overHex.bringToFront();
         }
         paper.view.update();
     
     }
 };
+/**
+ * That is it for the HexBoard Object itself! Below are some utility objects which will be moved into their own files
+ */
 
 
 /*
