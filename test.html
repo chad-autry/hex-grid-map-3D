@@ -12,7 +12,10 @@
     <script src="scripts/hexagon.js"></script>
     <script src="scripts/splayTree.js"></script>
     <script src="scripts/paper-core.min.js"></script>
+    <script src="scripts/exampleBackgroundContext.js"></script>
     <script src="scripts/hexBoard.js"></script>
+
+
 
 
     <script>
@@ -20,11 +23,13 @@
     var board;
     var cellDataSource;
         window.onload = function() {
-
+            var backgroundContext = new exampleBackgroundContext();
             var container = document.getElementById("myBoard");
             cellDataSource = new baseCellDataSource();
             var drawnItemFactory = new exampleDrawnItemFactory();
-            board = new hexBoardDefinition({containerId:"myBoard", edgeSize:45, edgeWidth:3, width:900, height:800, cellDataSource: cellDataSource, drawnItemFactory: drawnItemFactory});
+
+            board = new hexBoard({containerId:"myBoard", edgeSize:45, edgeWidth:3, width:900, height:800, cellDataSource: cellDataSource, drawnItemFactory: drawnItemFactory,
+                initBackground:backgroundContext.initBackground, updateBackgroundPosition: backgroundContext.updateBackgroundPosition});
 
 			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
 			cellDataSource.addItems([{radius: 30, sides: 3, color: 'purple', u:1, v:1}, {radius: 30, sides: 3, color: 'red', u:1, v:0}]);

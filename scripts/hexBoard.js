@@ -1,12 +1,12 @@
 /*
  * Defines an isometric hexagonal board for web games
  */
- 
- 
- /*
-  * Constructor for the hex board, accepts all options as a map of parameters
-  */
-function hexBoardDefinition(params) {
+
+
+/*
+ * Constructor for the hex board, accepts all options as a map of parameters
+ */
+function hexBoard(params) {
     //Get all the variables which come from the parameters
     
     //The factory which will provide the paper.js Item to draw
@@ -20,6 +20,11 @@ function hexBoardDefinition(params) {
     var gridColor = params.hasOwnProperty('gridColor') ? paramas.gridColor:'silver';
     var stackStep = params.hasOwnProperty('stackStep') ? paramas.gridColor:5; // the number of pixels to leave between stack items
     var verticalScaling = params.hasOwnProperty('verticalScaling') ? paramas.verticalScaling:.5; // The amount to scale the grid by vertically (.5 is traditional "near isometric")
+
+    //Set the background update function if it was passed in
+    if(params.hasOwnProperty('updateBackgroundPosition')) {
+        this.updateBackgroundPosition = params.updateBackgroundPosition
+    }
 
     //Now the board variables which do not comes from the initial params
     var dx = 0; //The current translation in x of the map
@@ -46,6 +51,11 @@ function hexBoardDefinition(params) {
     gridGroup.pivot = new paper.Point(0, 0);
     cellsGroup.pivot = new paper.Point(0, 0);
     foregroundGroup.pivot = new paper.Point(0, 0);
+    
+    //Init the background if there was an init method on the params
+    if(params.hasOwnProperty('initBackground')) {
+        params.initBackground(paper, backgroundGroup);
+    }
 
     //TODO Migrate re-setable orientation, perspective, and grid line style to its own method
 
@@ -206,8 +216,9 @@ function hexBoardDefinition(params) {
          paper.view.update();
          var date2 = new Date().getTime();
          document.getElementById("result").innerHTML = "Draw Time: " + (date2 - date1) + " ms";
-
      }
+
+
 
     /**
      * If someone wants to make a fancier windowing function, this is where to do it
@@ -227,11 +238,11 @@ function hexBoardDefinition(params) {
             } else if (i < windowStartIndex) {
                 //Calculate opacity as a percentage of the pixels till out of the window
                 itemGroup.drawnItem.visible = true;
-                itemGroup.drawnItem.opacity = (1 - ((cellGroup.dy - i * stackStep) / (stackStep * 7))); // the 7 term is 5 translucent items + 2, the 2 are "false" items at 0 and 1
+                itemGroup.drawnItem.opacity = (1 - ((cellGroup.dy - i * stackStep) / (stackStep * 6)));
             } else if (i > windowStartIndex + 4) {
                 //Calculate opacity as a percentage of the pixels till out of the window
                 itemGroup.drawnItem.visible = true;
-                itemGroup.drawnItem.opacity = (1 - (((i-4) * stackStep - cellGroup.dy) / (stackStep * 7))); // the 7 term is 5 translucent items + 2, the 2 are "false" items at 0 and 1
+                itemGroup.drawnItem.opacity = (1 - (((i-4) * stackStep - cellGroup.dy) / (stackStep * 6)));
             } else {
                 //Inside the window
                 itemGroup.drawnItem.visible = true;
@@ -302,11 +313,11 @@ function hexBoardDefinition(params) {
                    cellGroup.dy = cellGroup.maxDy;
                 }
             } else if (cellGroup.drawnItemCount == 5) {
-            	//We can no longer scroll the items,
-            	cellGroup.maxDy = 0;
-            	if (cellGroup.dy > cellGroup.maxDy) {
-		    cellGroup.baseGroup.position.y = cellGroup.baseGroup.position.y - (cellGroup.dy - cellGroup.maxDy);
-		    cellGroup.dy = cellGroup.maxDy;
+                //We can no longer scroll the items,
+                cellGroup.maxDy = 0;
+                if (cellGroup.dy > cellGroup.maxDy) {
+                    cellGroup.baseGroup.position.y = cellGroup.baseGroup.position.y - (cellGroup.dy - cellGroup.maxDy);
+                    cellGroup.dy = cellGroup.maxDy;
                 }
                 //Reomove the hex component being drawn over items
                 cellGroup.overHex.remove();
@@ -420,21 +431,20 @@ function baseCellDataSource() {
 
     this.addListener = function(listener) {
         listeners.push(listener);
-    }
+    };
     
     this.addItems = function(items) {
         for (var i = 0; i < listeners.length; i++) {
 	    listeners[i].onCellDataChanged({added:items, removed:[]});
         }
-    }
+    };
 
     this.removeItems = function(items) {
         for (var i = 0; i < listeners.length; i++) {
-	    listeners[i].onCellDataChanged({added:[], removed:items});
+        listeners[i].onCellDataChanged({added:[], removed:items});
         }
-    }
+    };
 };
-
 
 /*
  * This is a temporary drawnItemFactory for testing. Will move to its own file so it need not be included in apps which impliment their own
@@ -456,15 +466,20 @@ function exampleDrawnItemFactory() {
          });
          drawnItem.scale(1, .5);
          return drawnItem;
-
-     }
-
+     };
+     
     /**
      * Need to clean up cached Symbols like I do? Register for cellDataChanged events!
      * Make note that the exampleDrawnItemFactory registers second, so that it is called second on changes
      */
     this.onCellDataChanged = function(event) {
         //TODO Allow transition animations to be implimented for various changes, with examples
-    
-    }
+    };
+};
+
+/**
+ * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired background changes on grid drag
+ */
+hexBoard.prototype.updateBackgroundPosition = function(backgroundGroup, dx, dy) {
+
 };
