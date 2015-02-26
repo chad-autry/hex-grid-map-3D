@@ -59,44 +59,24 @@ function hexBoard(params) {
 
     //TODO Migrate re-setable orientation, perspective, and grid line style to its own method
 
-    //TODO See if rasterizing the hex grid improves performance
     //Create the half-hex path which will be duplicated (with different z values) to create the hex grid
-    var halfHex = new paper.Path();
+    var halfHex = new paper.Group();
     halfHex.pivot = new paper.Point(0,0); //Set the pivot point, else paper.js will try to re-compute it to the center
-    halfHex.add(new paper.Point(0, 0));
-    halfHex.add(new paper.Point(0, -hexDimensions.edgeSize));
-    halfHex.add(new paper.Point(hexDimensions.hexagon_height/2, -(hexDimensions.edgeSize + hexDimensions.h)));
-    halfHex.add(new paper.Point(hexDimensions.hexagon_height, -hexDimensions.edgeSize));
-    
+    halfHex.addChild(new paper.Path.Line(new paper.Point(0, 0), new paper.Point(0, hexDimensions.edgeSize)));
+    halfHex.addChild(new paper.Path.Line(new paper.Point(0, 0), new paper.Point(hexDimensions.hexagon_height/2, -hexDimensions.h)));
+    halfHex.addChild(new paper.Path.Line(new paper.Point(0, 0), new paper.Point(-hexDimensions.hexagon_height/2, -hexDimensions.h)));
+
     halfHex.strokeColor = gridColor;
     halfHex.strokeWidth = params.edgeWidth;
 
     //Note: Since paper.js is SVG based, this scaling is of the path co-ordinates, but does not scale the line width (the angles do not become thinner than the verticals)
-    halfHex.scale(1, .5); //TODO Provide feature to set dimetric/isometric scaling
+    halfHex.scale(1, verticalScaling);
 
-    //Re-position so the hex is centered on 0,0 and not an intersection TODO the scaling parameter in on Y
-    halfHex.position = new paper.Point(-hexDimensions.hexagon_height/2, (hexDimensions.edgeSize/2)/2);
+    //Re-position so the hex is centered on 0,0 and not an intersection
+    halfHex.position = new paper.Point(0, (hexDimensions.hexagon_wide_width*verticalScaling)/2);
 
     // Create a symbol from the path. Set "don't center" to true. If left default of false, then instances seem to have their co-ordinates recentered to their bounding box
     var halfHexSymbol = new paper.Symbol(halfHex, true);
-
-    //Create a duplicate looking set of segments to use to overlay groups so their items appear to go below gridlines
-    var overHex = new paper.Group;
-    overHex.pivot = new paper.Point(0,0); //Set the pivot point, else paper.js will try to re-compute it to the center
-    overHex.addChild(new paper.Path.Line(new paper.Point(0, 0), new paper.Point(0, hexDimensions.edgeSize)));
-    overHex.addChild(new paper.Path.Line(new paper.Point(0, 0), new paper.Point(hexDimensions.hexagon_height/2, -hexDimensions.h)));
-    overHex.addChild(new paper.Path.Line(new paper.Point(0, 0), new paper.Point(-hexDimensions.hexagon_height/2, -hexDimensions.h)));
-    
-    overHex.strokeColor = gridColor;
-    overHex.strokeWidth = params.edgeWidth;
-    //Note: Since paper.js is SVG based, this scaling is of the path co-ordinates, but does not scale the line width (the angles do not become thinner than the verticals)
-    overHex.scale(1, .5); //TODO Provide feature to set dimetric/isometric scaling
-
-    //Re-position so the hex is centered on 0,0 and not an intersection TODO the scaling parameter in on Y
-    overHex.position = new paper.Point(0, (hexDimensions.hexagon_wide_width/2)/2);
-
-    // Create a symbol from the path. Set "don't center" to true. If left default of false, then instances seem to have their co-ordinates recentered to their bounding box
-    var overHexSymbol = new paper.Symbol(overHex, true);
 
     //TODO Provide feature to set dimetric/isometric scaling (the Y dimension from getPixelCoordinaes is divided by 2, and the Y dimension of getReferenePoint is multiplied by 2)
     //For every hex, place an instance of the symbol. It will fill in the top and left half 3 segments, while the symbols from the 3 adjacent hexes will provide the bottom and right segments
@@ -106,8 +86,9 @@ function hexBoard(params) {
 
     //TODO This loop is assuming default orientation of the grid
 
-    //Note: The (+2) and (-2) values are to give extra slack around the edges for scrolling, don't want to see an incomplete grid appear
-    for (var i =  -2; i <= bottomRight.u + 2; i++) {
+    //Note: The (-3) and (+1) values are to give extra slack on the top and bottom for dragging, don't want to see an incomplete grid appear.
+    for (var i =  -3; i <= bottomRight.u + 1; i++) {
+        //Note: The (-2) and (+2) values are to give extra slack on the left and right for dragging, don't want to see an incomplete grid appear.
         for (var j =  -Math.abs(Math.round(i/2)) - 2; j <= topRight.v - Math.ceil(i/2) + 2; j++) {
             var pixelCoordinates = hexDimensions.getPixelCoordinates(i, j);
             pixelCoordinates.y = pixelCoordinates.y*verticalScaling;
@@ -402,7 +383,7 @@ function hexBoard(params) {
                 board.windowCell(cellGroup);
                 
                 if (!cellGroup.hasOwnProperty('overHex')) {
-                    var instance = overHexSymbol.place();
+                    var instance = halfHexSymbol.place();
                     instance.pivot = new paper.Point(0,0); //Set the pivot point, Instances do not inherit the parent symbol's pivot!
                     instance.position = cellGroup.position;
                     cellGroup.addChild(instance);
