@@ -12,7 +12,7 @@ function hexBoard(params) {
     //The factory which will provide the paper.js Item to draw
     var drawnItemFactory = params.drawnItemFactory;
     var canvas = document.getElementById(params.containerId);
-    var hexDimensions = new hexDefinition(params.edgeSize);
+
     var gridLineWidth = params.edgeWidth;
 
     //Add this board as a listener to the cell dataSource. this.onCellDataChanged will be called when items change.
@@ -20,7 +20,7 @@ function hexBoard(params) {
     var gridColor = params.hasOwnProperty('gridColor') ? paramas.gridColor:'silver';
     var stackStep = params.hasOwnProperty('stackStep') ? paramas.gridColor:5; // the number of pixels to leave between stack items
     var verticalScaling = params.hasOwnProperty('verticalScaling') ? paramas.verticalScaling:.5; // The amount to scale the grid by vertically (.5 is traditional "near isometric")
-
+    var hexDimensions = new hexDefinition(params.edgeSize, verticalScaling);
     //Set the background update function if it was passed in
     if(params.hasOwnProperty('updateBackgroundPosition')) {
         this.updateBackgroundPosition = params.updateBackgroundPosition
@@ -62,26 +62,27 @@ function hexBoard(params) {
     //Create the half-hex path which will be duplicated (with different z values) to create the hex grid
     var halfHex = new paper.Group();
     halfHex.pivot = new paper.Point(0,0); //Set the pivot point, else paper.js will try to re-compute it to the center
-    halfHex.addChild(new paper.Path.Line(new paper.Point(0, 0), new paper.Point(0, hexDimensions.edgeSize)));
-    halfHex.addChild(new paper.Path.Line(new paper.Point(0, 0), new paper.Point(hexDimensions.hexagon_height/2, -hexDimensions.h)));
-    halfHex.addChild(new paper.Path.Line(new paper.Point(0, 0), new paper.Point(-hexDimensions.hexagon_height/2, -hexDimensions.h)));
+    var zeroZeroPixelCoordinates = hexDimensions.getPixelCoordinates(0, 0);
+    //The first point of each line is the lower "junction" point of the point up hexagon
+    //Draw the vertical line first
+    halfHex.addChild(new paper.Path.Line(new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_half_wide_width), 
+        new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_half_wide_width + 2*hexDimensions.hexagon_scaled_half_edge_size)));
+    //Next the bottom right line
+    halfHex.addChild(new paper.Path.Line(new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_half_wide_width),
+        new paper.Point(zeroZeroPixelCoordinates.x + hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_scaled_half_edge_size)));
+    //Next the bottom left
+    halfHex.addChild(new paper.Path.Line(new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_half_wide_width),
+        new paper.Point(zeroZeroPixelCoordinates.x - hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_scaled_half_edge_size)));
 
     halfHex.strokeColor = gridColor;
     halfHex.strokeWidth = params.edgeWidth;
 
-    //Note: Since paper.js is SVG based, this scaling is of the path co-ordinates, but does not scale the line width (the angles do not become thinner than the verticals)
-    halfHex.scale(1, verticalScaling);
-
-    //Re-position so the hex is centered on 0,0 and not an intersection
-    halfHex.position = new paper.Point(0, (hexDimensions.hexagon_wide_width*verticalScaling)/2);
-
     // Create a symbol from the path. Set "don't center" to true. If left default of false, then instances seem to have their co-ordinates recentered to their bounding box
     var halfHexSymbol = new paper.Symbol(halfHex, true);
 
-    //TODO Provide feature to set dimetric/isometric scaling (the Y dimension from getPixelCoordinaes is divided by 2, and the Y dimension of getReferenePoint is multiplied by 2)
     //For every hex, place an instance of the symbol. It will fill in the top and left half 3 segments, while the symbols from the 3 adjacent hexes will provide the bottom and right segments
     //Top left hex is 0,0
-    var bottomRight = hexDimensions.getReferencePoint( paper.view.size.width,2*paper.view.size.height);
+    var bottomRight = hexDimensions.getReferencePoint( paper.view.size.width, paper.view.size.height);
     var topRight = hexDimensions.getReferencePoint(paper.view.size.width, 0);
 
     //TODO This loop is assuming default orientation of the grid
@@ -91,9 +92,8 @@ function hexBoard(params) {
         //Note: The (-2) and (+2) values are to give extra slack on the left and right for dragging, don't want to see an incomplete grid appear.
         for (var j =  -Math.abs(Math.round(i/2)) - 2; j <= topRight.v - Math.ceil(i/2) + 2; j++) {
             var pixelCoordinates = hexDimensions.getPixelCoordinates(i, j);
-            pixelCoordinates.y = pixelCoordinates.y*verticalScaling;
             var instance = halfHexSymbol.place();
-            instance.pivot = new paper.Point(0,0); //Set the pivot point, Instances do not inherit the parent symbol's pivot!
+            instance.pivot = new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y); //Set the pivot point, Instances do not inherit the parent symbol's pivot!
             instance.position = new paper.Point(pixelCoordinates.x, pixelCoordinates.y);
             gridGroup.addChild(instance);
         }
@@ -132,8 +132,8 @@ function hexBoard(params) {
          }
      };
 
-    var dyModulo = (hexDimensions.hexagon_wide_width + hexDimensions.edgeSize)*verticalScaling;
-    var dxModulo = hexDimensions.hexagon_height;
+    var dyModulo = (hexDimensions.hexagon_wide_width + 2*hexDimensions.hexagon_scaled_half_edge_size);
+    var dxModulo = hexDimensions.hexagon_edge_to_edge_width;
     tool.onMouseMove = function(e) {
          if (down == false) {
              return;
@@ -189,8 +189,8 @@ function hexBoard(params) {
       */
      this.centerOnCell = function(u, v) {
          var pixelCoordinates = hexDimensions.getPixelCoordinates(u, v);
-         dx = pixelCoordinates.x + paper.view.size.width/2;
-         dy = pixelCoordinates.y*verticalScaling + paper.view.size.height/2;
+         dx = Math.floor(pixelCoordinates.x) + paper.view.size.width/2;
+         dy = Math.floor(pixelCoordinates.y) + paper.view.size.height/2;
          this.updatePostion();
          var date1 = new Date().getTime();
 
@@ -332,11 +332,11 @@ function hexBoard(params) {
                 cellGroup.telescopePoint = new paper.Point(0, 0);
                 
                 var pixelCoordinates = hexDimensions.getPixelCoordinates(item.u, item.v);
-                cellGroup.position = new paper.Point(pixelCoordinates.x + dx, pixelCoordinates.y*verticalScaling + dy);
+                cellGroup.position = new paper.Point(pixelCoordinates.x + dx, pixelCoordinates.y + dy);
                 cellGroupsMap[groupKey] = cellGroup;
                 //decorate the cell group with various information we'll need
                 cellGroup.mouseDown = false;
-                cellGroup.originalYPosition = pixelCoordinates.y*verticalScaling;
+                cellGroup.originalYPosition = pixelCoordinates.y;
                 cellGroup.dy = 0;
                 cellGroup.maxDy = 0;
                 cellGroup.drawnItemCount = 0;
@@ -384,7 +384,7 @@ function hexBoard(params) {
                 
                 if (!cellGroup.hasOwnProperty('overHex')) {
                     var instance = halfHexSymbol.place();
-                    instance.pivot = new paper.Point(0,0); //Set the pivot point, Instances do not inherit the parent symbol's pivot!
+                    instance.pivot = new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y); //Set the pivot point, Instances do not inherit the parent symbol's pivot!
                     instance.position = cellGroup.position;
                     cellGroup.addChild(instance);
                     cellGroup.overHex = instance;
