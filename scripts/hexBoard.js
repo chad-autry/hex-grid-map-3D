@@ -76,6 +76,7 @@ function hexBoard(params) {
 
     halfHex.strokeColor = gridColor;
     halfHex.strokeWidth = params.edgeWidth;
+    halfHex.strokeCap = 'square';
 
     // Create a symbol from the path. Set "don't center" to true. If left default of false, then instances seem to have their co-ordinates recentered to their bounding box
     var halfHexSymbol = new paper.Symbol(halfHex, true);
@@ -189,8 +190,8 @@ function hexBoard(params) {
       */
      this.centerOnCell = function(u, v) {
          var pixelCoordinates = hexDimensions.getPixelCoordinates(u, v);
-         dx = Math.floor(pixelCoordinates.x) + paper.view.size.width/2;
-         dy = Math.floor(pixelCoordinates.y) + paper.view.size.height/2;
+         dx = Math.floor(pixelCoordinates.x + paper.view.size.width/2);
+         dy = Math.floor(pixelCoordinates.y + paper.view.size.height/2);
          this.updatePostion();
          var date1 = new Date().getTime();
 
