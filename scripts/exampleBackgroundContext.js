@@ -1,3 +1,4 @@
+var paper = require('browserifyable-paper');
 /**
  * This is an example context with methods to draw and update the background of a hexBoard
  * Drawing a starry background, since I'm personally interested in making a space game.
@@ -76,3 +77,5 @@ exampleBackgroundContext.prototype.createStarGroup = function( maxBrightness, ma
     starRaster.pivot = new paper.Point(0 - starRaster.position.x, 0 - starRaster.position.y);
     return starRaster;
 };
+
+module.exports = exampleBackgroundContext;

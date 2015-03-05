@@ -1,3 +1,6 @@
+var paper = require('browserifyable-paper');
+var SplayTree = require('./splayTree.js');
+var HexDefinition = require('canvas-hexagon');
 /*
  * Defines an isometric hexagonal board for web games
  */
@@ -20,7 +23,7 @@ function hexBoard(params) {
     var gridColor = params.hasOwnProperty('gridColor') ? paramas.gridColor:'silver';
     var stackStep = params.hasOwnProperty('stackStep') ? paramas.gridColor:5; // the number of pixels to leave between stack items
     var verticalScaling = params.hasOwnProperty('verticalScaling') ? paramas.verticalScaling:.5; // The amount to scale the grid by vertically (.5 is traditional "near isometric")
-    var hexDimensions = new hexDefinition(params.edgeSize, verticalScaling);
+    var hexDimensions = new HexDefinition(params.edgeSize, verticalScaling);
     //Set the background update function if it was passed in
     if(params.hasOwnProperty('updateBackgroundPosition')) {
         this.updateBackgroundPosition = params.updateBackgroundPosition
@@ -183,7 +186,7 @@ function hexBoard(params) {
          cellsGroup.position.x = dx;
          cellsGroup.position.y = dy;
          this.updateBackgroundPosition(backgroundGroup, dx, dy);
-     }
+     };
      
      /**
       * Utility function to center the board on a cell
@@ -399,65 +402,6 @@ function hexBoard(params) {
     
     }
 };
-/**
- * That is it for the HexBoard Object itself! Below are some utility objects which will be moved into their own files
- */
-
-
-/*
- * This function defines the base datasource for cell items. Expect client applications to impliment their own datasources which will listen to this one, and add filtering/sorting etc
- */
-function baseCellDataSource() {
-    var listeners = []; //The listeners registered for change events
-    var items = []; //The data items
-
-    this.addListener = function(listener) {
-        listeners.push(listener);
-    };
-    
-    this.addItems = function(items) {
-        for (var i = 0; i < listeners.length; i++) {
-	    listeners[i].onCellDataChanged({added:items, removed:[]});
-        }
-    };
-
-    this.removeItems = function(items) {
-        for (var i = 0; i < listeners.length; i++) {
-        listeners[i].onCellDataChanged({added:[], removed:items});
-        }
-    };
-};
-
-/*
- * This is a temporary drawnItemFactory for testing. Will move to its own file so it need not be included in apps which impliment their own
- */
-function exampleDrawnItemFactory() {
-    
-    /**
-     * This is the one method required of the factory. Returns the paper.js Item to be drawn for the cellItem
-     * My expectation is the application will provide cell items which have the data required to create a paper.js drawn item
-     * Maybe they give an SVG image, maybe they provide info to create a regular polygon, maybe they do a mix.
-     */
-     this.getDrawnItemForCellItem = function(cellItem) {
-         var drawnItem = new paper.Path.RegularPolygon({
-             center: [0, 0],
-             sides: cellItem.sides,
-             radius: cellItem.radius,
-             fillColor: cellItem.color,
-             strokeColor: 'black'
-         });
-         drawnItem.scale(1, .5);
-         return drawnItem;
-     };
-     
-    /**
-     * Need to clean up cached Symbols like I do? Register for cellDataChanged events!
-     * Make note that the exampleDrawnItemFactory registers second, so that it is called second on changes
-     */
-    this.onCellDataChanged = function(event) {
-        //TODO Allow transition animations to be implimented for various changes, with examples
-    };
-};
 
 /**
  * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired background changes on grid drag
@@ -465,3 +409,5 @@ function exampleDrawnItemFactory() {
 hexBoard.prototype.updateBackgroundPosition = function(backgroundGroup, dx, dy) {
 
 };
+
+module.exports = hexBoard;

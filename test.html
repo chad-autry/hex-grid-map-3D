@@ -9,67 +9,17 @@
 
 
 </style>
-    <script src="scripts/hexagon.js"></script>
-    <script src="scripts/splayTree.js"></script>
-    <script src="scripts/paper-core.min.js"></script>
-    <script src="scripts/exampleBackgroundContext.js"></script>
-    <script src="scripts/hexBoard.js"></script>
-
-
-
-
-    <script>
-
-    var board;
-    var cellDataSource;
-        window.onload = function() {
-            var backgroundContext = new exampleBackgroundContext();
-            var container = document.getElementById("myBoard");
-            cellDataSource = new baseCellDataSource();
-            var drawnItemFactory = new exampleDrawnItemFactory();
-
-            board = new hexBoard({containerId:"myBoard", edgeSize:45, edgeWidth:3, width:900, height:800, cellDataSource: cellDataSource, drawnItemFactory: drawnItemFactory,
-                initBackground:backgroundContext.initBackground, updateBackgroundPosition: backgroundContext.updateBackgroundPosition});
-
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'purple', u:1, v:1}, {radius: 30, sides: 3, color: 'red', u:1, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 5, color: 'purple', u:1, v:0}, {radius: 30, sides: 9, color: 'red', u:0, v:1}]);
-			cellDataSource.addItems([{radius: 30, sides: 6, color: 'purple', u:4, v:2}, {radius: 30, sides: 3, color: 'red', u:5, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 7, color: 'purple', u:1, v:0}, {radius: 30, sides: 4, color: 'red', u:0, v:4}]);
-			cellDataSource.addItems([{radius: 30, sides: 8, color: 'purple', u:1, v:5}, {radius: 30, sides: 6, color: 'red', u:3, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-			cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-
-
-
-        }
-
-        var items = [];
-        var keyId = 0;
-        addItem = function() {
-        	var item = {radius: 30, sides: 3, color: 'blue', u:0, v:0, key: 'test' + keyId++}
-        	items.push(item);
-        	cellDataSource.addItems([item]);
-        }
-        removeItem = function() {
-        	var item = items.pop();
-        	cellDataSource.removeItems([item]);
-        }
-    </script>
+<script src="bundle.js"></script>
+<script>
+window.onload = function() {
+    myMain.onLoad();
+}
+</script>
 
 </head>
 <body topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0" style="height:100%">
 <div id="result"></div>
-<div id="buttons"><button onClick="addItem()">Add</button><button onClick="removeItem()">Remove</button><button onClick="board.centerOnCell(0,0)">Center on 0, 0</button></div>
+<div id="buttons"><button onClick="myMain.addItem()">Add</button><button onClick="myMain.removeItem()">Remove</button><button onClick="myMain.centerOnCell(0,0)">Center on 0, 0</button></div>
 <div id="outer" style="height:100%">
 <canvas id="myBoard" style="background-color: black; width:100%; height:100%"></div>
 

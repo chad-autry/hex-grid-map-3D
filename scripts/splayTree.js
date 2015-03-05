@@ -305,3 +305,5 @@ SplayTree.Node.prototype.traverse_ = function(f) {
     current = current.right;
   }
 };
+
+module.exports = SplayTree;

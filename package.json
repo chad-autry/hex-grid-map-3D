@@ -1,0 +1,37 @@
+{
+  "name": "hex-widget",
+  "version": "0.0.1",
+  "description": "Configureable HTML5 Canvas Hex grid",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "browserify": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chad-autry/hex-widget.git"
+  },
+  "keywords": [
+    "canvas",
+    "hexagon",
+    "grid",
+    "paper.js"
+  ],
+  "author": {
+    "name": "Chad Autry",
+    "email": "chad.autry@gmail.com",
+    "url": "http://chad-autry.github.io/"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chad-autry/hex-widget/issues"
+  },
+  "homepage": "https://github.com/chad-autry/hex-widget",
+  "dependencies": {
+    "canvas-hexagon": "git+https://git@github.com/chad-autry/canvas-hexagon",
+    "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js"
+  },
+  "devDependencies": {
+    "browserify": "^9.0.3"
+  }
+}
