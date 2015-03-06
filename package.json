@@ -4,8 +4,8 @@
   "description": "Configureable HTML5 Canvas Hex grid",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "browserify": ""
+    "browserify": "browserify ./scripts/exampleMain.js --debug --standalone myMain > bundle.js",
+    "watchify": "watchify ./scripts/exampleMain.js --debug --standalone myMain -v -o ./bundle.js"
   },
   "repository": {
     "type": "git",
@@ -32,6 +32,7 @@
     "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js"
   },
   "devDependencies": {
-    "browserify": "^9.0.3"
+    "browserify": "^9.0.3",
+    "watchify": "^2.4.0"
   }
 }
