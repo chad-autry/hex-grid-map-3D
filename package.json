@@ -28,8 +28,9 @@
   },
   "homepage": "https://github.com/chad-autry/hex-widget",
   "dependencies": {
+    "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js",
     "canvas-hexagon": "git+https://git@github.com/chad-autry/canvas-hexagon",
-    "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js"
+    "collections": "^1.2.1"
   },
   "devDependencies": {
     "browserify": "^9.0.3",

@@ -1,5 +1,5 @@
 var paper = require('browserifyable-paper');
-var SplayTree = require('./splayTree.js');
+var SortedSet = require('collections/sorted-set');
 var HexDefinition = require('canvas-hexagon');
 /*
  * Defines an isometric hexagonal board for web games
@@ -35,7 +35,10 @@ function hexBoard(params) {
     
 
     var cellGroupsMap = {}; //empty map object to reference the individual cell groups by co-ordinate
-    var zindexSplayTree = new SplayTree(); // A search tree used to keep the individual cell groups sorted for insertion into the parent cell group
+    var cellGroupCompare = function(val1, val2) {
+        return val1.zindex - val2.zindex;
+    };
+    var zindexSplayTree = SortedSet([], function(val1, val2){ return val1.zindex == val2.zindex},cellGroupCompare); // A search tree used to keep the individual cell groups sorted for insertion into the parent cell group
 
     //A reference to the board for functions
     var board = this;
@@ -347,14 +350,15 @@ function hexBoard(params) {
                 
                 //Set an on click to the cellGroup to allow for cell item paging/scrolling
                 cellGroup.onMouseDown = function(e) {
-		    clickedGroup = this;
+                    clickedGroup = this;
                 };
 
                 //Use a search tree with the unmodified Y co-ord as primary index, and unmodified X coordinate as the secondary
                 zindex = parseFloat(pixelCoordinates.y +"."+pixelCoordinates.x);
-                zindexSplayTree.insert(zindex, cellGroup);
+                cellGroup.zindex = zindex;
+                zindexSplayTree.add(cellGroup);
                 //Insert group into cellsGroup before the found child
-                var node = zindexSplayTree.findGreatestLessThan(zindex);
+                var node = zindexSplayTree.findGreatestLessThan({zindex:zindex});
                 if (!!node) {
                    cellGroup.insertAbove(node.value);
                 } else {
@@ -383,7 +387,7 @@ function hexBoard(params) {
             
             //Set up the windowing, allow for 5 fully visible items
             if (cellGroup.drawnItemCount > 5) {
-            	cellGroup.maxDy = stackStep * (cellGroup.drawnItemCount - 5); //allow to scroll stackStep px for each item.outside the allowed window of 5 fully visible items
+                cellGroup.maxDy = stackStep * (cellGroup.drawnItemCount - 5); //allow to scroll stackStep px for each item.outside the allowed window of 5 fully visible items
                 board.windowCell(cellGroup);
                 
                 if (!cellGroup.hasOwnProperty('overHex')) {
