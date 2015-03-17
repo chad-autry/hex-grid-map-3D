@@ -1,11 +1,12 @@
 {
   "name": "hex-widget",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Configureable HTML5 Canvas Hex grid",
   "main": "index.js",
   "scripts": {
-    "browserify": "browserify ./exampleMain.js --debug --standalone myMain > bundle.js",
-    "watchify": "watchify ./exampleMain.js --debug --standalone myMain -v -o ./bundle.js"
+    "browserify": "browserify ./exampleMain.js --debug --standalone ExampleContext > bundle.js",
+    "watchify": "watchify ./exampleMain.js --debug --standalone ExampleContext -v -o ./bundle.js",
+    "jshint": "jshint ./"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,11 @@
   },
   "devDependencies": {
     "browserify": "^9.0.3",
+    "jshint": "^2.6.3",
     "watchify": "^2.4.0"
+  },
+  "jshintConfig": {
+    "node": "true",
+    "predef": [ "document" ]
   }
 }

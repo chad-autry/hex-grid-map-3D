@@ -16,13 +16,13 @@ function exampleBackgroundContext() {
      */
     this.initBackground = function(paper, backgroundGroup) {
         //Create a stationary background of dimmer, denser stars
-        var farLayer = context.createStarGroup(.5, 1.1, paper.view.size.width, paper.view.size.height, 1000);
+        var farLayer = context.createStarGroup(0.5, 1.1, paper.view.size.width, paper.view.size.height, 1000);
         backgroundGroup.addChild(farLayer);
         
         //Create a parallax background of fewer, brighter stars. Make it 4 times the view window in size
         var nearLayer = context.createStarGroup(1, 2.1, 4*paper.view.size.width, 4*paper.view.size.height, 1000);
-        nearLayer.position.x = -.5*paper.view.size.width;
-        nearLayer.position.y = -.5*paper.view.size.height;
+        nearLayer.position.x = -0.5*paper.view.size.width;
+        nearLayer.position.y = -0.5*paper.view.size.height;
         backgroundGroup.addChild(nearLayer);
         context.nearLayer = nearLayer;
     };
@@ -33,18 +33,18 @@ function exampleBackgroundContext() {
     this.updateBackgroundPosition = function(backgroundGroup, dx, dy) {
         //Scroll more slowly than the grid, and cap out position. Don't want to bother generating an infinite star field, most of the action will be in the middle
         if (dx > 0) {
-            context.nearLayer.position.x = Math.min( -.5*paper.view.size.width + dx / 10, 0);
+            context.nearLayer.position.x = Math.min( -0.5*paper.view.size.width + dx / 10, 0);
         } else {
-            context.nearLayer.position.x = Math.max( -.5*paper.view.size.width + dx / 10, -paper.view.size.width);
+            context.nearLayer.position.x = Math.max( -0.5*paper.view.size.width + dx / 10, -paper.view.size.width);
         }
 
         if (dy > 0) {
-            context.nearLayer.position.y = Math.min( -.5*paper.view.size.height + dy / 10, 0);
+            context.nearLayer.position.y = Math.min( -0.5*paper.view.size.height + dy / 10, 0);
         } else {
-            context.nearLayer.position.y = Math.max( -.5*paper.view.size.height + dy / 10, -paper.view.size.height);
+            context.nearLayer.position.y = Math.max( -0.5*paper.view.size.height + dy / 10, -paper.view.size.height);
         }
     };
-};
+}
 
 /**
  * Generate a random integer between min and max
@@ -59,7 +59,7 @@ exampleBackgroundContext.prototype.STAR_COLOURS = ["#ffffff", "#ffe9c4", "#d4fbf
  * Helper method, generates a raster containing randomly generated stars*
  */
 exampleBackgroundContext.prototype.createStarGroup = function( maxBrightness, maxRadius, width, height, star_number) {
-    var starGroup = new paper.Group;
+    var starGroup = new paper.Group();
     starGroup.pivot = new paper.Point(0, 0);
     var x, // x position of the star
     y; // y position of the star

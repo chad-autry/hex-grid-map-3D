@@ -20,6 +20,6 @@ function baseCellDataSource() {
         listeners[i].onCellDataChanged({added:[], removed:items});
         }
     };
-};
+}
 
 module.exports = baseCellDataSource;

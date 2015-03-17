@@ -1,5 +1,6 @@
+"use strict";
 var paper = require('browserifyable-paper');
-var SortedSet = require('collections/sorted-set');
+var sortedSet = require('collections/sorted-set');
 var HexDefinition = require('canvas-hexagon');
 /*
  * Defines an isometric hexagonal board for web games
@@ -9,7 +10,11 @@ var HexDefinition = require('canvas-hexagon');
 /*
  * Constructor for the hex board, accepts all options as a map of parameters
  */
-function hexBoard(params) {
+function HexBoard(params) {
+    //Protect the constructor from being called as a normal method
+    if (!(this instanceof HexBoard)) {
+        return new HexBoard(params);
+    }
     //Get all the variables which come from the parameters
     
     //The factory which will provide the paper.js Item to draw
@@ -20,13 +25,13 @@ function hexBoard(params) {
 
     //Add this board as a listener to the cell dataSource. this.onCellDataChanged will be called when items change.
     params.cellDataSource.addListener(this);
-    var gridColor = params.hasOwnProperty('gridColor') ? paramas.gridColor:'silver';
-    var stackStep = params.hasOwnProperty('stackStep') ? paramas.gridColor:5; // the number of pixels to leave between stack items
-    var verticalScaling = params.hasOwnProperty('verticalScaling') ? paramas.verticalScaling:.5; // The amount to scale the grid by vertically (.5 is traditional "near isometric")
+    var gridColor = params.hasOwnProperty('gridColor') ? params.gridColor:'silver';
+    var stackStep = params.hasOwnProperty('stackStep') ? params.stackStep:5; // the number of pixels to leave between stack items
+    var verticalScaling = params.hasOwnProperty('verticalScaling') ? params.verticalScaling:0.5; // The amount to scale the grid by vertically (.5 is traditional "near isometric")
     var hexDimensions = new HexDefinition(params.edgeSize, verticalScaling);
     //Set the background update function if it was passed in
     if(params.hasOwnProperty('updateBackgroundPosition')) {
-        this.updateBackgroundPosition = params.updateBackgroundPosition
+        this.updateBackgroundPosition = params.updateBackgroundPosition;
     }
 
     //Now the board variables which do not comes from the initial params
@@ -38,7 +43,7 @@ function hexBoard(params) {
     var cellGroupCompare = function(val1, val2) {
         return val1.zindex - val2.zindex;
     };
-    var zindexSplayTree = SortedSet([], function(val1, val2){ return val1.zindex == val2.zindex},cellGroupCompare); // A search tree used to keep the individual cell groups sorted for insertion into the parent cell group
+    var zindexSplayTree = sortedSet([], function(val1, val2){ return val1.zindex == val2.zindex;},cellGroupCompare); // A search tree used to keep the individual cell groups sorted for insertion into the parent cell group
 
     //A reference to the board for functions
     var board = this;
@@ -47,10 +52,10 @@ function hexBoard(params) {
     paper.setup(canvas);
 
     //Instantiate the groups in the desired z-index order
-    var backgroundGroup = new paper.Group;
-    var gridGroup = new paper.Group;
-    var cellsGroup = new paper.Group;
-    var foregroundGroup = new paper.Group;
+    var backgroundGroup = new paper.Group();
+    var gridGroup = new paper.Group();
+    var cellsGroup = new paper.Group();
+    var foregroundGroup = new paper.Group();
 
     //Set the group pivot points, else paper.js will try to re-compute it to the center
     backgroundGroup.pivot = new paper.Point(0, 0);
@@ -120,9 +125,9 @@ function hexBoard(params) {
      //Set up the psuedo drag for the grid
      var down = false;
      var mousemoved = false;
-     latestX=0;
-     latestY=0;
-     clickedY=0;
+     var latestX=0;
+     var latestY=0;
+     var clickedY=0;
      var clickedGroup;
      var maxGroupDy = 0;
      var minGroupDy = 0;
@@ -142,7 +147,7 @@ function hexBoard(params) {
     var dyModulo = (hexDimensions.hexagon_wide_width + 2*hexDimensions.hexagon_scaled_half_edge_size);
     var dxModulo = hexDimensions.hexagon_edge_to_edge_width;
     tool.onMouseMove = function(e) {
-         if (down == false) {
+         if (down === false) {
              return;
          }
          
@@ -174,7 +179,7 @@ function hexBoard(params) {
              dy = dy + e.point.y - latestY;
              latestX = e.point.x;
              latestY = e.point.y;
-             board.updatePostion()
+             board.updatePostion();
          }
          //paper.view.update();
      };
@@ -204,7 +209,7 @@ function hexBoard(params) {
          paper.view.update();
          var date2 = new Date().getTime();
          document.getElementById("result").innerHTML = "Draw Time: " + (date2 - date1) + " ms";
-     }
+     };
 
 
 
@@ -242,7 +247,7 @@ function hexBoard(params) {
 
     //TODO onMouseOut does not seem to work. However, mouse events still seem to happen when outside of the paper.js view. So the annoying effects onMouseOut was intended to fix don't show up anyways
     tool.onMouseLeave = function(e) {
-        if (down == false) {
+        if (down === false) {
             return;
         } 
         down = false;
@@ -261,13 +266,15 @@ function hexBoard(params) {
     this.onCellDataChanged = function(event) {
         //TODO Allow transition animations to be implimented for various changes, with examples.
         
+        //A reminder for the Author: Javascript variables are not at block level. These variables are used in both loops.
+        var i, item, itemGroup, groupKey, cellGroup;
         //Currentlly cell moves are done by re-adding an item with new cell co-ordinates, no z-index param, need to add/re-add all items in the desired order
         //Can do removes individually though
 
-        for (var i = 0; i < event.removed.length; i++) {
-            var item = event.removed[i];
-            var groupKey = item.u+":"+item.v;
-            var cellGroup;
+        for (i = 0; i < event.removed.length; i++) {
+            item = event.removed[i];
+            groupKey = item.u+":"+item.v;
+            cellGroup = null;
             if (cellGroupsMap.hasOwnProperty(groupKey)) {
                 cellGroup = cellGroupsMap[groupKey];
             }
@@ -275,7 +282,7 @@ function hexBoard(params) {
                 //Invalid item! Throw a hissy fit!
                 continue;
             }
-            var itemGroup = cellGroup[item.key];
+            itemGroup = cellGroup[item.key];
             //Clean up the reference
             //delete cellGroup[item.key];
             var parentGroup = itemGroup.parent;
@@ -314,11 +321,15 @@ function hexBoard(params) {
             board.windowCell(cellGroup);
             
         }
+        
+        var cellGroupOnMouseDown = function(e) {
+            clickedGroup = this;
+        };
 
-        for (var i = 0; i < event.added.length; i++) {
-            var item = event.added[i];
+        for (i = 0; i < event.added.length; i++) {
+            item = event.added[i];
             var drawnItem = drawnItemFactory.getDrawnItemForCellItem(item);
-            var itemGroup = new paper.Group;
+            itemGroup = new paper.Group();
             itemGroup.pivot = new paper.Point(0, 0);
             itemGroup.addChild(drawnItem);
             itemGroup.drawnItem = drawnItem;
@@ -327,13 +338,13 @@ function hexBoard(params) {
             itemGroup.telescopePoint = new paper.Point(0, -stackStep);
             
             //Get the cell group the drawn item should be a part of
-            var groupKey = item.u+":"+item.v;
-            var cellGroup;
+            groupKey = item.u+":"+item.v;
+            cellGroup = null;
             if (cellGroupsMap.hasOwnProperty(groupKey)) {
                 cellGroup = cellGroupsMap[groupKey];
             } else {
                 //create group
-                cellGroup = new paper.Group;
+                cellGroup = new paper.Group();
                 cellGroup.pivot = new paper.Point(0, 0);
                 cellGroup.tailGroup = cellGroup;
                 cellGroup.telescopePoint = new paper.Point(0, 0);
@@ -349,12 +360,10 @@ function hexBoard(params) {
                 cellGroup.drawnItemCount = 0;
                 
                 //Set an on click to the cellGroup to allow for cell item paging/scrolling
-                cellGroup.onMouseDown = function(e) {
-                    clickedGroup = this;
-                };
+                cellGroup.onMouseDown = cellGroupOnMouseDown;
 
                 //Use a search tree with the unmodified Y co-ord as primary index, and unmodified X coordinate as the secondary
-                zindex = parseFloat(pixelCoordinates.y +"."+pixelCoordinates.x);
+                var zindex = parseFloat(pixelCoordinates.y +"."+pixelCoordinates.x);
                 cellGroup.zindex = zindex;
                 zindexSplayTree.add(cellGroup);
                 //Insert group into cellsGroup before the found child
@@ -404,14 +413,14 @@ function hexBoard(params) {
         }
         paper.view.update();
     
-    }
-};
+    };
+}
 
 /**
  * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired background changes on grid drag
  */
-hexBoard.prototype.updateBackgroundPosition = function(backgroundGroup, dx, dy) {
+HexBoard.prototype.updateBackgroundPosition = function(backgroundGroup, dx, dy) {
 
 };
 
-module.exports = hexBoard;
+module.exports = HexBoard;

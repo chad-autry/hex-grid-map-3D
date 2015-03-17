@@ -2,7 +2,7 @@ var paper = require('browserifyable-paper');
 /*
  * This is a drawn item factory used for testing and as an example
  */
-function exampleDrawnItemFactory() {
+function ExampleDrawnItemFactory() {
     
     /**
      * This is the one method required of the factory. Returns the paper.js Item to be drawn for the cellItem
@@ -17,7 +17,7 @@ function exampleDrawnItemFactory() {
              fillColor: cellItem.color,
              strokeColor: 'black'
          });
-         drawnItem.scale(1, .5);
+         drawnItem.scale(1, 0.5);
          return drawnItem;
      };
      
@@ -28,6 +28,6 @@ function exampleDrawnItemFactory() {
     this.onCellDataChanged = function(event) {
         //TODO Allow transition animations to be implimented for various changes, with examples
     };
-};
+}
 
-module.exports = exampleDrawnItemFactory;
+module.exports = ExampleDrawnItemFactory;
