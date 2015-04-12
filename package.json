@@ -4,6 +4,12 @@
   "description": "Configureable HTML5 Canvas Hex grid",
   "main": "index.js",
   "scripts": {
+    "test": "npm run jshint && npm run build:specs && npm run karma:single",
+    "karma:single": "karma start karma-conf.js --log-level debug --single-run",
+    "watch:test": "parallelshell \"npm run watch:specs\" \"npm run watch:karma\"",
+    "watch:karma": "karma start karma-conf.js",
+    "build:specs": "browserify ./specs/*.spec.js --debug -o built.specs.js",
+    "watch:specs": "watchify ./specs/*.spec.js --debug -o built.specs.js",
     "browserify": "browserify ./exampleMain.js --debug --standalone ExampleContext > bundle.js",
     "watchify": "watchify ./exampleMain.js --debug --standalone ExampleContext -v -o ./bundle.js",
     "jshint": "jshint ./"
@@ -31,7 +37,15 @@
   "dependencies": {
     "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js",
     "canvas-hexagon": "git+https://git@github.com/chad-autry/canvas-hexagon",
-    "collections": "^1.2.1"
+    "collections": "^1.2.1",
+    "browserify": "git+https://github.com/chad-autry/node-browserify",
+    "jshint": "^2.6.3",
+    "karma": "^0.12.9",
+    "karma-cli": "0.0.4",
+    "karma-firefox-launcher": "^0.1.3",
+    "karma-jasmine": "^0.1.5",
+    "parallelshell": "^1.1.1",
+    "watchify": "^3.1.0"
   },
   "devDependencies": {
     "browserify": "^9.0.3",
