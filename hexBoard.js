@@ -34,6 +34,12 @@ function HexBoard(params) {
         this.updateBackgroundPosition = params.updateBackgroundPosition;
     }
 
+    //Set the foreground update function if it was passed in
+    if(params.hasOwnProperty('updateForegroundPosition')) {
+        this.updateForegroundPosition = params.updateForegroundPosition;
+    }
+
+
     //Now the board variables which do not comes from the initial params
     var dx = 0; //The current translation in x of the map
     var dy = 0; // the current translation in y of the map
@@ -66,6 +72,11 @@ function HexBoard(params) {
     //Init the background if there was an init method on the params
     if(params.hasOwnProperty('initBackground')) {
         params.initBackground(paper, backgroundGroup);
+    }
+
+    //Init the foreground if there was an init method on the params
+    if(params.hasOwnProperty('initForeground')) {
+        params.initForeground(paper, foregroundGroup, hexDimensions);
     }
 
     //TODO Migrate re-setable orientation, perspective, and grid line style to its own method
@@ -194,6 +205,7 @@ function HexBoard(params) {
          cellsGroup.position.x = dx;
          cellsGroup.position.y = dy;
          this.updateBackgroundPosition(backgroundGroup, dx, dy);
+         this.updateForegroundPosition(foregroundGroup, dx, dy);
      };
      
      /**
@@ -420,6 +432,13 @@ function HexBoard(params) {
  * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired background changes on grid drag
  */
 HexBoard.prototype.updateBackgroundPosition = function(backgroundGroup, dx, dy) {
+
+};
+
+/**
+ * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired foreground changes on grid drag
+ */
+HexBoard.prototype.updateForegroundPosition = function(foregroundGroup, dx, dy) {
 
 };
 
