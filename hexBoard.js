@@ -59,12 +59,14 @@ function HexBoard(params) {
 
     //Instantiate the groups in the desired z-index order
     var backgroundGroup = new paper.Group();
+    var belowGridCellsGroup = new paper.Group(); //When there is a stack some items might be drawn below grid, or if there is a large item (sphere) it might have components drawn above and below
     var gridGroup = new paper.Group();
     var cellsGroup = new paper.Group();
     var foregroundGroup = new paper.Group();
 
     //Set the group pivot points, else paper.js will try to re-compute it to the center
     backgroundGroup.pivot = new paper.Point(0, 0);
+    belowGridCellsGroup.pivot = new paper.Point(0, 0);
     gridGroup.pivot = new paper.Point(0, 0);
     cellsGroup.pivot = new paper.Point(0, 0);
     foregroundGroup.pivot = new paper.Point(0, 0);
@@ -173,14 +175,17 @@ function HexBoard(params) {
 
              //If trying to scroll upwards past original position, stop at original position
              if (dragDy < minGroupDy || clickedGroup.dy + eventDy <= 0) {
-                 clickedGroup.baseGroup.position.y = clickedGroup.originalYPosition + dy; //Still setting the position absolutely, not relative to the cell group's group
+                 clickedGroup.position.y = clickedGroup.originalYPosition + dy; //Still setting the position absolutely, not relative to the cell group's group
+                 clickedGroup.belowGridGroup.position.y = clickedGroup.position.y;
                  clickedGroup.dy = 0;
              } else if(dragDy > maxGroupDy || clickedGroup.dy + eventDy > clickedGroup.maxDy) {
-                 clickedGroup.baseGroup.position.y = clickedGroup.originalYPosition + dy + clickedGroup.maxDy; //Still setting the position absolutely, not relative to the cell group's group
+                 clickedGroup.position.y = clickedGroup.originalYPosition + dy + clickedGroup.maxDy; //Still setting the position absolutely, not relative to the cell group's group
+                 clickedGroup.belowGridGroup.position.y = clickedGroup.position.y;
                  clickedGroup.dy = clickedGroup.maxDy;
              } else {
                 //Neither too hot, or too cold. Drag the group up or down, and set the item visibillity
-                 clickedGroup.baseGroup.position.y = clickedGroup.baseGroup.position.y + eventDy;
+                 clickedGroup.position.y = clickedGroup.position.y + eventDy;
+                 clickedGroup.belowGridGroup.position.y = clickedGroup.position.y;
                  clickedGroup.dy = clickedGroup.dy + eventDy;
              }
              board.windowCell(clickedGroup);
@@ -200,6 +205,9 @@ function HexBoard(params) {
       * Will call into the background and foreground update functions
       */
      this.updatePostion = function() {
+         belowGridCellsGroup.position.x = dx;
+         belowGridCellsGroup.position.y = dy;
+         //Modulo the grid position since it is a finite repeating pattern
          gridGroup.position.x = dx%dxModulo;
          gridGroup.position.y = dy%dyModulo;
          cellsGroup.position.x = dx;
@@ -232,28 +240,34 @@ function HexBoard(params) {
     this.windowCell = function(cellGroup) {
         //re-set items visibillity and opacity
         var windowStartIndex = Math.floor(cellGroup.dy / stackStep);
-        var itemGroup = cellGroup.childGroup;
-        for (var i = 0; i < cellGroup.drawnItemCount; i++) {
+        var drawnItem = cellGroup.nextDrawnItem;
+        for (i = 0; i < cellGroup.drawnItemCount; i++) {
             if (i < windowStartIndex - 5) {
                  //Below the window, and the transition
-                itemGroup.drawnItem.visible = false;
+                drawnItem.visible = false;
             } else if (i > windowStartIndex + 9) {
                 //Above the window
-                itemGroup.drawnItem.visible = false;
+                drawnItem.visible = false;
             } else if (i < windowStartIndex) {
+                //Ensure a part of the below grid group
+                cellGroup.belowGridGroup.addChild(drawnItem);
                 //Calculate opacity as a percentage of the pixels till out of the window
-                itemGroup.drawnItem.visible = true;
-                itemGroup.drawnItem.opacity = (1 - ((cellGroup.dy - i * stackStep) / (stackStep * 6)));
+                drawnItem.visible = true;
+                drawnItem.opacity = (1 - ((cellGroup.dy - i * stackStep) / (stackStep * 6)));
             } else if (i > windowStartIndex + 4) {
+                //Ensure a part of the above grid group
+                cellGroup.addChild(drawnItem);
                 //Calculate opacity as a percentage of the pixels till out of the window
-                itemGroup.drawnItem.visible = true;
-                itemGroup.drawnItem.opacity = (1 - (((i-4) * stackStep - cellGroup.dy) / (stackStep * 6)));
+                drawnItem.visible = true;
+                drawnItem.opacity = (1 - (((i-4) * stackStep - cellGroup.dy) / (stackStep * 6)));
             } else {
                 //Inside the window
-                itemGroup.drawnItem.visible = true;
-                itemGroup.drawnItem.opacity = 1;
+                //Ensure a part of the above grid group
+                cellGroup.addChild(drawnItem);
+                drawnItem.visible = true;
+                drawnItem.opacity = 1;
             }
-            itemGroup = itemGroup.childGroup;
+            drawnItem = drawnItem.nextDrawnItem;
         }
     };
 
@@ -273,13 +287,12 @@ function HexBoard(params) {
 
     /**
      * Called when objects are added to cells, removed from cells, re-ordered in cells,
-     * Implement a telescoping-linked list strategy so individual adds, removes, and cell scrolling are all fast
      */
     this.onCellDataChanged = function(event) {
-        //TODO Allow transition animations to be implimented for various changes, with examples.
+        var changedGroups = {};
         
         //A reminder for the Author: Javascript variables are not at block level. These variables are used in both loops.
-        var i, item, itemGroup, groupKey, cellGroup;
+        var i, item, itemGroup, groupKey, cellGroup, drawnItem;
         //Currentlly cell moves are done by re-adding an item with new cell co-ordinates, no z-index param, need to add/re-add all items in the desired order
         //Can do removes individually though
 
@@ -294,60 +307,40 @@ function HexBoard(params) {
                 //Invalid item! Throw a hissy fit!
                 continue;
             }
-            itemGroup = cellGroup[item.key];
-            //Clean up the reference
-            //delete cellGroup[item.key];
-            var parentGroup = itemGroup.parent;
-            if (itemGroup.children.length == 2) {
-                //The itemGroup has both an item and a child,
-                itemGroup.children[1].position = itemGroup.position;
-                parentGroup.addChild(itemGroup.children[1]);
-                itemGroup.remove();
-                
-            } else {
-                //This item had been the tail group
-                cellGroup.tailGroup = parentGroup;
-                itemGroup.remove();
-            }
-            
+
+            drawnItem = cellGroup[item.key];
+            drawnItem.remove();
+            delete cellGroup[item.key];
+
+
+            drawnItem.previousDrawnItem.nextDrawnItem = drawnItem.nextDrawnItem;
+            drawnItem.nextDrawnItem.previousDrawnItem = drawnItem.previousDrawnItem;
+
+
             cellGroup.drawnItemCount--;
-            //TODO Hard coding the windowing here. It will work with my example drawn item factory, but might not work with other's customizations
-            if (cellGroup.drawnItemCount > 5) {
-            	cellGroup.maxDy = 5 * (cellGroup.drawnItemCount - 5); //allow to scroll 5 px for each item.outside the allowed window of 5 items
-                board.windowCell(cellGroup);
-                if (cellGroup.dy > cellGroup.maxDy) {
-                   cellGroup.baseGroup.position.y = cellGroup.baseGroup.position.y - (cellGroup.dy - cellGroup.maxDy);
-                   cellGroup.dy = cellGroup.maxDy;
-                }
-            } else if (cellGroup.drawnItemCount == 5) {
-                //We can no longer scroll the items,
-                cellGroup.maxDy = 0;
-                if (cellGroup.dy > cellGroup.maxDy) {
-                    cellGroup.baseGroup.position.y = cellGroup.baseGroup.position.y - (cellGroup.dy - cellGroup.maxDy);
-                    cellGroup.dy = cellGroup.maxDy;
-                }
-                //Reomove the hex component being drawn over items
-                cellGroup.overHex.remove();
-                delete cellGroup.overHex;
-            } 
-            board.windowCell(cellGroup);
-            
+
+            //Clean up and delete the empty cellGroups
+            if (cellGroup.drawnItemCount === 0) {
+                cellGroup.belowGridGroup.remove();
+                cellGroup.remove();
+                delete cellGroupsMap[groupKey];
+            } else {
+                changedGroups[groupKey] = cellGroup;
+            }
         }
         
         var cellGroupOnMouseDown = function(e) {
             clickedGroup = this;
         };
 
+        var belowGridCellGroupOnMouseDown = function(e) {
+            clickedGroup = this.aboveGridGroup;
+        };
+
         for (i = 0; i < event.added.length; i++) {
             item = event.added[i];
-            var drawnItem = drawnItemFactory.getDrawnItemForCellItem(item);
-            itemGroup = new paper.Group();
-            itemGroup.pivot = new paper.Point(0, 0);
-            itemGroup.addChild(drawnItem);
-            itemGroup.drawnItem = drawnItem;
-            //Save where the next item in the cell should go relative to this item
-            //TODO Add in the item's height. Do so according to the perspective (my exampleDrawnItemFactory items from the test all have 0 height)
-            itemGroup.telescopePoint = new paper.Point(0, -stackStep);
+            drawnItem = drawnItemFactory.getDrawnItemForCellItem(item);
+
             
             //Get the cell group the drawn item should be a part of
             groupKey = item.u+":"+item.v;
@@ -355,17 +348,24 @@ function HexBoard(params) {
             if (cellGroupsMap.hasOwnProperty(groupKey)) {
                 cellGroup = cellGroupsMap[groupKey];
             } else {
-                //create group
+                //create the above grid and below grid groups
+                //keep most of the meta data attached the the above grid group
                 cellGroup = new paper.Group();
                 cellGroup.pivot = new paper.Point(0, 0);
-                cellGroup.tailGroup = cellGroup;
-                cellGroup.telescopePoint = new paper.Point(0, 0);
+                
+                //Make a below grid group to handle the Z index of items in the cell below the grid
+                var belowGridGroup = new paper.Group();
+                belowGridGroup.pivot = new paper.Point(0, 0);
+                
+                cellGroup.belowGridGroup = belowGridGroup;
+                belowGridGroup.aboveGridGroup = cellGroup;
                 
                 var pixelCoordinates = hexDimensions.getPixelCoordinates(item.u, item.v);
                 cellGroup.position = new paper.Point(pixelCoordinates.x + dx, pixelCoordinates.y + dy);
                 cellGroupsMap[groupKey] = cellGroup;
                 //decorate the cell group with various information we'll need
                 cellGroup.mouseDown = false;
+                cellGroup.originalXPosition = pixelCoordinates.x;
                 cellGroup.originalYPosition = pixelCoordinates.y;
                 cellGroup.dy = 0;
                 cellGroup.maxDy = 0;
@@ -373,6 +373,7 @@ function HexBoard(params) {
                 
                 //Set an on click to the cellGroup to allow for cell item paging/scrolling
                 cellGroup.onMouseDown = cellGroupOnMouseDown;
+                belowGridGroup.onMouseDown = belowGridCellGroupOnMouseDown;
 
                 //Use a search tree with the unmodified Y co-ord as primary index, and unmodified X coordinate as the secondary
                 var zindex = parseFloat(pixelCoordinates.y +"."+pixelCoordinates.x);
@@ -382,45 +383,55 @@ function HexBoard(params) {
                 var node = zindexSplayTree.findGreatestLessThan({zindex:zindex});
                 if (!!node) {
                    cellGroup.insertAbove(node.value);
+                   belowGridGroup.insertAbove(node.value.belowGridGroup);
                 } else {
                    cellsGroup.insertChild(0, cellGroup);
+                   belowGridCellsGroup.insertChild(0, belowGridGroup);
                 }
-
-            }
-            
-            //add the itemGroup with the item's key to the cellgroup so it can be removed easily
-            cellGroup[item.key] = itemGroup;
-            
-            //add the drawnItem, to the tail of the telescope chain,
-            cellGroup.tailGroup.addChild(itemGroup);
-            cellGroup.drawnItemCount++;
-            
-            if (cellGroup.drawnItemCount == 1) {
-                cellGroup.baseGroup = itemGroup;
-            }
-
-            //set the position to where the telescope group says it should go. Paper.js positions aren't relative, though further translation will be applied to both parent and child
-            itemGroup.position = new paper.Point(cellGroup.tailGroup.telescopePoint.x + cellGroup.tailGroup.position.x, 
-                cellGroup.tailGroup.telescopePoint.y + cellGroup.tailGroup.position.y);
-            //set the item group as the new group
-            cellGroup.tailGroup.childGroup = itemGroup;
-            cellGroup.tailGroup = itemGroup;
-            
-            //Set up the windowing, allow for 5 fully visible items
-            if (cellGroup.drawnItemCount > 5) {
-                cellGroup.maxDy = stackStep * (cellGroup.drawnItemCount - 5); //allow to scroll stackStep px for each item.outside the allowed window of 5 fully visible items
-                board.windowCell(cellGroup);
                 
-                if (!cellGroup.hasOwnProperty('overHex')) {
-                    var instance = halfHexSymbol.place();
-                    instance.pivot = new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y); //Set the pivot point, Instances do not inherit the parent symbol's pivot!
-                    instance.position = cellGroup.position;
-                    cellGroup.addChild(instance);
-                    cellGroup.overHex = instance;
+                //Set the doubly linked list references, makes a circle with the cellGroup itself as a node. Means don't need to null check
+                cellGroup.previousDrawnItem = cellGroup;
+                cellGroup.nextDrawnItem = cellGroup;
+            }
+            changedGroups[groupKey] = cellGroup;
+            
+            //Update the group with the drawn item, all items get added to the top, so must be above grid
+            cellGroup.addChild(drawnItem);
+            cellGroup.drawnItemCount++;
+            //Some circular logic here. Pun intended
+            cellGroup.previousDrawnItem.nextDrawnItem = drawnItem;
+            drawnItem.previousDrawnItem = cellGroup.previousDrawnItem;
+            cellGroup.previousDrawnItem = drawnItem;
+
+        }
+        
+        //For each changed group
+        for (var key in changedGroups) {
+            if (changedGroups.hasOwnProperty(key)) {
+                cellGroup = changedGroups[key];
+                
+                //Figure out the maxDy
+                if (cellGroup.drawnItemCount > 5) {
+                    cellGroup.maxDy = 5 * (cellGroup.drawnItemCount - 5); //allow to scroll 5 px for each item.outside the allowed window of 5 items
+
+                } else {
+                    cellGroup.maxDy = 0;
                 }
-                cellGroup.overHex.bringToFront();
-            } else {
-                cellGroup.maxDy = 0;
+
+                if (cellGroup.dy > cellGroup.maxDy) {
+                   cellGroup.baseGroup.position.y = cellGroup.baseGroup.position.y - (cellGroup.dy - cellGroup.maxDy);
+                   cellGroup.dy = cellGroup.maxDy;
+                }
+                
+                //Reposition each item of the group, according to its index and the new dy
+                drawnItem = cellGroup.nextDrawnItem;
+                for (i = 0; i < cellGroup.drawnItemCount; i++) {
+                    drawnItem.position = new paper.Point(cellGroup.originalXPosition + dx, cellGroup.originalYPosition + dy + cellGroup.dy - stackStep * i);
+                    drawnItem = drawnItem.nextDrawnItem;
+                }
+                
+                //Set the transluceny of each item in the group, and put in the appropriate above/below grid Z index group
+                board.windowCell(cellGroup);
             }
         }
         paper.view.update();
