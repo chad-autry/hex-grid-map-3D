@@ -39,6 +39,10 @@ function HexBoard(params) {
         this.updateForegroundPosition = params.updateForegroundPosition;
     }
 
+    //Set the grid update function if it was passed in
+    if(params.hasOwnProperty('updateGridPosition')) {
+        this.updateGridPosition = params.updateGridPosition;
+    }
 
     //Now the board variables which do not comes from the initial params
     var dx = 0; //The current translation in x of the map
@@ -80,59 +84,13 @@ function HexBoard(params) {
     if(params.hasOwnProperty('initForeground')) {
         params.initForeground(paper, foregroundGroup, hexDimensions);
     }
-
-    //TODO Migrate re-setable orientation, perspective, and grid line style to its own method
-
-    //Create the half-hex path which will be duplicated (with different z values) to create the hex grid
-    var halfHex = new paper.Group();
-    halfHex.pivot = new paper.Point(0,0); //Set the pivot point, else paper.js will try to re-compute it to the center
-    var zeroZeroPixelCoordinates = hexDimensions.getPixelCoordinates(0, 0);
-    //The first point of each line is the lower "junction" point of the point up hexagon
-    //Draw the vertical line first
-    halfHex.addChild(new paper.Path.Line(new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_half_wide_width), 
-        new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_half_wide_width + 2*hexDimensions.hexagon_scaled_half_edge_size)));
-    //Next the bottom right line
-    halfHex.addChild(new paper.Path.Line(new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_half_wide_width),
-        new paper.Point(zeroZeroPixelCoordinates.x + hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_scaled_half_edge_size)));
-    //Next the bottom left
-    halfHex.addChild(new paper.Path.Line(new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_half_wide_width),
-        new paper.Point(zeroZeroPixelCoordinates.x - hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + hexDimensions.hexagon_scaled_half_edge_size)));
-
-    halfHex.strokeColor = gridColor;
-    halfHex.strokeWidth = params.edgeWidth;
-    halfHex.strokeCap = 'square';
-
-    // Create a symbol from the path. Set "don't center" to true. If left default of false, then instances seem to have their co-ordinates recentered to their bounding box
-    var halfHexSymbol = new paper.Symbol(halfHex, true);
-
-    //For every hex, place an instance of the symbol. It will fill in the top and left half 3 segments, while the symbols from the 3 adjacent hexes will provide the bottom and right segments
-    //Top left hex is 0,0
-    var bottomRight = hexDimensions.getReferencePoint( paper.view.size.width, paper.view.size.height);
-    var topRight = hexDimensions.getReferencePoint(paper.view.size.width, 0);
-
-    //TODO This loop is assuming default orientation of the grid
-
-    //Note: The (-3) and (+1) values are to give extra slack on the top and bottom for dragging, don't want to see an incomplete grid appear.
-    for (var i =  -3; i <= bottomRight.u + 1; i++) {
-        //Note: The (-2) and (+2) values are to give extra slack on the left and right for dragging, don't want to see an incomplete grid appear.
-        for (var j =  -Math.abs(Math.round(i/2)) - 2; j <= topRight.v - Math.ceil(i/2) + 2; j++) {
-            var pixelCoordinates = hexDimensions.getPixelCoordinates(i, j);
-            var instance = halfHexSymbol.place();
-            instance.pivot = new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y); //Set the pivot point, Instances do not inherit the parent symbol's pivot!
-            instance.position = new paper.Point(pixelCoordinates.x, pixelCoordinates.y);
-            gridGroup.addChild(instance);
-        }
+    
+    //Init the grid if there was an init method on the params
+    if(params.hasOwnProperty('initGrid')) {
+        params.initGrid(paper, gridGroup, hexDimensions);
     }
 
-    //Rasterize the grid to improve performance.
-    var raster = gridGroup.rasterize();
-    //Normalize the raster's pivot to be the current 0,0 position
-    raster.pivot = new paper.Point(0 - raster.position.x, 0 - raster.position.y);
-
-    gridGroup.remove();
-    gridGroup = raster;
     paper.view.draw();
-
     var tool = new paper.Tool();
 
      //Set up the psuedo drag for the grid
@@ -157,8 +115,7 @@ function HexBoard(params) {
          }
      };
 
-    var dyModulo = (hexDimensions.hexagon_wide_width + 2*hexDimensions.hexagon_scaled_half_edge_size);
-    var dxModulo = hexDimensions.hexagon_edge_to_edge_width;
+
     tool.onMouseMove = function(e) {
          if (down === false) {
              return;
@@ -207,11 +164,10 @@ function HexBoard(params) {
      this.updatePostion = function() {
          belowGridCellsGroup.position.x = dx;
          belowGridCellsGroup.position.y = dy;
-         //Modulo the grid position since it is a finite repeating pattern
-         gridGroup.position.x = dx%dxModulo;
-         gridGroup.position.y = dy%dyModulo;
+
          cellsGroup.position.x = dx;
          cellsGroup.position.y = dy;
+         this.updateGridPosition(gridGroup, dx, dy);
          this.updateBackgroundPosition(backgroundGroup, dx, dy);
          this.updateForegroundPosition(foregroundGroup, dx, dy);
      };
@@ -241,7 +197,7 @@ function HexBoard(params) {
         //re-set items visibillity and opacity
         var windowStartIndex = Math.floor(cellGroup.dy / stackStep);
         var drawnItem = cellGroup.nextDrawnItem;
-        for (i = 0; i < cellGroup.drawnItemCount; i++) {
+        for (var i = 0; i < cellGroup.drawnItemCount; i++) {
             if (i < windowStartIndex - 5) {
                  //Below the window, and the transition
                 drawnItem.visible = false;
@@ -450,6 +406,13 @@ HexBoard.prototype.updateBackgroundPosition = function(backgroundGroup, dx, dy) 
  * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired foreground changes on grid drag
  */
 HexBoard.prototype.updateForegroundPosition = function(foregroundGroup, dx, dy) {
+
+};
+
+/**
+ * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired grid changes on global drag
+ */
+HexBoard.prototype.updateGridPosition = function(gridGroup, dx, dy) {
 
 };
 
