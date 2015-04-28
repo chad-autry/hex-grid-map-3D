@@ -1,6 +1,5 @@
 "use strict";
 var paper = require('browserifyable-paper');
-var sortedSet = require('collections/sorted-set');
 var HexDefinition = require('canvas-hexagon');
 /*
  * Defines an isometric hexagonal board for web games
@@ -10,7 +9,7 @@ var HexDefinition = require('canvas-hexagon');
 /*
  * Constructor for the hex board, accepts all options as a map of parameters
  */
-function HexBoard(params) {
+function HexBoard(params, cellContext) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof HexBoard)) {
         return new HexBoard(params);
@@ -23,10 +22,7 @@ function HexBoard(params) {
 
     var gridLineWidth = params.edgeWidth;
 
-    //Add this board as a listener to the cell dataSource. this.onCellDataChanged will be called when items change.
-    params.cellDataSource.addListener(this);
     var gridColor = params.hasOwnProperty('gridColor') ? params.gridColor:'silver';
-    var stackStep = params.hasOwnProperty('stackStep') ? params.stackStep:5; // the number of pixels to leave between stack items
     var verticalScaling = params.hasOwnProperty('verticalScaling') ? params.verticalScaling:0.5; // The amount to scale the grid by vertically (.5 is traditional "near isometric")
     var hexDimensions = new HexDefinition(params.edgeSize, verticalScaling);
     //Set the background update function if it was passed in
@@ -43,17 +39,11 @@ function HexBoard(params) {
     if(params.hasOwnProperty('updateGridPosition')) {
         this.updateGridPosition = params.updateGridPosition;
     }
-
+    this.cellContext = cellContext;
     //Now the board variables which do not comes from the initial params
     var dx = 0; //The current translation in x of the map
     var dy = 0; // the current translation in y of the map
     
-
-    var cellGroupsMap = {}; //empty map object to reference the individual cell groups by co-ordinate
-    var cellGroupCompare = function(val1, val2) {
-        return val1.zindex - val2.zindex;
-    };
-    var zindexSplayTree = sortedSet([], function(val1, val2){ return val1.zindex == val2.zindex;},cellGroupCompare); // A search tree used to keep the individual cell groups sorted for insertion into the parent cell group
 
     //A reference to the board for functions
     var board = this;
@@ -65,14 +55,14 @@ function HexBoard(params) {
     var backgroundGroup = new paper.Group();
     var belowGridCellsGroup = new paper.Group(); //When there is a stack some items might be drawn below grid, or if there is a large item (sphere) it might have components drawn above and below
     var gridGroup = new paper.Group();
-    var cellsGroup = new paper.Group();
+    var aboveGridCellsGroup = new paper.Group();
     var foregroundGroup = new paper.Group();
 
     //Set the group pivot points, else paper.js will try to re-compute it to the center
     backgroundGroup.pivot = new paper.Point(0, 0);
     belowGridCellsGroup.pivot = new paper.Point(0, 0);
     gridGroup.pivot = new paper.Point(0, 0);
-    cellsGroup.pivot = new paper.Point(0, 0);
+    aboveGridCellsGroup.pivot = new paper.Point(0, 0);
     foregroundGroup.pivot = new paper.Point(0, 0);
     
     //Init the background if there was an init method on the params
@@ -89,6 +79,9 @@ function HexBoard(params) {
     if(params.hasOwnProperty('initGrid')) {
         params.initGrid(paper, gridGroup, hexDimensions);
     }
+    
+    //Init the cellContext
+    cellContext.init(paper, belowGridCellsGroup, aboveGridCellsGroup, hexDimensions);
 
     paper.view.draw();
     var tool = new paper.Tool();
@@ -99,74 +92,61 @@ function HexBoard(params) {
      var latestX=0;
      var latestY=0;
      var clickedY=0;
-     var clickedGroup;
-     var maxGroupDy = 0;
-     var minGroupDy = 0;
+     var mouseDownContext; //The context which has "claimed" the mouse down event
+
      tool.onMouseDown = function(e) {
          down = true;
          var mousemoved = false;
          latestX = e.point.x;
          latestY = e.point.y;
          clickedY = e.point.y;
-
-         if (!!clickedGroup) {
-             maxGroupDy = clickedGroup.maxDy - clickedGroup.dy;
-             minGroupDy = -clickedGroup.dy;
+         if (board.cellContext.aboveGridMouseDown(e.point.x, e.point.y)) {
+             mouseDownContext = board.cellContext;
+         } else if (board.cellContext.belowGridMouseDown(e.point.x, e.point.y)) {
+             mouseDownContext = board.cellContext;
          }
      };
 
 
     tool.onMouseMove = function(e) {
-         if (down === false) {
-             return;
-         }
-         
+        if (down === false) {
+            return;
+        }
 
-         
-         if (!!clickedGroup) {
-             //A group is clicked, perform cell item scrolling/dragging
-             //TODO Move this to an over-rideable function of the board object
-             var dragDy = e.point.y - clickedY;
-             var eventDy = e.point.y - latestY;
-             latestY = e.point.y;
 
-             //If trying to scroll upwards past original position, stop at original position
-             if (dragDy < minGroupDy || clickedGroup.dy + eventDy <= 0) {
-                 clickedGroup.position.y = clickedGroup.originalYPosition + dy; //Still setting the position absolutely, not relative to the cell group's group
-                 clickedGroup.belowGridGroup.position.y = clickedGroup.position.y;
-                 clickedGroup.dy = 0;
-             } else if(dragDy > maxGroupDy || clickedGroup.dy + eventDy > clickedGroup.maxDy) {
-                 clickedGroup.position.y = clickedGroup.originalYPosition + dy + clickedGroup.maxDy; //Still setting the position absolutely, not relative to the cell group's group
-                 clickedGroup.belowGridGroup.position.y = clickedGroup.position.y;
-                 clickedGroup.dy = clickedGroup.maxDy;
-             } else {
-                //Neither too hot, or too cold. Drag the group up or down, and set the item visibillity
-                 clickedGroup.position.y = clickedGroup.position.y + eventDy;
-                 clickedGroup.belowGridGroup.position.y = clickedGroup.position.y;
-                 clickedGroup.dy = clickedGroup.dy + eventDy;
-             }
-             board.windowCell(clickedGroup);
-         } else {
+        if (!!mouseDownContext) {
+            //A context has claimed further mouse drag
+            mouseDownContext.mouseDragged(e.point.x, e.point.y, e.point.x - latestX, e.point.y - latestY, dx, dy);
+        } else {
             //general dragging, translate all cell groups. Position the grid to look infinite
-             dx = dx + e.point.x - latestX;
-             dy = dy + e.point.y - latestY;
-             latestX = e.point.x;
-             latestY = e.point.y;
-             board.updatePostion();
-         }
-         //paper.view.update();
+            dx = dx + e.point.x - latestX;
+            dy = dy + e.point.y - latestY;
+            board.updatePostion();
+        }
+        latestX = e.point.x;
+        latestY = e.point.y;
+        //paper.view.update();
      };
+
+    //TODO onMouseOut does not seem to work. However, mouse events still seem to happen when outside of the paper.js view. So the annoying effects onMouseOut was intended to fix don't show up anyways
+    tool.onMouseLeave = function(e) {
+        if (down === false) {
+            return;
+        } 
+        down = false;
+        mouseDownContext = null;
+        if (mousemoved) {
+            return;
+        }
+    };
+    tool.onMouseUp = tool.onMouseLeave;
      
      /**
       * Update x/y positions based on the current dx and dy
       * Will call into the background and foreground update functions
       */
      this.updatePostion = function() {
-         belowGridCellsGroup.position.x = dx;
-         belowGridCellsGroup.position.y = dy;
-
-         cellsGroup.position.x = dx;
-         cellsGroup.position.y = dy;
+         this.cellContext.updatePosition(dx, dy);
          this.updateGridPosition(gridGroup, dx, dy);
          this.updateBackgroundPosition(backgroundGroup, dx, dy);
          this.updateForegroundPosition(foregroundGroup, dx, dy);
@@ -189,210 +169,7 @@ function HexBoard(params) {
 
 
 
-    /**
-     * If someone wants to make a fancier windowing function, this is where to do it
-     * Maybe have items split apart on the edges of windowing, maybe have them shrink and grow,
-     */
-    this.windowCell = function(cellGroup) {
-        //re-set items visibillity and opacity
-        var windowStartIndex = Math.floor(cellGroup.dy / stackStep);
-        var drawnItem = cellGroup.nextDrawnItem;
-        for (var i = 0; i < cellGroup.drawnItemCount; i++) {
-            if (i < windowStartIndex - 5) {
-                 //Below the window, and the transition
-                drawnItem.visible = false;
-            } else if (i > windowStartIndex + 9) {
-                //Above the window
-                drawnItem.visible = false;
-            } else if (i < windowStartIndex) {
-                //Ensure a part of the below grid group
-                cellGroup.belowGridGroup.addChild(drawnItem);
-                //Calculate opacity as a percentage of the pixels till out of the window
-                drawnItem.visible = true;
-                drawnItem.opacity = (1 - ((cellGroup.dy - i * stackStep) / (stackStep * 6)));
-            } else if (i > windowStartIndex + 4) {
-                //Ensure a part of the above grid group
-                cellGroup.addChild(drawnItem);
-                //Calculate opacity as a percentage of the pixels till out of the window
-                drawnItem.visible = true;
-                drawnItem.opacity = (1 - (((i-4) * stackStep - cellGroup.dy) / (stackStep * 6)));
-            } else {
-                //Inside the window
-                //Ensure a part of the above grid group
-                cellGroup.addChild(drawnItem);
-                drawnItem.visible = true;
-                drawnItem.opacity = 1;
-            }
-            drawnItem = drawnItem.nextDrawnItem;
-        }
-    };
 
-    //TODO onMouseOut does not seem to work. However, mouse events still seem to happen when outside of the paper.js view. So the annoying effects onMouseOut was intended to fix don't show up anyways
-    tool.onMouseLeave = function(e) {
-        if (down === false) {
-            return;
-        } 
-        down = false;
-        clickedGroup = null;
-        if (mousemoved) {
-            return;
-        }
-    };
-    tool.onMouseUp = tool.onMouseLeave;
-
-
-    /**
-     * Called when objects are added to cells, removed from cells, re-ordered in cells,
-     */
-    this.onCellDataChanged = function(event) {
-        var changedGroups = {};
-        
-        //A reminder for the Author: Javascript variables are not at block level. These variables are used in both loops.
-        var i, item, itemGroup, groupKey, cellGroup, drawnItem;
-        //Currentlly cell moves are done by re-adding an item with new cell co-ordinates, no z-index param, need to add/re-add all items in the desired order
-        //Can do removes individually though
-
-        for (i = 0; i < event.removed.length; i++) {
-            item = event.removed[i];
-            groupKey = item.u+":"+item.v;
-            cellGroup = null;
-            if (cellGroupsMap.hasOwnProperty(groupKey)) {
-                cellGroup = cellGroupsMap[groupKey];
-            }
-            if (!cellGroup) {
-                //Invalid item! Throw a hissy fit!
-                continue;
-            }
-
-            drawnItem = cellGroup[item.key];
-            drawnItem.remove();
-            delete cellGroup[item.key];
-
-
-            drawnItem.previousDrawnItem.nextDrawnItem = drawnItem.nextDrawnItem;
-            drawnItem.nextDrawnItem.previousDrawnItem = drawnItem.previousDrawnItem;
-
-
-            cellGroup.drawnItemCount--;
-
-            //Clean up and delete the empty cellGroups
-            if (cellGroup.drawnItemCount === 0) {
-                cellGroup.belowGridGroup.remove();
-                cellGroup.remove();
-                delete cellGroupsMap[groupKey];
-            } else {
-                changedGroups[groupKey] = cellGroup;
-            }
-        }
-        
-        var cellGroupOnMouseDown = function(e) {
-            clickedGroup = this;
-        };
-
-        var belowGridCellGroupOnMouseDown = function(e) {
-            clickedGroup = this.aboveGridGroup;
-        };
-
-        for (i = 0; i < event.added.length; i++) {
-            item = event.added[i];
-            drawnItem = drawnItemFactory.getDrawnItemForCellItem(item);
-
-            
-            //Get the cell group the drawn item should be a part of
-            groupKey = item.u+":"+item.v;
-            cellGroup = null;
-            if (cellGroupsMap.hasOwnProperty(groupKey)) {
-                cellGroup = cellGroupsMap[groupKey];
-            } else {
-                //create the above grid and below grid groups
-                //keep most of the meta data attached the the above grid group
-                cellGroup = new paper.Group();
-                cellGroup.pivot = new paper.Point(0, 0);
-                
-                //Make a below grid group to handle the Z index of items in the cell below the grid
-                var belowGridGroup = new paper.Group();
-                belowGridGroup.pivot = new paper.Point(0, 0);
-                
-                cellGroup.belowGridGroup = belowGridGroup;
-                belowGridGroup.aboveGridGroup = cellGroup;
-                
-                var pixelCoordinates = hexDimensions.getPixelCoordinates(item.u, item.v);
-                cellGroup.position = new paper.Point(pixelCoordinates.x + dx, pixelCoordinates.y + dy);
-                cellGroupsMap[groupKey] = cellGroup;
-                //decorate the cell group with various information we'll need
-                cellGroup.mouseDown = false;
-                cellGroup.originalXPosition = pixelCoordinates.x;
-                cellGroup.originalYPosition = pixelCoordinates.y;
-                cellGroup.dy = 0;
-                cellGroup.maxDy = 0;
-                cellGroup.drawnItemCount = 0;
-                
-                //Set an on click to the cellGroup to allow for cell item paging/scrolling
-                cellGroup.onMouseDown = cellGroupOnMouseDown;
-                belowGridGroup.onMouseDown = belowGridCellGroupOnMouseDown;
-
-                //Use a search tree with the unmodified Y co-ord as primary index, and unmodified X coordinate as the secondary
-                var zindex = parseFloat(pixelCoordinates.y +"."+pixelCoordinates.x);
-                cellGroup.zindex = zindex;
-                zindexSplayTree.add(cellGroup);
-                //Insert group into cellsGroup before the found child
-                var node = zindexSplayTree.findGreatestLessThan({zindex:zindex});
-                if (!!node) {
-                   cellGroup.insertAbove(node.value);
-                   belowGridGroup.insertAbove(node.value.belowGridGroup);
-                } else {
-                   cellsGroup.insertChild(0, cellGroup);
-                   belowGridCellsGroup.insertChild(0, belowGridGroup);
-                }
-                
-                //Set the doubly linked list references, makes a circle with the cellGroup itself as a node. Means don't need to null check
-                cellGroup.previousDrawnItem = cellGroup;
-                cellGroup.nextDrawnItem = cellGroup;
-            }
-            changedGroups[groupKey] = cellGroup;
-            
-            //Update the group with the drawn item, all items get added to the top, so must be above grid
-            cellGroup.addChild(drawnItem);
-            cellGroup.drawnItemCount++;
-            //Some circular logic here. Pun intended
-            cellGroup.previousDrawnItem.nextDrawnItem = drawnItem;
-            drawnItem.previousDrawnItem = cellGroup.previousDrawnItem;
-            cellGroup.previousDrawnItem = drawnItem;
-
-        }
-        
-        //For each changed group
-        for (var key in changedGroups) {
-            if (changedGroups.hasOwnProperty(key)) {
-                cellGroup = changedGroups[key];
-                
-                //Figure out the maxDy
-                if (cellGroup.drawnItemCount > 5) {
-                    cellGroup.maxDy = 5 * (cellGroup.drawnItemCount - 5); //allow to scroll 5 px for each item.outside the allowed window of 5 items
-
-                } else {
-                    cellGroup.maxDy = 0;
-                }
-
-                if (cellGroup.dy > cellGroup.maxDy) {
-                   cellGroup.baseGroup.position.y = cellGroup.baseGroup.position.y - (cellGroup.dy - cellGroup.maxDy);
-                   cellGroup.dy = cellGroup.maxDy;
-                }
-                
-                //Reposition each item of the group, according to its index and the new dy
-                drawnItem = cellGroup.nextDrawnItem;
-                for (i = 0; i < cellGroup.drawnItemCount; i++) {
-                    drawnItem.position = new paper.Point(cellGroup.originalXPosition + dx, cellGroup.originalYPosition + dy + cellGroup.dy - stackStep * i);
-                    drawnItem = drawnItem.nextDrawnItem;
-                }
-                
-                //Set the transluceny of each item in the group, and put in the appropriate above/below grid Z index group
-                board.windowCell(cellGroup);
-            }
-        }
-        paper.view.update();
-    
-    };
 }
 
 /**

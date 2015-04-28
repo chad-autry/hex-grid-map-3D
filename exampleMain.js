@@ -2,6 +2,7 @@ var Board = require('./hexBoard.js');
 var BackgroundContext = require('./exampleBackgroundContext.js');
 var ForegroundContext = require('./exampleForegroundContext.js');
 var GridContext = require('./GridContext.js');
+var CellContext = require('./CellContext.js');
 var CellDataSource = require('./baseCellDataSource.js');
 var DrawnItemFactory = require('./exampleDrawnItemFactory');
 
@@ -15,14 +16,15 @@ var ExampleContext = function() {
     var container = document.getElementById("myBoard");
     cellDataSource = new CellDataSource();
     var drawnItemFactory = new DrawnItemFactory();
+    var cellContext = new CellContext(cellDataSource, drawnItemFactory, 5);
     var items = [];
     var keyId = 0;
 
     this.onLoad = function() {
-        board = new Board({containerId:"myBoard", edgeSize:55, edgeWidth:3, width:900, height:800, cellDataSource: cellDataSource, drawnItemFactory: drawnItemFactory,
+        board = new Board({containerId:"myBoard", edgeSize:55, edgeWidth:3, width:900, height:800,
         initBackground:backgroundContext.initBackground, updateBackgroundPosition: backgroundContext.updateBackgroundPosition,
         initForeground:foregroundContext.initForeground, updateForegroundPosition: foregroundContext.updateForegroundPosition,
-        initGrid: gridContext.initGrid, updateGridPosition: gridContext.updateGridPosition});
+        initGrid: gridContext.initGrid, updateGridPosition: gridContext.updateGridPosition}, cellContext);
 
         cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
         cellDataSource.addItems([{radius: 30, sides: 3, color: 'purple', u:1, v:1}, {radius: 30, sides: 3, color: 'red', u:1, v:0}]);
