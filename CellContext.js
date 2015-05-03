@@ -114,7 +114,7 @@ CellContext.prototype.hitTest = function(clickedX, clickedY, hitTestGroup) {
 /**
  * Called when objects are added to cells, removed from cells, re-ordered in cells,
  */
-CellContext.prototype.onCellDataChanged = function(event) {
+CellContext.prototype.onDataChanged = function(event) {
     var changedGroups = {};
 
     //A reminder for the Author: Javascript variables are not at block level. These variables are used in both loops.

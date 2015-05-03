@@ -1,7 +1,7 @@
 /*
- * This function defines the base datasource for cell items. Expect client applications to impliment their own datasources which will listen to this one, and add filtering/sorting etc
+ * This function defines a minimal datasource for items. Expect client applications to impliment their own datasources which will listen to this one, and add filtering/sorting etc
  */
-function baseCellDataSource() {
+function DataSource() {
     var listeners = []; //The listeners registered for change events
     var items = []; //The data items
 
@@ -11,15 +11,15 @@ function baseCellDataSource() {
     
     this.addItems = function(items) {
         for (var i = 0; i < listeners.length; i++) {
-	    listeners[i].onCellDataChanged({added:items, removed:[]});
+	    listeners[i].onDataChanged({added:items, removed:[]});
         }
     };
 
     this.removeItems = function(items) {
         for (var i = 0; i < listeners.length; i++) {
-        listeners[i].onCellDataChanged({added:[], removed:items});
+        listeners[i].onDataChanged({added:[], removed:items});
         }
     };
 }
 
-module.exports = baseCellDataSource;
+module.exports = DataSource;

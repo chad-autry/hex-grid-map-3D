@@ -1,6 +1,5 @@
 "use strict";
 var paper = require('browserifyable-paper');
-var HexDefinition = require('canvas-hexagon');
 /*
  * Defines an isometric hexagonal board for web games
  */
@@ -9,7 +8,7 @@ var HexDefinition = require('canvas-hexagon');
 /*
  * Constructor for the hex board, accepts all options as a map of parameters
  */
-function HexBoard(params, cellContext) {
+function HexBoard(hexDimensions, params, cellContext, gridOverlayContext) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof HexBoard)) {
         return new HexBoard(params);
@@ -22,9 +21,7 @@ function HexBoard(params, cellContext) {
 
     var gridLineWidth = params.edgeWidth;
 
-    var gridColor = params.hasOwnProperty('gridColor') ? params.gridColor:'silver';
-    var verticalScaling = params.hasOwnProperty('verticalScaling') ? params.verticalScaling:0.5; // The amount to scale the grid by vertically (.5 is traditional "near isometric")
-    var hexDimensions = new HexDefinition(params.edgeSize, verticalScaling);
+    this.hexDimensions = hexDimensions; 
     //Set the background update function if it was passed in
     if(params.hasOwnProperty('updateBackgroundPosition')) {
         this.updateBackgroundPosition = params.updateBackgroundPosition;
@@ -40,6 +37,7 @@ function HexBoard(params, cellContext) {
         this.updateGridPosition = params.updateGridPosition;
     }
     this.cellContext = cellContext;
+    this.gridOverlayContext = gridOverlayContext;
     //Now the board variables which do not comes from the initial params
     var dx = 0; //The current translation in x of the map
     var dy = 0; // the current translation in y of the map
@@ -55,6 +53,7 @@ function HexBoard(params, cellContext) {
     var backgroundGroup = new paper.Group();
     var belowGridCellsGroup = new paper.Group(); //When there is a stack some items might be drawn below grid, or if there is a large item (sphere) it might have components drawn above and below
     var gridGroup = new paper.Group();
+    var gridOverlayGroup = new paper.Group();
     var aboveGridCellsGroup = new paper.Group();
     var foregroundGroup = new paper.Group();
 
@@ -62,6 +61,7 @@ function HexBoard(params, cellContext) {
     backgroundGroup.pivot = new paper.Point(0, 0);
     belowGridCellsGroup.pivot = new paper.Point(0, 0);
     gridGroup.pivot = new paper.Point(0, 0);
+    gridOverlayGroup.pivot = new paper.Point(0, 0);
     aboveGridCellsGroup.pivot = new paper.Point(0, 0);
     foregroundGroup.pivot = new paper.Point(0, 0);
     
@@ -82,6 +82,9 @@ function HexBoard(params, cellContext) {
     
     //Init the cellContext
     cellContext.init(paper, belowGridCellsGroup, aboveGridCellsGroup, hexDimensions);
+    
+    //Init the gridOverlayContext
+    gridOverlayContext.init(gridOverlayGroup);
 
     paper.view.draw();
     var tool = new paper.Tool();
@@ -147,6 +150,7 @@ function HexBoard(params, cellContext) {
       */
      this.updatePostion = function() {
          this.cellContext.updatePosition(dx, dy);
+         this.gridOverlayContext.updatePosition(dx, dy);
          this.updateGridPosition(gridGroup, dx, dy);
          this.updateBackgroundPosition(backgroundGroup, dx, dy);
          this.updateForegroundPosition(foregroundGroup, dx, dy);
