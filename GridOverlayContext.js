@@ -36,8 +36,10 @@ function GridOverlayContext(overlayDataSource, drawnItemFactory, hexDimensions) 
      */
     this.onMouseDown = function(clickedX, clickedY) {
         //Hit test for items
-        var clickedItem = context.gridOverlayGroup.hitTest(new paper.Point(clickedX, clickedY));
-        if (clickedItem) {
+        var result = context.gridOverlayGroup.hitTest(new paper.Point(clickedX, clickedY));
+        if (result) {
+            context.clickedItem = result.item.parent;
+            return true;
             //Check if the clickedItem is one the layer claims further mouse events for
         }
         return;
@@ -58,7 +60,7 @@ function GridOverlayContext(overlayDataSource, drawnItemFactory, hexDimensions) 
      * The method called when the user drags the mouse, and this context has claimed that drag
      */
     this.mouseDragged = function( x, y, eventDx, eventDy, dx, dy) {
-
+        context.clickedItem.data.onDrag( x, y, eventDx, eventDy, dx, dy);
     };
 }
 
@@ -75,11 +77,6 @@ GridOverlayContext.prototype.onDataChanged = function(event) {
 
     for (i = 0; i < event.removed.length; i++) {
         item = event.removed[i];
-        drawnItem = this.drawnItemFactory.getDrawnItem(item);
-        var sourcePixelCoordinates = this.hexDimensions.getPixelCoordinates(item.sourceU, item.sourceV);
-        drawnItem.position.x = this.dx + sourcePixelCoordinates.x;
-        drawnItem.position.y = this.dy + sourcePixelCoordinates.y;
-        this.gridOverlayGroup.addChild(drawnItem);
 
     }
 

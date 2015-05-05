@@ -41,6 +41,7 @@ VectorDrawnItemFactory.prototype.getDrawnItem = function(item) {
          strokeCap: 'butt',
          strokeWidth: item.shaftWidth + 2
     });
+    vectorGroup.data.shaftBorder = shaftBorder;
     
     vectorGroup.addChild(shaftBorder);
     var headBorder = new paper.Path({
@@ -56,6 +57,7 @@ VectorDrawnItemFactory.prototype.getDrawnItem = function(item) {
     headBorder.rotate (angle - 45);
     
     vectorGroup.addChild(headBorder);
+    vectorGroup.data.headBorder = headBorder;
     
     var vectorShaft = new paper.Path.Line({
          from: [0, 0],
@@ -65,6 +67,7 @@ VectorDrawnItemFactory.prototype.getDrawnItem = function(item) {
          strokeWidth: item.shaftWidth
     });
     vectorGroup.addChild(vectorShaft);
+    vectorGroup.data.vectorShaft = vectorShaft;
 
     // The head of the vector
     //Figure out rotation
@@ -81,7 +84,36 @@ VectorDrawnItemFactory.prototype.getDrawnItem = function(item) {
     vectorHead.rotate (angle - 45);
     //vectorHead.scale(1, 0.5);
     vectorGroup.addChild(vectorHead);
+    vectorGroup.data.vectorHead = vectorHead;
+    //Will be used to test if the click was near enough to the head
+    vectorGroup.data.isDrag = function(x, y) {
+        return true;
+    };
+    
+    vectorGroup.data.lastRotation = angle;
          
+    vectorGroup.data.onDrag = function(x, y, eventDx, eventDy, dx, dy) {
+        var normalizedX = x - this.shaftBorder.firstSegment.point.x;
+        var normalizedY = y - this.shaftBorder.firstSegment.point.y;
+        //Get the angle (clockwise in degrees) of the vector
+        var angle = Math.acos(normalizedX / (Math.sqrt(normalizedX*normalizedX + normalizedY*normalizedY))) * 180 / Math.PI;
+        if (normalizedY < 0) {
+            angle = - angle;
+        }
+
+        this.shaftBorder.firstSegment.next.point.x = x;
+        this.shaftBorder.firstSegment.next.point.y = y;
+        this.headBorder.rotate(angle - this.lastRotation);
+        this.headBorder.position.x = x;
+        this.headBorder.position.y = y;
+        this.vectorShaft.firstSegment.next.point.x = x;
+        this.vectorShaft.firstSegment.next.point.y = y;
+        this.vectorHead.rotate(angle - this.lastRotation);
+        this.vectorHead.position.x = x;
+        this.vectorHead.position.y = y;
+        this.lastRotation = angle;
+        
+    };
          
     return vectorGroup;
 };

@@ -107,6 +107,8 @@ function HexBoard(hexDimensions, params, cellContext, gridOverlayContext) {
              mouseDownContext = board.cellContext;
          } else if (board.cellContext.belowGridMouseDown(e.point.x, e.point.y)) {
              mouseDownContext = board.cellContext;
+         } else if (board.gridOverlayContext.onMouseDown(e.point.x, e.point.y)) {
+             mouseDownContext = board.gridOverlayContext;
          }
      };
 
