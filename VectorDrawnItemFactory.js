@@ -24,19 +24,20 @@ VectorDrawnItemFactory.prototype.getDrawnItem = function(item) {
     var normalizedU = item.destU - item.sourceU;
     var normalizedV = item.destV - item.sourceV;
    
-    //Get the x, y for the normalized u, v
-    var pixelCoordinates = this.hexDefinition.getPixelCoordinates(normalizedU, normalizedV);
-    
+    //Get the x, y for the vector
+    var sourcePixelCoordinates = this.hexDefinition.getPixelCoordinates(item.sourceU, item.sourceV);
+    var destPixelCoordinates = this.hexDefinition.getPixelCoordinates(item.destU, item.destV);
+    var normalizedPixelCoordinates = {x: destPixelCoordinates.x - sourcePixelCoordinates.x, y: destPixelCoordinates.y - sourcePixelCoordinates.y};
     
     //Get the angle (clockwise in degrees) of the vector
-    var angle = Math.acos(pixelCoordinates.x / (Math.sqrt(pixelCoordinates.x*pixelCoordinates.x + pixelCoordinates.y*pixelCoordinates.y))) * 180 / Math.PI;
-    if (pixelCoordinates.y < 0) {
+    var angle = Math.acos(normalizedPixelCoordinates.x / (Math.sqrt(normalizedPixelCoordinates.x*normalizedPixelCoordinates.x + normalizedPixelCoordinates.y*normalizedPixelCoordinates.y))) * 180 / Math.PI;
+    if (normalizedPixelCoordinates.y < 0) {
         angle = - angle;
     }
     //First draw the vector in black 1 pixel larger for a border
     var shaftBorder = new paper.Path.Line({
-         from: [0, 0],
-         to: [pixelCoordinates.x, pixelCoordinates.y],
+         from: [sourcePixelCoordinates.x, sourcePixelCoordinates.y],
+         to: [destPixelCoordinates.x, destPixelCoordinates.y],
          strokeColor: 'black',
          strokeCap: 'butt',
          strokeWidth: item.shaftWidth + 2
@@ -51,8 +52,8 @@ VectorDrawnItemFactory.prototype.getDrawnItem = function(item) {
         strokeCap: 'round'
     });
     headBorder.setPivot(new paper.Point(0, 0));
-    headBorder.position.x = pixelCoordinates.x;
-    headBorder.position.y = pixelCoordinates.y;
+    headBorder.position.x = destPixelCoordinates.x;
+    headBorder.position.y = destPixelCoordinates.y;
     //already rotated 45 degrees
     headBorder.rotate (angle - 45);
     
@@ -60,8 +61,8 @@ VectorDrawnItemFactory.prototype.getDrawnItem = function(item) {
     vectorGroup.data.headBorder = headBorder;
     
     var vectorShaft = new paper.Path.Line({
-         from: [0, 0],
-         to: [pixelCoordinates.x, pixelCoordinates.y],
+         from: [sourcePixelCoordinates.x, sourcePixelCoordinates.y],
+         to: [destPixelCoordinates.x, destPixelCoordinates.y],
          strokeColor: item.color,
          strokeCap: 'butt',
          strokeWidth: item.shaftWidth
@@ -78,8 +79,8 @@ VectorDrawnItemFactory.prototype.getDrawnItem = function(item) {
         strokeCap: 'round'
     });
     vectorHead.setPivot(new paper.Point(0, 0));
-    vectorHead.position.x = pixelCoordinates.x;
-    vectorHead.position.y = pixelCoordinates.y;
+    vectorHead.position.x = destPixelCoordinates.x;
+    vectorHead.position.y = destPixelCoordinates.y;
     //already rotated 45 degrees
     vectorHead.rotate (angle - 45);
     //vectorHead.scale(1, 0.5);

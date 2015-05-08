@@ -4,6 +4,7 @@ var ForegroundContext = require('./exampleForegroundContext.js');
 var GridContext = require('./GridContext.js');
 var CellContext = require('./CellContext.js');
 var VectorDrawnItemFactory = require('./VectorDrawnItemFactory.js');
+var PathDrawnItemFactory = require('./PathDrawnItemFactory.js');
 var DelegatingDrawnItemFactory = require('./DelegatingDrawnItemFactory.js');
 var GridOverlayContext = require('./GridOverlayContext.js');
 var DataSource = require('./DataSource.js');
@@ -20,10 +21,11 @@ var ExampleContext = function() {
     var container = document.getElementById("myBoard");
     var cellDataSource = new DataSource();
     var cellDrawnItemFactory = new CellDrawnItemFactory();
+    var pathDrawnItemFactory = new PathDrawnItemFactory(hexDimensions);
     var cellContext = new CellContext(cellDataSource, cellDrawnItemFactory, 5);
     var gridOverlayDataSource = new DataSource();
     var vectorDrawnItemFactory = new VectorDrawnItemFactory(hexDimensions);
-    var gridOverlayDrawnItemFactoryMap = {vector: vectorDrawnItemFactory};
+    var gridOverlayDrawnItemFactoryMap = {vector: vectorDrawnItemFactory, path: pathDrawnItemFactory};
     var gridOverlayDrawnItemFactory = new DelegatingDrawnItemFactory(gridOverlayDrawnItemFactoryMap);
     var gridOverlayContext = new GridOverlayContext(gridOverlayDataSource, gridOverlayDrawnItemFactory, hexDimensions);
     var items = [];
@@ -53,8 +55,13 @@ var ExampleContext = function() {
         cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
         cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
         
+        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:6, v:-4}]);
         
-        gridOverlayDataSource.addItems([{type:'vector', shaftWidth: 5, color: 'green', sourceU: 0, sourceV: 0, destU: 2, destV: 1}]);
+        gridOverlayDataSource.addItems([{id: 'path1', type:'vector', shaftWidth: 5, color: 'green', sourceU: 6, sourceV: -4, destU: 5, destV: -2}]);
+        
+        gridOverlayDataSource.addItems([{id: 'path2', type:'path', width: 5, color: 'blue', points:[[0,0],[0,3],[1,5]]},
+                                        {id: 'path3', type:'path', width: 5, color: 'purple', points:[[0,0],[1,3],[1,5]]}]);
+        gridOverlayDataSource.removeItems([{id: 'path2', type:'path', width: 5, color: 'blue', points:[[0,0],[0,3],[1,5]]}]);
         
     };
 

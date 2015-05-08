@@ -19,7 +19,7 @@ function GridOverlayContext(overlayDataSource, drawnItemFactory, hexDimensions) 
     this.hexDimensions = hexDimensions;
     this.dx = 0;
     this.dy = 0;
-
+    this.drawnItemCache = {};
 
     //Add this as a listener to the overlay dataSource. this.onOverlayDataChanged will be called when items change.
     overlayDataSource.addListener(this);
@@ -77,15 +77,17 @@ GridOverlayContext.prototype.onDataChanged = function(event) {
 
     for (i = 0; i < event.removed.length; i++) {
         item = event.removed[i];
-
+        drawnItem = this.drawnItemCache[item.id];
+        drawnItem.remove();
+        delete this.drawnItemCache[item.id];
     }
 
     for (i = 0; i < event.added.length; i++) {
         item = event.added[i];
+        
         drawnItem = this.drawnItemFactory.getDrawnItem(item);
+        this.drawnItemCache[item.id] = drawnItem;
         var sourcePixelCoordinates = this.hexDimensions.getPixelCoordinates(item.sourceU, item.sourceV);
-        drawnItem.position.x = this.dx + sourcePixelCoordinates.x;
-        drawnItem.position.y = this.dy + sourcePixelCoordinates.y;
         this.gridOverlayGroup.addChild(drawnItem);
     }
 
