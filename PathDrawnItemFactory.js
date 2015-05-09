@@ -23,7 +23,7 @@ PathDrawnItemFactory.prototype.getDrawnItem = function(item) {
     var xyPoints = [];
     //Convert the item's array of u, v points into x, y
     for (var i = 0; i < item.points.length; i++) {
-        var pixelCoordinates = this.hexDefinition.getPixelCoordinates(item.points[i][0], item.points[i][1])
+        var pixelCoordinates = this.hexDefinition.getPixelCoordinates(item.points[i][0], item.points[i][1]);
         xyPoints.push([pixelCoordinates.x, pixelCoordinates.y]);
     }
     
