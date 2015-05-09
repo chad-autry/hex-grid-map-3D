@@ -12,4 +12,5 @@ script:
 - npm test
 - npm run browserify
 after_success:
+- chmod ugo+x ./deploy-gh-pages.sh
 - ./deploy-gh-pages.sh
