@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ev;
 echo "gather files for deployment...";
 mkdir -p target/gh-pages;
 cp test.html ./target/gh-pages/index.html;
