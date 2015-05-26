@@ -9,7 +9,7 @@ function ExampleDrawnItemFactory() {
      * My expectation is the application will provide cell items which have the data required to create a paper.js drawn item
      * Maybe they give an SVG image, maybe they provide info to create a regular polygon, maybe they do a mix.
      */
-     this.getDrawnItemForCellItem = function(cellItem) {
+     this.getDrawnItem = function(cellItem) {
          var drawnItem = new paper.Path.RegularPolygon({
              center: [0, 0],
              sides: cellItem.sides,

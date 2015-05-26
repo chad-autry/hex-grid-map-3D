@@ -9,6 +9,7 @@ var DelegatingDrawnItemFactory = require('./DelegatingDrawnItemFactory.js');
 var GridOverlayContext = require('./GridOverlayContext.js');
 var DataSource = require('./DataSource.js');
 var CellDrawnItemFactory = require('./exampleDrawnItemFactory');
+var SphereDrawnItemFactory = require('./SphereDrawnItemFactory');
 var HexDefinition = require('canvas-hexagon');
 
 var ExampleContext = function() {
@@ -20,7 +21,10 @@ var ExampleContext = function() {
     var gridContext = new GridContext();
     var container = document.getElementById("myBoard");
     var cellDataSource = new DataSource();
-    var cellDrawnItemFactory = new CellDrawnItemFactory();
+    var simpleDrawnItemFactory = new CellDrawnItemFactory();
+    var sphereDrawnItemFactor = new SphereDrawnItemFactory(hexDimensions);
+    var cellDrawnItemFactoryMap = {simple: simpleDrawnItemFactory, sphere: sphereDrawnItemFactor};
+    var cellDrawnItemFactory = new DelegatingDrawnItemFactory(cellDrawnItemFactoryMap);
     var pathDrawnItemFactory = new PathDrawnItemFactory(hexDimensions);
     var cellContext = new CellContext(cellDataSource, cellDrawnItemFactory, 5);
     var gridOverlayDataSource = new DataSource();
@@ -37,25 +41,25 @@ var ExampleContext = function() {
         initForeground:foregroundContext.initForeground, updateForegroundPosition: foregroundContext.updateForegroundPosition,
         initGrid: gridContext.initGrid, updateGridPosition: gridContext.updateGridPosition}, cellContext, gridOverlayContext);
 
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'purple', u:1, v:1}, {radius: 30, sides: 3, color: 'red', u:1, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 5, color: 'purple', u:1, v:0}, {radius: 30, sides: 9, color: 'red', u:0, v:1}]);
-        cellDataSource.addItems([{radius: 30, sides: 6, color: 'purple', u:4, v:2}, {radius: 30, sides: 3, color: 'red', u:5, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 7, color: 'purple', u:1, v:0}, {radius: 30, sides: 4, color: 'red', u:0, v:4}]);
-        cellDataSource.addItems([{radius: 30, sides: 8, color: 'purple', u:1, v:5}, {radius: 30, sides: 6, color: 'red', u:3, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:1, v:0}, {radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'purple', u:1, v:1}, {type:'simple', radius: 30, sides: 3, color: 'red', u:1, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 5, color: 'purple', u:1, v:0}, {type:'simple', radius: 30, sides: 9, color: 'red', u:0, v:1}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 6, color: 'purple', u:4, v:2}, {type:'simple', radius: 30, sides: 3, color: 'red', u:5, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 7, color: 'purple', u:1, v:0}, {type:'simple', radius: 30, sides: 4, color: 'red', u:0, v:4}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 8, color: 'purple', u:1, v:5}, {type:'simple', radius: 30, sides: 6, color: 'red', u:3, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
         
-        cellDataSource.addItems([{radius: 30, sides: 3, color: 'green', u:6, v:-4}]);
+        cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:6, v:-4}]);
         
         gridOverlayDataSource.addItems([{id: 'path1', type:'vector', shaftWidth: 5, color: 'green', sourceU: 6, sourceV: -4, destU: 5, destV: -2}]);
         
@@ -63,11 +67,14 @@ var ExampleContext = function() {
                                         {id: 'path3', type:'path', width: 5, color: 'purple', points:[[0,0],[1,3],[1,5]]}]);
         gridOverlayDataSource.removeItems([{id: 'path2', type:'path', width: 5, color: 'blue', points:[[0,0],[0,3],[1,5]]}]);
         
+        
+        //The rotation is the "nearly isometric" converted to radians.
+        cellDataSource.addItems([{type:'sphere', size: 100, rotation: 63.435*(Math.PI/180), lineWidth: 3, greatCircleAngles: [0, Math.PI/4, -Math.PI/4], latitudeAngles: [Math.PI/8, Math.PI/4, -Math.PI/8], lineColor: 'yellow', backgroundColor: 'black', u:0, v:0}]);
     };
-
+    
 
     this.addItem = function() {
-        var item = {radius: 30, sides: 3, color: 'blue', u:0, v:0, key: 'test' + keyId++};
+        var item = {type:'simple', radius: 30, sides: 3, color: 'blue', u:-1, v:0, key: 'test' + keyId++};
         items.push(item);
         cellDataSource.addItems([item]);
     };

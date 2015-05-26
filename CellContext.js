@@ -134,9 +134,9 @@ CellContext.prototype.onDataChanged = function(event) {
             continue;
         }
 
-        drawnItem = cellGroup[item.key];
+        drawnItem = cellGroup.data.drawnItems[item.key];
         drawnItem.remove();
-        delete cellGroup[item.key];
+        delete cellGroup.data.drawnItems[item.key];
 
         drawnItem.previousDrawnItem.nextDrawnItem = drawnItem.nextDrawnItem;
         drawnItem.nextDrawnItem.previousDrawnItem = drawnItem.previousDrawnItem;
@@ -148,7 +148,7 @@ CellContext.prototype.onDataChanged = function(event) {
         if (cellGroup.drawnItemCount === 0) {
             cellGroup.belowGridGroup.remove();
             cellGroup.remove();
-            delete cellGroupsMap[groupKey];
+            delete this.cellGroupsMap[groupKey];
         } else {
             changedGroups[groupKey] = cellGroup;
         }
@@ -156,7 +156,7 @@ CellContext.prototype.onDataChanged = function(event) {
 
     for (i = 0; i < event.added.length; i++) {
         item = event.added[i];
-        drawnItem = this.drawnItemFactory.getDrawnItemForCellItem(item);
+        drawnItem = this.drawnItemFactory.getDrawnItem(item);
 
         //Get the cell group the drawn item should be a part of
         groupKey = item.u+":"+item.v;
@@ -205,16 +205,28 @@ CellContext.prototype.onDataChanged = function(event) {
             //Set the doubly linked list references, makes a circle with the cellGroup itself as a node. Means don't need to null check
             cellGroup.previousDrawnItem = cellGroup;
             cellGroup.nextDrawnItem = cellGroup;
+            
+            //Prepare the map of drawn items by id
+            cellGroup.data.drawnItems = {};
         }
         changedGroups[groupKey] = cellGroup;
 
         //Update the group with the drawn item, all items get added to the top, so must be above grid
         cellGroup.addChild(drawnItem);
         cellGroup.drawnItemCount++;
+        //Map the drawn items by id so they can be removed
+        if (!!item.key) {
+            cellGroup.data.drawnItems[item.key] = drawnItem;
+        }
+        //some item types include pieces drawn below the grid (let the game logic ensure they are the only item in the cell)
+        if (!!drawnItem.belowGridItem) {
+            cellGroup.belowGridGroup.addChild(drawnItem.belowGridItem);
+        }
         //Some circular logic here. Pun intended
         cellGroup.previousDrawnItem.nextDrawnItem = drawnItem;
         drawnItem.previousDrawnItem = cellGroup.previousDrawnItem;
         cellGroup.previousDrawnItem = drawnItem;
+        drawnItem.nextDrawnItem = cellGroup;
     }
 
     //For each changed group
