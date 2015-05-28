@@ -37,8 +37,10 @@
   "dependencies": {
     "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js",
     "canvas-hexagon": "git+https://git@github.com/chad-autry/canvas-hexagon",
-    "collections": "^1.2.1",
-    "browserify": "git+https://github.com/chad-autry/node-browserify",
+    "collections": "^1.2.1"
+  },
+  "devDependencies": {
+    "browserify": "git+https://git@github.com/chad-autry/node-browserify",
     "jshint": "^2.6.3",
     "karma": "^0.12.9",
     "karma-cli": "0.0.4",
@@ -47,13 +49,10 @@
     "parallelshell": "^1.1.1",
     "watchify": "^3.1.0"
   },
-  "devDependencies": {
-    "browserify": "^9.0.3",
-    "jshint": "^2.6.3",
-    "watchify": "^2.4.0"
-  },
   "jshintConfig": {
     "node": "true",
-    "predef": [ "document" ]
+    "predef": [
+      "document"
+    ]
   }
 }
