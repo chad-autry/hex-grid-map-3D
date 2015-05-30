@@ -69,7 +69,7 @@ var ExampleContext = function() {
         
         
         //The rotation is the "nearly isometric" converted to radians.
-        cellDataSource.addItems([{type:'sphere', size: 100, rotation: 63.435*(Math.PI/180), lineWidth: 3, greatCircleAngles: [0, Math.PI/4, -Math.PI/4], latitudeAngles: [Math.PI/8, Math.PI/4, -Math.PI/8], lineColor: 'yellow', backgroundColor: 'black', u:0, v:0}]);
+        cellDataSource.addItems([{type:'sphere', size: 100, rotation: 63.435*(Math.PI/180), lineWidth: 3, greatCircleAngles: [-Math.PI/6, Math.PI/6, Math.PI/2], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6], lineColor: 'orange', backgroundColor: 'yellow', u:0, v:0}]);
     };
     
 

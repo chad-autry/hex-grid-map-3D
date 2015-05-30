@@ -179,6 +179,7 @@ CellContext.prototype.onDataChanged = function(event) {
 
             var pixelCoordinates = this.hexDimensions.getPixelCoordinates(item.u, item.v);
             cellGroup.position = new paper.Point(pixelCoordinates.x + this.dx, pixelCoordinates.y + this.dy);
+            belowGridGroup.position = new paper.Point(pixelCoordinates.x + this.dx, pixelCoordinates.y + this.dy);
             this.cellGroupsMap[groupKey] = cellGroup;
                 //decorate the cell group with various information we'll need
             cellGroup.mouseDown = false;
@@ -251,6 +252,9 @@ CellContext.prototype.onDataChanged = function(event) {
             drawnItem = cellGroup.nextDrawnItem;
             for (i = 0; i < cellGroup.drawnItemCount; i++) {
                     drawnItem.position = new paper.Point(cellGroup.originalXPosition + this.dx, cellGroup.originalYPosition + this.dy + cellGroup.dy - this.stackStep * i);
+                    if (!!drawnItem.belowGridItem) {
+                        drawnItem.belowGridItem.position = new paper.Point(cellGroup.originalXPosition + this.dx, cellGroup.originalYPosition + this.dy + cellGroup.dy - this.stackStep * i);
+                    }
                     drawnItem = drawnItem.nextDrawnItem;
             }
 
