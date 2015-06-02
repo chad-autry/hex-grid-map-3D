@@ -1,7 +1,7 @@
 var paper = require('browserifyable-paper');
 /**
  * Converts a provided sphere item into a drawn representation
- * Returns the below grid portion as 
+ * Returns the below grid portion as the "belowGridItem" on the main component
  */
 function SphereDrawnItemFactory(hexDefinition) {
     this.hexDefinition = hexDefinition;
@@ -123,7 +123,7 @@ SphereDrawnItemFactory.prototype.getDrawnItem = function(item) {
 
     }
     
-    //if given, draw great circle, perpendicular to the equator, going through the poles
+    //if given, draw great circles, perpendicular to the equator, going through the poles
     if (!!item.greatCircleAngles) {
         var upperGreatCirclePoints;
         var lowerGreatCirclePoints;
@@ -186,6 +186,23 @@ SphereDrawnItemFactory.prototype.getDrawnItem = function(item) {
     //drawn item fatories return only 1 item, but compound items like this (above and below grid) return the lower half as a property of the upper half
     
     upperGroup.belowGridItem = lowerGroup;
+    if (!!item.borderWidth) {
+        var backGroundCircle = new paper.Path.Circle({center: [0, 0],
+        radius: radius + item.borderWidth,
+        fillColor: item.borderColor});
+        lowerGroup.addChild(backGroundCircle);
+        backGroundCircle.sendToBack();
+    }
+    
+    if (!!item.borderStar) {
+        var backGroundStar = new paper.Path.Star({center: [0, 0],
+        radius1: radius + item.borderStar.radius1,
+        radius2: radius + item.borderStar.radius2,
+        points: item.borderStar.points,
+        fillColor: item.borderStar.borderColor});
+        lowerGroup.addChild(backGroundStar);
+        backGroundStar.sendToBack();
+    }
     return upperGroup;
     
     
