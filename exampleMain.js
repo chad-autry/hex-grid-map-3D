@@ -5,6 +5,7 @@ var GridContext = require('./GridContext.js');
 var CellContext = require('./CellContext.js');
 var VectorDrawnItemFactory = require('./VectorDrawnItemFactory.js');
 var PathDrawnItemFactory = require('./PathDrawnItemFactory.js');
+var ArrowDrawnItemFactory = require('./ArrowDrawnItemFactory.js');
 var DelegatingDrawnItemFactory = require('./DelegatingDrawnItemFactory.js');
 var GridOverlayContext = require('./GridOverlayContext.js');
 var DataSource = require('./DataSource.js');
@@ -23,7 +24,8 @@ var ExampleContext = function() {
     var cellDataSource = new DataSource();
     var simpleDrawnItemFactory = new CellDrawnItemFactory();
     var sphereDrawnItemFactor = new SphereDrawnItemFactory(hexDimensions);
-    var cellDrawnItemFactoryMap = {simple: simpleDrawnItemFactory, sphere: sphereDrawnItemFactor};
+    var arrowDrawnItemFactory = new ArrowDrawnItemFactory(hexDimensions);
+    var cellDrawnItemFactoryMap = {simple: simpleDrawnItemFactory, sphere: sphereDrawnItemFactor, arrow: arrowDrawnItemFactory};
     var cellDrawnItemFactory = new DelegatingDrawnItemFactory(cellDrawnItemFactoryMap);
     var pathDrawnItemFactory = new PathDrawnItemFactory(hexDimensions);
     var cellContext = new CellContext(cellDataSource, cellDrawnItemFactory, 5);
@@ -40,6 +42,28 @@ var ExampleContext = function() {
         initBackground:backgroundContext.initBackground, updateBackgroundPosition: backgroundContext.updateBackgroundPosition,
         initForeground:foregroundContext.initForeground, updateForegroundPosition: foregroundContext.updateForegroundPosition,
         initGrid: gridContext.initGrid, updateGridPosition: gridContext.updateGridPosition}, cellContext, gridOverlayContext);
+
+
+        cellDataSource.addItems([{type:'arrow', u: 0, v: -1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 180, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: -1, v: 0, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 240, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: -1, v: 1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 300, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 0, v: 1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 0, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 1, v: 0, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 60, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 1, v: -1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 120, scaleX: 0.75, scaleY:0.75*0.5}]);
+        
+        cellDataSource.addItems([{type:'arrow', u: 5, v: 4, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 180, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 4, v: 5, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 240, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 4, v: 6, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 300, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 5, v: 6, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 0, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 6, v: 5, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 60, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 6, v: 4, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 120, scaleX: 0.75, scaleY:0.75*0.5}]);
+        
+        cellDataSource.addItems([{type:'arrow', u: 3, v: 7, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 180, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 2, v: 8, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 240, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 2, v: 9, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 300, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 3, v: 9, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 0, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 4, v: 8, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 60, scaleX: 0.75, scaleY:0.75*0.5}]);
+        cellDataSource.addItems([{type:'arrow', u: 4, v: 7, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 120, scaleX: 0.75, scaleY:0.75*0.5}]);
 
         cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0}]);
         cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'purple', u:1, v:1}, {type:'simple', radius: 30, sides: 3, color: 'red', u:1, v:0}]);
@@ -74,7 +98,11 @@ var ExampleContext = function() {
         
         
         cellDataSource.addItems([{type:'sphere', size: 66, rotation: 63.435*(Math.PI/180), lineWidth: 3, greatCircleAngles: [-Math.PI/6, Math.PI/6, Math.PI/2], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6], 
-        lineColor: '#653700', backgroundColor: 'blue', borderWidth: 3, borderColor: 'white', u:5, v:5}]);
+        lineColor: '#653700', backgroundColor: 'blue', borderWidth: 2, borderColor: 'white', u:5, v:5}]);
+        cellDataSource.addItems([{type:'sphere', size: 33, rotation: 63.435*(Math.PI/180), lineWidth: 2, greatCircleAngles: [-Math.PI/6, Math.PI/6, Math.PI/2], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6], 
+        lineColor: 'grey', backgroundColor: 'white', borderWidth: 3, borderColor: 'black', u:3, v:8}]);
+        
+        
     };
     
 

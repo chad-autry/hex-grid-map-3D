@@ -186,12 +186,14 @@ SphereDrawnItemFactory.prototype.getDrawnItem = function(item) {
     //drawn item fatories return only 1 item, but compound items like this (above and below grid) return the lower half as a property of the upper half
     
     upperGroup.belowGridItem = lowerGroup;
+    var upperBorderItem;
     if (!!item.borderWidth) {
         var backGroundCircle = new paper.Path.Circle({center: [0, 0],
         radius: radius + item.borderWidth,
         fillColor: item.borderColor});
         lowerGroup.addChild(backGroundCircle);
         backGroundCircle.sendToBack();
+        upperBorderItem = backGroundCircle.clone(false);
     }
     
     if (!!item.borderStar) {
@@ -202,6 +204,23 @@ SphereDrawnItemFactory.prototype.getDrawnItem = function(item) {
         fillColor: item.borderStar.borderColor});
         lowerGroup.addChild(backGroundStar);
         backGroundStar.sendToBack();
+        
+        upperBorderItem = backGroundStar.clone(false);
+    }
+    
+    //Need the upper portion of the border to cover items appropriately, create another copy masked to only the upper half
+    if (!!upperBorderItem) {
+        var upperBorderClippingGroup = new paper.Group();
+        upperBorderClippingGroup.pivot = new paper.Point(0, 0);
+        
+        upperBorderClippingGroup.addChild(new paper.Shape.Rectangle({
+        from: [-radius - 200, -radius - 200],
+        to: [radius + 200, 0],
+        strokeColor: 'black'}));
+        upperBorderClippingGroup.clipped = true;
+        upperBorderClippingGroup.addChild(upperBorderItem);
+        upperGroup.addChild(upperBorderClippingGroup);
+        upperBorderClippingGroup.sendToBack();
     }
     return upperGroup;
     
@@ -210,15 +229,15 @@ SphereDrawnItemFactory.prototype.getDrawnItem = function(item) {
 
 // Utility method to rotate point by X in a 3D space
 SphereDrawnItemFactory.prototype.rotateX = function(point, radians) {
-	var z = point.z;
-	point.z = (z * Math.cos(radians)) + (point.y * Math.sin(radians));
-	point.y = (-1.0*z * Math.sin(radians)) + (point.y * Math.cos(radians));
+    var z = point.z;
+    point.z = (z * Math.cos(radians)) + (point.y * Math.sin(radians));
+    point.y = (-1.0*z * Math.sin(radians)) + (point.y * Math.cos(radians));
 };
 
 // Utility method to rotate point by Z in a 3D space
 SphereDrawnItemFactory.prototype.rotateZ = function(point, radians) {
-	var x = point.x;
-	point.x = (x * Math.cos(radians)) + (point.y * Math.sin(radians) * -1.0);
-	point.y = (x * Math.sin(radians)) + (point.y * Math.cos(radians));
+    var x = point.x;
+    point.x = (x * Math.cos(radians)) + (point.y * Math.sin(radians) * -1.0);
+    point.y = (x * Math.sin(radians)) + (point.y * Math.cos(radians));
 };
 module.exports = SphereDrawnItemFactory;
