@@ -10,7 +10,7 @@ before_install:
 - sh -e /etc/init.d/xvfb start
 script:
 - npm test
-- npm run browserify
+- npm run build:demo
 after_success:
 - chmod ugo+x ./deploy-gh-pages.sh
 - ./deploy-gh-pages.sh
