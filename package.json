@@ -10,7 +10,7 @@
     "watch:karma": "karma start karma-conf.js",
     "build:specs": "mkdirp ./target/test && browserify ./specs/*.spec.js --debug -o ./target/test/built.specs.js",
     "watch:specs": "mkdirp ./target/test && watchify ./specs/*.spec.js --debug -o ./target/test/built.specs.js",
-    "build:demo": "mkdirp ./target/demo &&  && browserify ./demo/demoMain.js --debug --standalone ExampleContext > ./target/demo/bundle.js",
+    "build:demo": "mkdirp ./target/demo && npm run copy:demoHTML && browserify ./demo/demoMain.js --debug --standalone ExampleContext > ./target/demo/bundle.js",
     "watch:demo": "mkdirp ./target/demo && npm run copy:demoHTML && watchify ./demo/demoMain.js --debug --standalone ExampleContext -v -o ./target/demo/bundle.js",
     "jshint": "jshint ./src",
     "copy:demoHTML": "copyfiles -f ./demo/demo.html ./target/demo"
