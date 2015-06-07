@@ -1,3 +1,4 @@
+"use strict";
 var paper = require('browserifyable-paper');
 /**
  * This is the context which managed the overlay items that appear right on top of the grid
@@ -11,7 +12,7 @@ var paper = require('browserifyable-paper');
 function GridOverlayContext(overlayDataSource, drawnItemFactory, hexDimensions) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof GridOverlayContext)) {
-        return new GridOverlayContext(params);
+        return new GridOverlayContext(overlayDataSource, drawnItemFactory, hexDimensions);
     }
     var context = this;
     this.overlayDataSource = overlayDataSource;

@@ -1,16 +1,17 @@
-var Board = require('./hexBoard.js');
-var BackgroundContext = require('./exampleBackgroundContext.js');
-var ForegroundContext = require('./exampleForegroundContext.js');
-var GridContext = require('./GridContext.js');
-var CellContext = require('./CellContext.js');
-var VectorDrawnItemFactory = require('./VectorDrawnItemFactory.js');
-var PathDrawnItemFactory = require('./PathDrawnItemFactory.js');
-var ArrowDrawnItemFactory = require('./ArrowDrawnItemFactory.js');
-var DelegatingDrawnItemFactory = require('./DelegatingDrawnItemFactory.js');
-var GridOverlayContext = require('./GridOverlayContext.js');
-var DataSource = require('./DataSource.js');
-var CellDrawnItemFactory = require('./exampleDrawnItemFactory');
-var SphereDrawnItemFactory = require('./SphereDrawnItemFactory');
+"use strict";
+var Board = require('../src/HexBoard.js');
+var BackgroundContext = require('../src/contexts/BackgroundContext.js');
+var ForegroundContext = require('../src/contexts/ForegroundContext.js');
+var GridContext = require('../src/contexts/GridContext.js');
+var CellContext = require('../src/contexts/CellContext.js');
+var VectorDrawnItemFactory = require('../src/drawnItemFactories/VectorDrawnItemFactory.js');
+var PathDrawnItemFactory = require('../src/drawnItemFactories/PathDrawnItemFactory.js');
+var ArrowDrawnItemFactory = require('../src/drawnItemFactories/ArrowDrawnItemFactory.js');
+var DelegatingDrawnItemFactory = require('../src/drawnItemFactories/DelegatingDrawnItemFactory.js');
+var GridOverlayContext = require('../src/contexts/GridOverlayContext.js');
+var DataSource = require('../src/dataSources/DataSource.js');
+var CellDrawnItemFactory = require('../src/drawnItemFactories/RegularPolygonDrawnItemFactory');
+var SphereDrawnItemFactory = require('../src/drawnItemFactories/SphereDrawnItemFactory');
 var HexDefinition = require('canvas-hexagon');
 
 var ExampleContext = function() {
@@ -100,7 +101,7 @@ var ExampleContext = function() {
         cellDataSource.addItems([{type:'sphere', size: 66, rotation: 63.435*(Math.PI/180), lineWidth: 3, greatCircleAngles: [-Math.PI/6, Math.PI/6, Math.PI/2], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6], 
         lineColor: '#653700', backgroundColor: 'blue', borderWidth: 2, borderColor: 'white', u:5, v:5}]);
         cellDataSource.addItems([{type:'sphere', size: 33, rotation: 63.435*(Math.PI/180), lineWidth: 2, greatCircleAngles: [-Math.PI/6, Math.PI/6, Math.PI/2], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6], 
-        lineColor: 'grey', backgroundColor: 'white', borderWidth: 3, borderColor: 'black', u:3, v:8}]);
+        lineColor: 'grey', backgroundColor: '#E1E1D6', borderWidth: 3, borderColor: 'black', u:3, v:8}]);
         
         
     };

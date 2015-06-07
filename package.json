@@ -8,12 +8,14 @@
     "karma:single": "karma start karma-conf.js --log-level debug --single-run",
     "watch:test": "parallelshell \"npm run watch:specs\" \"npm run watch:karma\"",
     "watch:karma": "karma start karma-conf.js",
-    "build:specs": "browserify ./specs/*.spec.js --debug -o built.specs.js",
-    "watch:specs": "watchify ./specs/*.spec.js --debug -o built.specs.js",
-    "browserify": "browserify ./exampleMain.js --debug --standalone ExampleContext > bundle.js",
-    "watchify": "watchify ./exampleMain.js --debug --standalone ExampleContext -v -o ./bundle.js",
-    "jshint": "jshint ./"
+    "build:specs": "mkdirp ./target/test && browserify ./specs/*.spec.js --debug -o ./target/test/built.specs.js",
+    "watch:specs": "mkdirp ./target/test && watchify ./specs/*.spec.js --debug -o ./target/test/built.specs.js",
+    "build:demo": "mkdirp ./target/demo &&  && browserify ./demo/demoMain.js --debug --standalone ExampleContext > ./target/demo/bundle.js",
+    "watch:demo": "mkdirp ./target/demo && npm run copy:demoHTML && watchify ./demo/demoMain.js --debug --standalone ExampleContext -v -o ./target/demo/bundle.js",
+    "jshint": "jshint ./src",
+    "copy:demoHTML": "copyfiles -f ./demo/demo.html ./target/demo"
   },
+
   "repository": {
     "type": "git",
     "url": "https://github.com/chad-autry/hex-widget.git"
@@ -41,11 +43,14 @@
   },
   "devDependencies": {
     "browserify": "git+https://git@github.com/chad-autry/node-browserify",
+    "copyfiles": "^0.2.1",
     "jshint": "^2.6.3",
     "karma": "^0.12.9",
     "karma-cli": "0.0.4",
     "karma-firefox-launcher": "^0.1.3",
     "karma-jasmine": "^0.1.5",
+    "mkdirp": "^0.5.1",
+    "npm-watch": "0.0.0",
     "parallelshell": "^1.1.1",
     "watchify": "^3.1.0"
   },

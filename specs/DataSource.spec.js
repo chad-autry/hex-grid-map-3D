@@ -2,7 +2,7 @@
  * A set of tests for the main java file
  */
 //Require the Constructor of the object being tested
-var DataSource = require("../DataSource.js");
+var DataSource = require("../src/datasources/DataSource.js");
 
 describe( 'DataSource dummy test', function() {
 

@@ -1,8 +1,8 @@
 #!/bin/bash
 set -ev;
 mkdir -p target/gh-pages;
-cp test.html ./target/gh-pages/index.html;
-cp bundle.js ./target/gh-pages/bundle.js;
+cp ./target/demo/demo.html ./target/gh-pages/index.html;
+cp ./target/demo/bundle.js ./target/gh-pages/bundle.js;
 cd target/gh-pages
 git init
 git config user.name ${GH_NAME}

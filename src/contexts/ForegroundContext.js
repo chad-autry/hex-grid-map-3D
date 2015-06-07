@@ -1,3 +1,4 @@
+"use strict";
 var paper = require('browserifyable-paper');
 /**
  * This is an example context with methods to draw and update the foreground of a hexBoard
@@ -7,7 +8,11 @@ var paper = require('browserifyable-paper');
 /**
  * The context object constructor, pass in an array of u, v points
  */
-function exampleForegroundContext(points) {
+function ForegroundContext(points) {
+    //Protect the constructor from being called as a normal method
+    if (!(this instanceof ForegroundContext)) {
+        return new ForegroundContext();
+    }
     var context = this;
     context.points = points;
 
@@ -57,4 +62,4 @@ function exampleForegroundContext(points) {
     };
 }
 
-module.exports = exampleForegroundContext;
+module.exports = ForegroundContext;

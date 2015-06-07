@@ -1,3 +1,4 @@
+"use strict";
 var paper = require('browserifyable-paper');
 /**
  * This is the context object for creating and managing the grid layer of a board
@@ -9,7 +10,7 @@ var paper = require('browserifyable-paper');
 function GridContext() {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof GridContext)) {
-        return new GridContext(params);
+        return new GridContext();
     }
     var context = this;
 

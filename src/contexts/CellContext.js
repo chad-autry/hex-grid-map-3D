@@ -1,3 +1,4 @@
+"use strict";
 var paper = require('browserifyable-paper');
 var sortedSet = require('collections/sorted-set');
 /**
@@ -11,7 +12,7 @@ var sortedSet = require('collections/sorted-set');
 function CellContext(cellDataSource, drawnItemFactory, stackStep) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof CellContext)) {
-        return new CellContext(params);
+        return new CellContext(cellDataSource, drawnItemFactory, stackStep);
     }
     var context = this;
     this.cellDataSource = cellDataSource;

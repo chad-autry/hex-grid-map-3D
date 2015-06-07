@@ -1,3 +1,4 @@
+"use strict";
 /*
  * This is a drawn item factory which delegates to provided more specific factories by type
  */

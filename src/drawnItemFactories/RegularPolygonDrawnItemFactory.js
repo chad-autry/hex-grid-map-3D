@@ -1,8 +1,9 @@
+"use strict";
 var paper = require('browserifyable-paper');
 /*
- * This is a drawn item factory used for testing and as an example
+ * This is a drawn item factory which will return RegularPolygons for the input item
  */
-function ExampleDrawnItemFactory() {
+function RegularPolygonDrawnItemFactory() {
     
     /**
      * This is the one method required of the factory. Returns the paper.js Item to be drawn for the cellItem
@@ -20,14 +21,6 @@ function ExampleDrawnItemFactory() {
          drawnItem.scale(1, 0.5);
          return drawnItem;
      };
-     
-    /**
-     * Need to clean up cached Symbols like I do? Register for cellDataChanged events!
-     * Make note that the exampleDrawnItemFactory registers second, so that it is called second on changes
-     */
-    this.onCellDataChanged = function(event) {
-        //TODO Allow transition animations to be implimented for various changes, with examples
-    };
 }
 
-module.exports = ExampleDrawnItemFactory;
+module.exports = RegularPolygonDrawnItemFactory;

@@ -1,3 +1,4 @@
+"use strict";
 var paper = require('browserifyable-paper');
 /**
  * Converts a provided vector item into a drawn representation

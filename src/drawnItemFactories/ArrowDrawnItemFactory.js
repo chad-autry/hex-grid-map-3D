@@ -1,3 +1,4 @@
+"use strict";
 var paper = require('browserifyable-paper');
 /**
  * Creates an arrow drawn item, such as might represent gravity

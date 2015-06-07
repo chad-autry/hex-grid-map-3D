@@ -1,3 +1,4 @@
+"use strict";
 var paper = require('browserifyable-paper');
 /**
  * This is an example context with methods to draw and update the background of a hexBoard
@@ -8,7 +9,11 @@ var paper = require('browserifyable-paper');
 /**
  * The context object constructor
  */
-function exampleBackgroundContext() {
+function BackgroundContext() {
+    //Protect the constructor from being called as a normal method
+    if (!(this instanceof BackgroundContext)) {
+        return new BackgroundContext();
+    }
     var context = this;
 
     /**
@@ -49,16 +54,16 @@ function exampleBackgroundContext() {
 /**
  * Generate a random integer between min and max
  */
-exampleBackgroundContext.prototype.random = function (min, max) {
+BackgroundContext.prototype.random = function (min, max) {
         return Math.round((Math.random() * max - min) + min);
 };
 
-exampleBackgroundContext.prototype.STAR_COLOURS = ["#ffffff", "#ffe9c4", "#d4fbff"];
+BackgroundContext.prototype.STAR_COLOURS = ["#ffffff", "#ffe9c4", "#d4fbff"];
 
 /**
  * Helper method, generates a raster containing randomly generated stars*
  */
-exampleBackgroundContext.prototype.createStarGroup = function( maxBrightness, maxRadius, width, height, star_number) {
+BackgroundContext.prototype.createStarGroup = function( maxBrightness, maxRadius, width, height, star_number) {
     var starGroup = new paper.Group();
     starGroup.pivot = new paper.Point(0, 0);
     var x, // x position of the star
@@ -78,4 +83,4 @@ exampleBackgroundContext.prototype.createStarGroup = function( maxBrightness, ma
     return starRaster;
 };
 
-module.exports = exampleBackgroundContext;
+module.exports = BackgroundContext;
