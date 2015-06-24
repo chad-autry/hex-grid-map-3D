@@ -4,7 +4,6 @@ node_js:
 env:
   global:
   - GH_REF: github.com/chad-autry/hex-widget 
-  - secure: aIWrYXGCElOdBN/XA6o8tMbF0bpI+WDAc78SqDglIwr+Il+jDtRMcmUSLd99g0Kz3d0dxN3Zsmd6Q+CfL1rXGpLs/u3dN+J3JYx5m717hX2JARl5fDD2xB/9YaXSiUbCWBIHVDIMHW4jKfOJLGjBVn0sfu95mv2XonLl+vUMR/vQ/HMx5MzViQKq2pAwAzTDDnDoV4HvG+XxkKh5oph8T/6VtEGjA0mTAfplT7TMTo/sUCq5hJbeO7xEothXltnirqfMbV2clZslUVJsFoC/PjqPVae8Wlyr6riwDe76F3u+ctjiQ1LRN0Wvup09TunFdJ0inAPi+JoTFGtoaS4X3AHEZbOISD7vTXhkE+GNMzBU7GnUm8vYRITOjzwOgQf1ntt4NOIKA3kWLdL0zVNl/8Qk/jpIg0vLFp6kps57ALfnLFcjOjKfVGvY68NirGW/eR1/FvuF3YJm7HmDj2QDpvXjZUbxypLLa5+LesOX39xNbI1ALGlTrT6S1wkk1I/uPzAmRmQvMCNoCJNEpeXOTHmSkq7ryw89bwbFnoI/85FHq08Sok9a7yBDbQhpy+ME48dqySRpKfOLtNLulZHWoGBui/BnVfi4LKEDTtjQ6JOrD92TZ5ZMtT9r7sLzqREFfqZJFg5PaiwrRUsQIMB04ZLbVmzE+X1cS2jWk/F2o7c=
 before_install:
 - export DISPLAY=:99.0
 - sh -e /etc/init.d/xvfb start

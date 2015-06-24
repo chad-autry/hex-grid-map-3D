@@ -12,7 +12,7 @@ var GridOverlayContext = require('../src/contexts/GridOverlayContext.js');
 var DataSource = require('../src/dataSources/DataSource.js');
 var CellDrawnItemFactory = require('../src/drawnItemFactories/RegularPolygonDrawnItemFactory');
 var SphereDrawnItemFactory = require('../src/drawnItemFactories/SphereDrawnItemFactory');
-var HexDefinition = require('canvas-hexagon');
+var HexDefinition = require('cartesian-hexagonal'); //external project required in constructors
 
 var ExampleContext = function() {
     var hexDimensions = new HexDefinition(55, 0.5);

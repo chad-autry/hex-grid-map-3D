@@ -15,7 +15,6 @@
     "jshint": "jshint ./src",
     "copy:demoHTML": "copyfiles -f ./demo/demo.html ./target/demo"
   },
-
   "repository": {
     "type": "git",
     "url": "https://github.com/chad-autry/hex-widget.git"
@@ -38,7 +37,7 @@
   "homepage": "https://github.com/chad-autry/hex-widget",
   "dependencies": {
     "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js",
-    "canvas-hexagon": "git+https://git@github.com/chad-autry/canvas-hexagon",
+    "cartesian-hexagonal": "0.0.2",
     "collections": "^1.2.1"
   },
   "devDependencies": {
