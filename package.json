@@ -10,10 +10,11 @@
     "watch:karma": "karma start karma-conf.js",
     "build:specs": "mkdirp ./target/test && browserify ./specs/*.spec.js --debug -o ./target/test/built.specs.js",
     "watch:specs": "mkdirp ./target/test && watchify ./specs/*.spec.js --debug -o ./target/test/built.specs.js",
-    "build:demo": "mkdirp ./target/demo && npm run copy:demoHTML && browserify ./demo/demoMain.js --debug --standalone ExampleContext > ./target/demo/bundle.js",
-    "watch:demo": "mkdirp ./target/demo && npm run copy:demoHTML && watchify ./demo/demoMain.js --debug --standalone ExampleContext -v -o ./target/demo/bundle.js",
+    "build:demo": "mkdirp ./target/gh-pages && npm run less && npm run copy:demoHTML && browserify ./gh-pages/src/app/app.js --debug -o ./target/gh-pages/bundle.js",
+    "watch:demo": "mkdirp ./target/gh-pages && npm run copy:demoHTML && watchify ./gh-pages/src/app/app.js --debug -v -o ./target/gh-pages/bundle.js",
     "jshint": "jshint ./src",
-    "copy:demoHTML": "copyfiles -f ./demo/demo.html ./target/demo"
+    "less": "lessc ./gh-pages/src/less/main.less > ./target/gh-pages/styles.css",
+    "copy:demoHTML": "copyfiles -f ./gh-pages/src/index.html ./target/gh-pages"
   },
   "repository": {
     "type": "git",
@@ -38,16 +39,24 @@
   "dependencies": {
     "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js",
     "cartesian-hexagonal": "0.0.2",
-    "collections": "^1.2.1"
+    "collections": "^1.2.1",
+    "angular": "^1.3.14",
+    "angular-bootstrap": "^0.12.0",
+    "angular-ui-router": "^0.2.13",
+    "bootstrap": "^3.3.4"
   },
   "devDependencies": {
+    "angular-mocks": "^1.3.15",
     "browserify": "git+https://git@github.com/chad-autry/node-browserify",
+    "browserify-ng-html2js": "^1.0.0",
+    "browserify-shim": "^3.8.3",
     "copyfiles": "^0.2.1",
     "jshint": "^2.6.3",
     "karma": "^0.12.9",
     "karma-cli": "0.0.4",
     "karma-firefox-launcher": "^0.1.3",
     "karma-jasmine": "^0.1.5",
+    "less": "^2.4.0",
     "mkdirp": "^0.5.1",
     "npm-watch": "0.0.0",
     "parallelshell": "^1.1.1",
@@ -58,5 +67,37 @@
     "predef": [
       "document"
     ]
+  },
+  "browserify": {
+    "transform": [
+      "browserify-ng-html2js",
+      "browserify-shim"
+    ]
+  },
+  "browser": {
+    "ui.bootstrap.dropdown": "./node_modules/angular-bootstrap/src/dropdown/dropdown.js",
+    "ui.bootstrap.collapse": "./node_modules/angular-bootstrap/src/collapse/collapse.js",
+    "ui.bootstrap.transition": "./node_modules/angular-bootstrap/src/transition/transition.js"
+  },
+  "browserify-shim": {
+    "ui.bootstrap.dropdown": {
+      "depends": [
+        "angular"
+      ],
+      "exports": "angular.module('ui.bootstrap.dropdown').name"
+    },
+    "ui.bootstrap.transition": {
+      "depends": [
+        "angular"
+      ],
+      "exports": "angular.module('ui.bootstrap.transition').name"
+    },
+    "ui.bootstrap.collapse": {
+      "depends": [
+        "angular",
+        "ui.bootstrap.transition"
+      ],
+      "exports": "angular.module('ui.bootstrap.collapse').name"
+    }
   }
 }

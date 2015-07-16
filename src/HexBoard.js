@@ -17,7 +17,7 @@ function HexBoard(hexDimensions, params, cellContext, gridOverlayContext) {
     
     //The factory which will provide the paper.js Item to draw
     var drawnItemFactory = params.drawnItemFactory;
-    var canvas = document.getElementById(params.containerId);
+    var canvas = params.canvas;
 
     var gridLineWidth = params.edgeWidth;
 

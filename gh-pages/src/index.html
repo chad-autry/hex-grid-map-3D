@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html ng-app="ngBoilerplate" ng-controller="AppCtrl">
+  <head>
+    <title ng-bind="pageTitle"></title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- font awesome from BootstrapCDN -->
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+
+    <!-- compiled JavaScript -->
+    <script type="text/javascript" src="bundle.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="navbar navbar-default">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" ng-init="menuCollapsed = true"
+            ng-click="menuCollapsed = ! menuCollapsed">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <div class="navbar-brand">
+            hex-widget
+            <small>
+              <a href="https://github.com/chad-autry/hex-widget/blob/v<%= version %>-release/CHANGELOG.md">
+                TEMPVERSION<!--v<%= version %>-->
+              </a>
+            </small>
+          </div>
+        </div>
+        <div class="collapse navbar-collapse" collapse="menuCollapsed">
+          <ul class="nav navbar-nav">
+            <li ui-sref-active="active">
+              <a href ui-sref="demo">
+                <i class="fa fa-picture-o"></i>
+                Demo
+              </a>
+            </li>
+            <li>
+              <a href="jsdoc">
+                <i class="fa fa-book"></i>
+                JSDoc
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/chad-autry/hex-widget">
+                <i class="fa fa-github-alt"></i>
+                Github
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/chad-autry/hex-widget/issues">
+                <i class="fa fa-comments"></i>
+                Support
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" ui-view="main"></div>
+  </body>
+</html>
