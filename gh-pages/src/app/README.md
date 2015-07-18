@@ -22,10 +22,6 @@ route `/products`, though this is in no way enforced. Products may then have
 subdirectories for "create", "view", "search", etc. The "view" submodule may
 then define a route of `/products/:id`, ad infinitum.
 
-As `ngBoilerplate` is quite minimal, take a look at the two provided submodules
-to gain a better understanding of how these are used as well as to get a
-glimpse of how powerful this simple construct can be.
-
 ## `app.js`
 
 This is our main app configuration file. It kickstarts the whole process by
@@ -42,11 +38,11 @@ submodules that need them to ensure proper dependency handling. These are
 app-wide dependencies that are required to assemble your app.
 
 ```js
-angular.module( 'ngBoilerplate', [
+angular.module( 'hexWidget', [
   'templates-app',
   'templates-common',
-  'ngBoilerplate.home',
-  'ngBoilerplate.about'
+  'hexWidget.home',
+  'hexWidget.about'
   'ui.router',
   'ui.route'
 ])
@@ -80,7 +76,7 @@ not specific to the template or route, such as menu logic or page title wiring.
 .controller( 'AppCtrl', function AppCtrl ( $scope, $location ) {
   $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
     if ( angular.isDefined( toState.data.pageTitle ) ) {
-      $scope.pageTitle = toState.data.pageTitle + ' | ngBoilerplate' ;
+      $scope.pageTitle = toState.data.pageTitle + ' | hexWidget' ;
     }
   });
 })

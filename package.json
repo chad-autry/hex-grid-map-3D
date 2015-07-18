@@ -14,7 +14,8 @@
     "watch:demo": "mkdirp ./target/gh-pages && npm run copy:demoHTML && watchify ./gh-pages/src/app/app.js --debug -v -o ./target/gh-pages/bundle.js",
     "jshint": "jshint ./src",
     "less": "lessc ./gh-pages/src/less/main.less > ./target/gh-pages/styles.css",
-    "copy:demoHTML": "copyfiles -f ./gh-pages/src/index.html ./target/gh-pages"
+    "copy:demoHTML": "copyfiles -f ./gh-pages/src/index.html ./target/gh-pages",
+    "jsdoc": "jsdoc -r ./src -d ./target/jsdoc"
   },
   "repository": {
     "type": "git",
@@ -51,6 +52,7 @@
     "browserify-ng-html2js": "^1.0.0",
     "browserify-shim": "^3.8.3",
     "copyfiles": "^0.2.1",
+    "jsdoc": "^3.3.2",
     "jshint": "^2.6.3",
     "karma": "^0.12.9",
     "karma-cli": "0.0.4",

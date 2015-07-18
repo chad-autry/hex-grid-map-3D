@@ -37,12 +37,7 @@ See each directory for a detailed explanation.
 
 The `index.html` file is the HTML document of the single-page application (SPA)
 that should contain all markup that applies to everything in the app, such as
-the header and footer. It declares with `ngApp` that this is `ngBoilerplate`,
+the header and footer. It declares with `ngApp` that this is `hexWidget`,
 specifies the main `AppCtrl` controller, and contains the `ngView` directive
 into which route templates are placed.
 
-Unlike any other HTML document (e.g. the templates), `index.html` is compiled as
-a Grunt template, so variables from `Gruntfile.js` and `package.json` can be
-referenced from within it. Changing `name` in `package.json` from
-"ng-boilerplate" will rename the resultant CSS and JavaScript placed in `build/`,
-so this HTML references them by variable for convenience.

@@ -16,7 +16,7 @@ var CellDrawnItemFactory = require('../../../../src/drawnItemFactories/RegularPo
 var SphereDrawnItemFactory = require('../../../../src/drawnItemFactories/SphereDrawnItemFactory');
 var HexDefinition = require('cartesian-hexagonal'); //external project required in constructors
 
-module.exports = angular.module( 'ngBoilerplate.demo', [
+module.exports = angular.module( 'hexWidget.demo', [
   ui_router,
   hexBoard.name,
   template.name
