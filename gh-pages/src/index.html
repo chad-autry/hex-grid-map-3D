@@ -42,8 +42,8 @@
                 Demo
               </a>
             </li>
-            <li>
-              <a href="jsdoc">
+            <li ui-sref-active="active">
+              <a href ui-sref="jsdoc">
                 <i class="fa fa-book"></i>
                 JSDoc
               </a>
@@ -65,6 +65,7 @@
       </div>
     </div>
 
-    <div class="container" ui-view="main"></div>
+    <div class="container" ui-view></div>
+    <div ui-view="demo" ng-show="isDemo"/> <!--Sticky (stateful) States require their own view which has to be hidden-->
   </body>
 </html>

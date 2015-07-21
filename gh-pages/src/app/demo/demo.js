@@ -1,6 +1,7 @@
 var angular = require('angular');
 var template = require("./demo.tpl.html");
 var ui_router = require('angular-ui-router');
+var ui_router_extras_sticky = require('ct.ui.router.extras.sticky');
 var hexBoard = require("../../common/hexBoard/hexBoard");
 var BackgroundContext = require('../../../../src/contexts/BackgroundContext.js');
 var ForegroundContext = require('../../../../src/contexts/ForegroundContext.js');
@@ -18,6 +19,7 @@ var HexDefinition = require('cartesian-hexagonal'); //external project required 
 
 module.exports = angular.module( 'hexWidget.demo', [
   ui_router,
+  ui_router_extras_sticky,
   hexBoard.name,
   template.name
 ])
@@ -25,8 +27,9 @@ module.exports = angular.module( 'hexWidget.demo', [
 .config(function config( $stateProvider ) {
   $stateProvider.state( 'demo', {
     url: '/demo',
+    sticky: true,
     views: {
-      "main": {
+      "demo": {
         controller: 'DemoCtrl',
         templateUrl: 'demo.tpl.html'
       }

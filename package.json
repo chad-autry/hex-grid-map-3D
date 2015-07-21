@@ -10,12 +10,12 @@
     "watch:karma": "karma start karma-conf.js",
     "build:specs": "mkdirp ./target/test && browserify ./specs/*.spec.js --debug -o ./target/test/built.specs.js",
     "watch:specs": "mkdirp ./target/test && watchify ./specs/*.spec.js --debug -o ./target/test/built.specs.js",
-    "build:demo": "mkdirp ./target/gh-pages && npm run less && npm run copy:demoHTML && browserify ./gh-pages/src/app/app.js --debug -o ./target/gh-pages/bundle.js",
+    "build:demo": "mkdirp ./target/gh-pages && npm run jsdoc &&  npm run less && npm run copy:demoHTML && browserify ./gh-pages/src/app/app.js --debug -o ./target/gh-pages/bundle.js",
     "watch:demo": "mkdirp ./target/gh-pages && npm run copy:demoHTML && watchify ./gh-pages/src/app/app.js --debug -v -o ./target/gh-pages/bundle.js",
     "jshint": "jshint ./src",
     "less": "lessc ./gh-pages/src/less/main.less > ./target/gh-pages/styles.css",
     "copy:demoHTML": "copyfiles -f ./gh-pages/src/index.html ./target/gh-pages",
-    "jsdoc": "jsdoc -r ./src -d ./target/jsdoc"
+    "jsdoc": "jsdoc -t ./jsdoc-template -r ./src -d ./target/jsdoc"
   },
   "repository": {
     "type": "git",
@@ -38,13 +38,14 @@
   },
   "homepage": "https://github.com/chad-autry/hex-widget",
   "dependencies": {
-    "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js",
-    "cartesian-hexagonal": "0.0.2",
-    "collections": "^1.2.1",
     "angular": "^1.3.14",
     "angular-bootstrap": "^0.12.0",
     "angular-ui-router": "^0.2.13",
-    "bootstrap": "^3.3.4"
+    "bootstrap": "^3.3.4",
+    "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js",
+    "cartesian-hexagonal": "0.0.2",
+    "collections": "^1.2.1",
+    "ui-router-extras": "0.0.14"
   },
   "devDependencies": {
     "angular-mocks": "^1.3.15",
@@ -79,7 +80,9 @@
   "browser": {
     "ui.bootstrap.dropdown": "./node_modules/angular-bootstrap/src/dropdown/dropdown.js",
     "ui.bootstrap.collapse": "./node_modules/angular-bootstrap/src/collapse/collapse.js",
-    "ui.bootstrap.transition": "./node_modules/angular-bootstrap/src/transition/transition.js"
+    "ui.bootstrap.transition": "./node_modules/angular-bootstrap/src/transition/transition.js",
+    "ct.ui.router.extras.core": "./node_modules/ui-router-extras/release/modular/ct-ui-router-extras.core.js",
+    "ct.ui.router.extras.sticky": "./node_modules/ui-router-extras/release/modular/ct-ui-router-extras.sticky.js"
   },
   "browserify-shim": {
     "ui.bootstrap.dropdown": {
@@ -100,6 +103,19 @@
         "ui.bootstrap.transition"
       ],
       "exports": "angular.module('ui.bootstrap.collapse').name"
+    },
+    "ct.ui.router.extras.core": {
+      "depends": [
+        "angular"
+      ],
+      "exports": "angular.module('ct.ui.router.extras.core').name"
+    },
+    "ct.ui.router.extras.sticky": {
+      "depends": [
+        "angular",
+        "ct.ui.router.extras.core"
+      ],
+      "exports": "angular.module('ct.ui.router.extras.sticky').name"
     }
   }
 }

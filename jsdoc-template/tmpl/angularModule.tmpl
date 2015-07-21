@@ -1,0 +1,68 @@
+'use strict';
+var angular = require('angular'),
+ ui_router = require('angular-ui-router'),
+ jsdoc_index = require("./jsdoc_index.tpl.html");
+<?js
+
+    filenames.forEach(function(file, i) {
+?>
+<?js= 'var ' + file.substring(0, file.length - 9) + ' = require("./'+file+'");' ?>
+<?js
+
+    });
+?>
+module.exports = angular.module( 'hexWidget.jsdoc', [
+  ui_router,
+  jsdoc_index.name
+  <?js
+  
+      filenames.forEach(function(file, i) {
+  ?>
+  <?js= ', ' + file.substring(0, file.length - 9) + '.name' ?>
+  <?js
+  
+      });
+?>
+])
+
+.config(function config( $stateProvider ) {
+    $stateProvider
+    .state('jsdoc', {
+      url: "/jsdoc",
+      templateUrl: "jsdoc_index.tpl.html",
+      data:{ pageTitle: 'JSDoc' }
+    })
+    <?js
+    
+        filenames.forEach(function(file, i) {
+    ?>
+     .state('jsdoc.<?js=file.substring(6, file.length - 9)?>', {
+      url: "/<?js=file.substring(6, file.length - 9)?>?anchor",
+      templateUrl: "<?js=file?>",
+      controller: 'JsdocCtrl'
+    })
+    <?js
+    
+        });
+    ?>
+    ;
+
+}).controller( 'JsdocCtrl', function JsdocCtrl( $stateParams, $anchorScroll, $location, $scope ) {
+
+      $scope.gotoAnchor = function(x) {
+        var newHash = x;
+        if ($location.hash() !== newHash) {
+          // set the $location.hash to `newHash` and
+          // $anchorScroll will automatically scroll to it
+          $location.hash(x);
+        } else {
+          // call $anchorScroll() explicitly,
+          // since $location.hash hasn't changed
+          $anchorScroll();
+        }
+      };
+      
+      $scope.gotoAnchor($stateParams.anchor);
+})
+
+;
