@@ -293,13 +293,15 @@ function buildMemberNav(items, itemHeading, itemsSeen, linktoFn) {
 
     if (items.length) {
         var itemsNav = '';
-
+	var url = '';
         items.forEach(function(item) {
+            url = helper.longnameToUrl[item.longname]; 
             if ( !hasOwnProp.call(item, 'longname') ) {
-                itemsNav += '<li>' + linktoFn(itemHeading, '', item.name) + '</li>';
+                itemsNav += '<li>' + linktoFn(url.substring(0, url.length - 5), '', item.name) + '</li>';
             }
             else if ( !hasOwnProp.call(itemsSeen, item.longname) ) {
-                itemsNav += '<li>' + linktoFn(itemHeading, item.longname, item.name.replace(/^module:/, '')) + '</li>';
+                
+                itemsNav += '<li>' + linktoFn(url.substring(0, url.length - 5), item.longname, item.name.replace(/^module:/, '')) + '</li>';
                 itemsSeen[item.longname] = true;
             }
         });
@@ -376,8 +378,8 @@ function buildNav(members) {
  */
 function linkto(parentState, longname, name) {
 
-    if (longname !== '') {
-        return '<a ui-sref="jsdoc.' + parentState + "({anchor:'" + longname + "'})" + '">' + name + '</a>';
+    if (!!longname && longname !== '') {
+        return '<a ui-sref="jsdoc.' + parentState + "({anchor:'" + longname.replace('module:', '') + "'})" + '">' + name + '</a>';
     }
     return '<a ui-sref="jsdoc.' + parentState + '">' + name + '</a>';
     
@@ -402,7 +404,7 @@ exports.publish = function(taffyData, opts, tutorials) {
     var indexUrl = 'jsdoc_index.tpl.html';
     // don't call registerLink() on this one! 'index' is also a valid longname
 
-    var globalUrl = 'jsdoc_global.tpl.html';
+    var globalUrl = 'jsdoc_global.html';
     helper.registerLink('global', globalUrl);
 
     // set up templating
@@ -561,37 +563,41 @@ exports.publish = function(taffyData, opts, tutorials) {
     Object.keys(helper.longnameToUrl).forEach(function(longname) {
         var myModules = helper.find(modules, {longname: longname});
         if (myModules.length) {
-            generate('Module: ' + myModules[0].name, myModules, helper.longnameToUrl[longname], filenames);
+            generate('Module: ' + myModules[0].name, myModules, 'jsdoc_' + helper.longnameToUrl[longname], filenames);
         }
 
         var myClasses = helper.find(classes, {longname: longname});
         if (myClasses.length) {
-            generate('Class: ' + myClasses[0].name, myClasses, helper.longnameToUrl[longname], filenames);
+            generate('Class: ' + myClasses[0].name, myClasses, 'jsdoc_' + helper.longnameToUrl[longname], filenames);
         }
 
         var myNamespaces = helper.find(namespaces, {longname: longname});
         if (myNamespaces.length) {
-            generate('Namespace: ' + myNamespaces[0].name, myNamespaces, helper.longnameToUrl[longname], filenames);
+            generate('Namespace: ' + myNamespaces[0].name, myNamespaces, 'jsdoc_' + helper.longnameToUrl[longname], filenames);
         }
 
         var myMixins = helper.find(mixins, {longname: longname});
         if (myMixins.length) {
-            generate('Mixin: ' + myMixins[0].name, myMixins, helper.longnameToUrl[longname], filenames);
+            generate('Mixin: ' + myMixins[0].name, myMixins, 'jsdoc_' + helper.longnameToUrl[longname], filenames);
         }
 
         var myExternals = helper.find(externals, {longname: longname});
         if (myExternals.length) {
-            generate('External: ' + myExternals[0].name, myExternals, helper.longnameToUrl[longname], filenames);
+            generate('External: ' + myExternals[0].name, myExternals, 'jsdoc_' + helper.longnameToUrl[longname], filenames);
         }
 
         var myInterfaces = helper.find(interfaces, {longname: longname});
         if (myInterfaces.length) {
-            generate('Interface: ' + myInterfaces[0].name, myInterfaces, helper.longnameToUrl[longname], filenames);
+            generate('Interface: ' + myInterfaces[0].name, myInterfaces, 'jsdoc_' + helper.longnameToUrl[longname], filenames);
         }
     });
     
+    function onlyUnique(value, index, self) { 
+        return self.indexOf(value) === index;
+    }
+    
     var docData = {
-        filenames: filenames
+        filenames: filenames.filter(onlyUnique)
     };
 
     //Write out the angule module

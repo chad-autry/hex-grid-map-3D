@@ -1,14 +1,22 @@
 "use strict";
+/**
+ * Since only a single constructor is being exported as module.exports this comment isn't documented.
+ * The class and module are the same thing, the contructor comment takes precedence.
+ * @module hexagonal-map
+ */
+ 
 var paper = require('browserifyable-paper');
 /*
  * Defines an isometric hexagonal board for web games
  */
 
 
-/*
- * Constructor for the hex board, accepts all options as a map of parameters
+/**
+ * Pretty much the controller of a hexagonal map scene using the provided canvas and context objects
+ * @constructor
+ * @example var hexMap = new (require(hexagonal-map))(hexDimension, params, cellContext, gridOverlayContext);
  */
-function HexBoard(hexDimensions, params, cellContext, gridOverlayContext) {
+ module.exports = function HexBoard(hexDimensions, params, cellContext, gridOverlayContext) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof HexBoard)) {
         return new HexBoard(params);
@@ -181,22 +189,20 @@ function HexBoard(hexDimensions, params, cellContext, gridOverlayContext) {
 /**
  * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired background changes on grid drag
  */
-HexBoard.prototype.updateBackgroundPosition = function(backgroundGroup, dx, dy) {
+module.exports.prototype.updateBackgroundPosition = function(backgroundGroup, dx, dy) {
 
 };
 
 /**
  * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired foreground changes on grid drag
  */
-HexBoard.prototype.updateForegroundPosition = function(foregroundGroup, dx, dy) {
+module.exports.prototype.updateForegroundPosition = function(foregroundGroup, dx, dy) {
 
 };
 
 /**
  * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired grid changes on global drag
  */
-HexBoard.prototype.updateGridPosition = function(gridGroup, dx, dy) {
+module.exports.prototype.updateGridPosition = function(gridGroup, dx, dy) {
 
 };
-
-module.exports = HexBoard;
