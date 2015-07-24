@@ -5,14 +5,14 @@ var angular = require('angular'),
     ui_router_extras_sticky = require('ct.ui.router.extras.sticky'),
     app_demo = require('./demo/demo'),
     app_jsdoc = require('../../../target/jsdoc/jsdoc'), //This is generated
-    ui_bootstrap_collapse =  require('ui.bootstrap.collapse');
+    ui_bootstrap =  require('ui.bootstrap');
 
 module.exports = angular.module( 'hexWidget', [
   app_demo.name,
   app_jsdoc.name,
   ui_router,
   ui_router_extras_sticky,
-  ui_bootstrap_collapse
+  ui_bootstrap
 ])
 
 .config( function myAppConfig ( $stateProvider, $urlRouterProvider, $stickyStateProvider ) {

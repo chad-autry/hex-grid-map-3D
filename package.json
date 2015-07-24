@@ -39,7 +39,7 @@
   "homepage": "https://github.com/chad-autry/hex-widget",
   "dependencies": {
     "angular": "^1.3.14",
-    "angular-bootstrap": "^0.12.0",
+    "angular-bootstrap": "^0.12.2",
     "angular-ui-router": "^0.2.13",
     "bootstrap": "^3.3.4",
     "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js",
@@ -78,31 +78,16 @@
     ]
   },
   "browser": {
-    "ui.bootstrap.dropdown": "./node_modules/angular-bootstrap/src/dropdown/dropdown.js",
-    "ui.bootstrap.collapse": "./node_modules/angular-bootstrap/src/collapse/collapse.js",
-    "ui.bootstrap.transition": "./node_modules/angular-bootstrap/src/transition/transition.js",
+    "ui.bootstrap": "./node_modules/angular-bootstrap/ui-bootstrap.js",
     "ct.ui.router.extras.core": "./node_modules/ui-router-extras/release/modular/ct-ui-router-extras.core.js",
     "ct.ui.router.extras.sticky": "./node_modules/ui-router-extras/release/modular/ct-ui-router-extras.sticky.js"
   },
   "browserify-shim": {
-    "ui.bootstrap.dropdown": {
+    "ui.bootstrap": {
       "depends": [
         "angular"
       ],
-      "exports": "angular.module('ui.bootstrap.dropdown').name"
-    },
-    "ui.bootstrap.transition": {
-      "depends": [
-        "angular"
-      ],
-      "exports": "angular.module('ui.bootstrap.transition').name"
-    },
-    "ui.bootstrap.collapse": {
-      "depends": [
-        "angular",
-        "ui.bootstrap.transition"
-      ],
-      "exports": "angular.module('ui.bootstrap.collapse').name"
+      "exports": "angular.module('ui.bootstrap').name"
     },
     "ct.ui.router.extras.core": {
       "depends": [
