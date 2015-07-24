@@ -184,7 +184,7 @@ var paper = require('browserifyable-paper');
 
 
 
-}
+};
 
 /**
  * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired background changes on grid drag
