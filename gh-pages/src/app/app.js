@@ -22,12 +22,16 @@ module.exports = angular.module( 'hexWidget', [
 .run( function run () {
 })
 
-.controller( 'AppCtrl', function AppCtrl ( $scope, $location, $state ) {
+.controller( 'AppCtrl', function AppCtrl ( $scope, $rootScope, $location, $state ) {
+  $scope.rootScope = $rootScope;
   $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
     if ( angular.isDefined( toState.data.pageTitle ) ) {
       $scope.pageTitle = toState.data.pageTitle + ' | hex-widget' ;
     }
     $scope.isDemo = $state.includes('demo');
+
+    //Add the isIndexed property for all routes which have an index
+    $scope.isIndexed = $state.includes('jsdoc');
   });
 })
 

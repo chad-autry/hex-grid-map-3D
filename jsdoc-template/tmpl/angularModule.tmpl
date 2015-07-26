@@ -30,7 +30,8 @@ module.exports = angular.module( 'hexWidget.jsdoc', [
     .state('jsdoc', {
       url: "/jsdoc",
       templateUrl: "jsdoc_index.tpl.html",
-      data:{ pageTitle: 'JSDoc' }
+      data:{ pageTitle: 'JSDoc' },
+      controller: 'JsdocCtrl'
     })
     <?js
     
@@ -39,6 +40,7 @@ module.exports = angular.module( 'hexWidget.jsdoc', [
      .state('jsdoc.<?js=file.substring(6, file.length - 5)?>', {
       url: "/<?js=file.substring(6, file.length - 5)?>?anchor",
       templateUrl: "<?js=file?>",
+      data:{ pageTitle: 'JSDoc' },
       controller: 'JsdocCtrl'
     })
     <?js
@@ -48,7 +50,12 @@ module.exports = angular.module( 'hexWidget.jsdoc', [
     ;
 
 }).controller( 'JsdocCtrl', function JsdocCtrl( $stateParams, $anchorScroll, $location, $scope ) {
-
+      //Init variable to toggle the index on mobile
+      $scope.indexVisibleToMobile = false;
+      //Listen for the index toggling link to be clicked
+      $scope.$on('toggleIndex', function() {
+        $scope.indexVisibleToMobile = ! $scope.indexVisibleToMobile;
+      });
       $scope.gotoAnchor = function(x) {
         var newHash = x;
         if ($location.hash() !== newHash) {

@@ -1,15 +1,21 @@
 "use strict";
-var paper = require('browserifyable-paper');
 /**
+ * Since only a single constructor is being exported as module.exports this comment isn't documented.
+ * The class and module are the same thing, the contructor comment takes precedence.
+ * @module BackgroundContext
+ */
+ 
+var paper = require('browserifyable-paper');
+/*
  * This is an example context with methods to draw and update the background of a hexBoard
  * Drawing a starry background, since I'm personally interested in making a space game.
  * However, you could draw water or clouds if doing an ocean or flight game
  */
  
-/**
- * The context object constructor
+/** The context object constructor
+ * @constructor
  */
-function BackgroundContext() {
+ module.exports = function BackgroundContext() {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof BackgroundContext)) {
         return new BackgroundContext();
@@ -49,21 +55,23 @@ function BackgroundContext() {
             context.nearLayer.position.y = Math.max( -0.5*paper.view.size.height + dy / 10, -paper.view.size.height);
         }
     };
-}
+};
 
 /**
  * Generate a random integer between min and max
+ * TODO Refactor into a starry background extension
  */
-BackgroundContext.prototype.random = function (min, max) {
+module.exports.prototype.random = function (min, max) {
         return Math.round((Math.random() * max - min) + min);
 };
 
-BackgroundContext.prototype.STAR_COLOURS = ["#ffffff", "#ffe9c4", "#d4fbff"];
+module.exports.prototype.STAR_COLOURS = ["#ffffff", "#ffe9c4", "#d4fbff"];
 
 /**
- * Helper method, generates a raster containing randomly generated stars*
+ * Helper method, generates a raster containing randomly generated stars
+ * TODO Refactor into a starry background extension
  */
-BackgroundContext.prototype.createStarGroup = function( maxBrightness, maxRadius, width, height, star_number) {
+module.exports.prototype.createStarGroup = function( maxBrightness, maxRadius, width, height, star_number) {
     var starGroup = new paper.Group();
     starGroup.pivot = new paper.Point(0, 0);
     var x, // x position of the star
@@ -82,5 +90,3 @@ BackgroundContext.prototype.createStarGroup = function( maxBrightness, maxRadius
     starRaster.pivot = new paper.Point(0 - starRaster.position.x, 0 - starRaster.position.y);
     return starRaster;
 };
-
-module.exports = BackgroundContext;

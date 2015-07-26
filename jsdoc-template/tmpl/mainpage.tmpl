@@ -14,9 +14,16 @@ var self = this;
 <?js } ?>
 
 <?js if (data.kind === 'mainpage') { ?>
-<nav>
-    <?js= this.nav ?>
-</nav>
-
-<div ui-view></div>
+<article>
+  <div class="col-md-4">
+    <aside ng-class="indexVisibleToMobile ? '' : 'hidden-xs'">
+      <nav>
+        <?js= this.nav ?>
+      </nav>
+    </aside>
+  </div>
+  <div class="col-md-4">
+    <section ui-view></section>
+  </div>
+</article>
 <?js } ?>

@@ -33,6 +33,12 @@
               </a>
             </small>
           </div>
+          <div class="navbar-global">
+              <a class="visible-xs-inline" href="" ng-click="rootScope.$broadcast('toggleIndex');" ng-show="isIndexed">
+                <i class="fa fa-list"></i>
+                Index
+              </a>
+          </div>
         </div>
         <div class="collapse navbar-collapse" collapse="menuCollapsed">
           <ul class="nav navbar-nav">
@@ -65,7 +71,7 @@
       </div>
     </div>
 
-    <div class="container" ui-view></div>
+    <div ui-view></div>
     <div ui-view="demo" ng-show="isDemo"/> <!--Sticky (stateful) States require their own view which has to be hidden-->
   </body>
 </html>
