@@ -319,7 +319,7 @@ function linktoTutorial(longName, name) {
 }
 
 function linktoExternal(longName, name) {
-    return linkto(longName, name.replace(/(^"|"$)/g, ''));
+    return '<a href="' + longName + '">' + name + '</a>';
 }
 
 /**
@@ -342,7 +342,7 @@ function buildNav(members) {
     var seenTutorials = {};
 
     nav += buildMemberNav(members.modules, 'Modules', {}, linkto);
-    nav += buildMemberNav(members.externals, 'Externals', seen, linktoExternal);
+    nav += buildMemberNav(members.externals, 'Externals', seen, linkto);
     nav += buildMemberNav(members.classes, 'Classes', seen, linkto);
     nav += buildMemberNav(members.events, 'Events', seen, linkto);
     nav += buildMemberNav(members.namespaces, 'Namespaces', seen, linkto);
