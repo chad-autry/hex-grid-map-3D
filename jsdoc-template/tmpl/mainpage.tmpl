@@ -3,6 +3,7 @@ var data = obj;
 var self = this;
 ?>
 
+
 <?js if (data.kind === 'package') { ?>
     <h3><?js= data.name ?> <?js= data.version ?></h3>
 <?js } ?>
@@ -16,11 +17,15 @@ var self = this;
 <?js if (data.kind === 'mainpage') { ?>
 <article>
   <div class="col-md-4">
-    <aside ng-class="indexVisibleToMobile ? '' : 'hidden-xs'">
-      <nav>
-        <?js= this.nav ?>
-      </nav>
-    </aside>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <aside ng-class="indexVisibleToMobile ? '' : 'hidden-xs'">
+          <nav>
+            <?js= this.nav ?>
+          </nav>
+        </aside>
+      </div>
+    </div>
   </div>
   <div class="col-md-4">
     <section ui-view></section>
