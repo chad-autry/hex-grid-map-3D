@@ -2,6 +2,7 @@
 var data = obj;
 var self = this;
 ?>
+
 <?js if (data.kind !== 'module') { ?>
     <?js if (data.kind === 'class' && data.classdesc) { ?>
     <h2>Constructor</h2>
@@ -16,9 +17,11 @@ var self = this;
 <?js } ?>
 
 <?js if (data.kind !== 'module' && data.description) { ?>
-<div class="description">
-    <?js= data.description.replace(/(?:\r\n|\r|\n)/g, '<br />') ?>
-</div>
+  <div class="description">
+    <blockquote>
+      <?js= data.description.replace(/(?:\r\n|\r|\n)/g, '<br />') ?>
+    </blockquote>
+  </div>
 <?js } ?>
 
 <?js if (data.augments && data.alias && data.alias.indexOf('module:') === 0) { ?>
