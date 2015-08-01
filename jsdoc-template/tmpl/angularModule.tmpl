@@ -49,8 +49,9 @@ module.exports = angular.module( 'hexWidget.jsdoc', [
     ?>
     ;
 
-}).controller( 'JsdocCtrl', function JsdocCtrl( $stateParams, $anchorScroll, $location, $scope ) {
+}).controller( 'JsdocCtrl', function JsdocCtrl( $stateParams, $rootScope, $anchorScroll, $location, $scope ) {
       //Init variable to toggle the index on mobile
+      $scope.srcroot=$rootScope.srcroot;
       $scope.indexVisibleToMobile = false;
       //Listen for the index toggling link to be clicked
       $scope.$on('toggleIndex', function() {

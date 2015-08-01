@@ -23,6 +23,7 @@ module.exports = angular.module( 'hexWidget', [
 })
 
 .controller( 'AppCtrl', function AppCtrl ( $scope, $rootScope, $location, $state ) {
+  $rootScope.srcroot = "https://github.com/chad-autry/hex-widget/blob/master/src/";
   $scope.rootScope = $rootScope;
   $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
     if ( angular.isDefined( toState.data.pageTitle ) ) {

@@ -386,6 +386,17 @@ function linkto(parentState, longname, name) {
 }
 
 /**
+ * Create links to the src relative to the external source url
+ * Adds a link to the line number according to github's format
+ * Since JSDoc seems incapable of accept external parameters, inject a value which will be replaced in Angular
+ */
+function linkToSrc(shortPath, lineNumber) {
+    var splitPath = shortPath.split("/");
+    return '<a href="{{srcroot}}' + shortPath+'">' + splitPath[splitPath.length - 1] + '</a>, <a href="{{srcroot}}' + shortPath+'#L'+lineNumber+'">' + lineNumber + '</a>';
+    
+}
+
+/**
     @param {TAFFY} taffyData See <http://taffydb.com/>.
     @param {object} opts
     @param {Tutorial} tutorials
@@ -528,6 +539,7 @@ exports.publish = function(taffyData, opts, tutorials) {
     // add template helpers
     view.find = find;
     view.linkto = linkto;
+    view.linkToSrc = linkToSrc;
     view.resolveAuthorLinks = resolveAuthorLinks;
     view.tutoriallink = tutoriallink;
     view.htmlsafe = htmlsafe;
