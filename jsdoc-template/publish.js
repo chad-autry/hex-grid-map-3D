@@ -337,7 +337,7 @@ function linktoExternal(longName, name) {
  * @return {string} The HTML for the navigation sidebar.
  */
 function buildNav(members) {
-    var nav = '<h2><a ui-sref="jsdoc">Home</a></h2>';
+    var nav = '';//TODO This link is only needed and makes sense if there is some actual content at the Home/Index'<h2><a ui-sref="jsdoc">Home</a></h2>';
     var seen = {};
     var seenTutorials = {};
 

@@ -16,10 +16,10 @@ var self = this;
 
 <?js if (data.kind === 'mainpage') { ?>
 <article>
-  <div class="col-md-4">
-    <div class="panel panel-default">
+  <div class="col-md-3">
+    <div class="panel panel-default" ng-class="indexVisibleToMobile ? '' : 'hidden-xs'">
       <div class="panel-body">
-        <aside ng-class="indexVisibleToMobile ? '' : 'hidden-xs'">
+        <aside>
           <nav>
             <?js= this.nav ?>
           </nav>
@@ -27,7 +27,7 @@ var self = this;
       </div>
     </div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-6">
     <section ui-view></section>
   </div>
 </article>
