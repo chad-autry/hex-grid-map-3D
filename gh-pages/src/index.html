@@ -17,17 +17,17 @@
   <body>
     <div class="container">
       <div class="navbar navbar-default">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" ng-init="menuCollapsed = true"
-            ng-click="menuCollapsed = ! menuCollapsed">
+        <!--Note: I don't care about giving a different mouse icon for collapsing, since it is mainly for mobile -->
+        <div class="navbar-header" ng-click="menuCollapsed = ! menuCollapsed" ng-init="menuCollapsed = true">
+          <div class="navbar-toggle">
             <span class="sr-only">Toggle navigation</span>
             <i ng-class="menuCollapsed ? 'fa fa-chevron-right' : 'fa fa-chevron-down'"></i>
-          </button>
+          </div>
           <div class="navbar-brand">
             hex-widget
             <small>
-              <a href="https://github.com/chad-autry/hex-widget/blob/v<%= version %>-release/CHANGELOG.md">
-                TEMPVERSION<!--v<%= version %>-->
+              <a class="navbar-link" href="https://github.com/chad-autry/hex-widget/tree/{{version}}">
+                {{version}}
               </a>
             </small>
           </div>

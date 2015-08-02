@@ -13,9 +13,10 @@ var self = this;
 <article>
   <div class="col-md-3">
     <div class="panel panel-default">
+      <!--Note: Don't care about giving mouse hover context that this is clickable since it is for mobile -->
       <div class="panel-heading visible-xs-block" ng-click="indexVisibleToMobile = ! indexVisibleToMobile">
         Index
-        <i class="pull-right" ng-class="indexVisibleToMobile ? 'fa fa-minus-square-o' : 'fa fa-plus-square-o'"></i>
+        <i class="pull-right" ng-class="indexVisibleToMobile ? 'fa fa-minus-square' : 'fa fa-plus-square'"></i>
       </div>
       <div class="panel-body" ng-class="indexVisibleToMobile ? '' : 'hidden-xs'">
         <aside>

@@ -24,13 +24,14 @@ module.exports = angular.module( 'hexWidget', [
 
 .controller( 'AppCtrl', function AppCtrl ( $scope, $rootScope, $location, $state ) {
   $rootScope.srcroot = "https://github.com/chad-autry/hex-widget/blob/master/src/";
-
+  $scope.version = 'master';
   $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
     if ( angular.isDefined( toState.data.pageTitle ) ) {
       $scope.pageTitle = toState.data.pageTitle + ' | hex-widget' ;
     }
     $scope.isDemo = $state.includes('demo');
     
+    $scope.menuCollapsed = true;
     //We auto-expand for the base jsdoc state, and collapse for everything else
     if ($state.is('jsdoc')) {
         $rootScope.$broadcast('showIndex');
