@@ -3,11 +3,6 @@ var data = obj;
 var self = this;
 ?>
 
-
-<?js if (data.kind === 'package') { ?>
-    <h3><?js= data.name ?> <?js= data.version ?></h3>
-<?js } ?>
-
 <?js if (data.readme) { ?>
     <section>
         <article><?js= data.readme ?></article>
@@ -17,8 +12,12 @@ var self = this;
 <?js if (data.kind === 'mainpage') { ?>
 <article>
   <div class="col-md-3">
-    <div class="panel panel-default" ng-class="indexVisibleToMobile ? '' : 'hidden-xs'">
-      <div class="panel-body">
+    <div class="panel panel-default">
+      <div class="panel-heading visible-xs-block" ng-click="indexVisibleToMobile = ! indexVisibleToMobile">
+        Index
+        <i class="pull-right" ng-class="indexVisibleToMobile ? 'fa fa-minus-square-o' : 'fa fa-plus-square-o'"></i>
+      </div>
+      <div class="panel-body" ng-class="indexVisibleToMobile ? '' : 'hidden-xs'">
         <aside>
           <nav>
             <?js= this.nav ?>

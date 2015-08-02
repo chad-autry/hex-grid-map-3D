@@ -21,9 +21,7 @@
           <button type="button" class="navbar-toggle" ng-init="menuCollapsed = true"
             ng-click="menuCollapsed = ! menuCollapsed">
             <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
+            <i ng-class="menuCollapsed ? 'fa fa-chevron-right' : 'fa fa-chevron-down'"></i>
           </button>
           <div class="navbar-brand">
             hex-widget
@@ -32,12 +30,6 @@
                 TEMPVERSION<!--v<%= version %>-->
               </a>
             </small>
-          </div>
-          <div class="navbar-global">
-              <a class="visible-xs-inline" href="" ng-click="rootScope.$broadcast('toggleIndex');" ng-show="isIndexed">
-                <i class="fa fa-list"></i>
-                Index
-              </a>
           </div>
         </div>
         <div class="collapse navbar-collapse" collapse="menuCollapsed">

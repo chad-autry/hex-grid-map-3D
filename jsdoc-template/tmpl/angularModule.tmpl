@@ -49,13 +49,18 @@ module.exports = angular.module( 'hexWidget.jsdoc', [
     ?>
     ;
 
-}).controller( 'JsdocCtrl', function JsdocCtrl( $stateParams, $rootScope, $anchorScroll, $location, $scope ) {
+}).controller( 'JsdocCtrl', function JsdocCtrl( $state, $stateParams, $rootScope, $anchorScroll, $location, $scope ) {
       //Init variable to toggle the index on mobile
       $scope.srcroot=$rootScope.srcroot;
-      $scope.indexVisibleToMobile = false;
-      //Listen for the index toggling link to be clicked
-      $scope.$on('toggleIndex', function() {
-        $scope.indexVisibleToMobile = ! $scope.indexVisibleToMobile;
+      $scope.indexVisibleToMobile = true;
+      $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
+
+        //We auto-expand for the base jsdoc state, and collapse for everything else
+        if ($state.is('jsdoc')) {
+            $scope.indexVisibleToMobile = true;
+        } else {
+            $scope.indexVisibleToMobile = false;
+        }
       });
       $scope.gotoAnchor = function(x) {
         var newHash = x;
