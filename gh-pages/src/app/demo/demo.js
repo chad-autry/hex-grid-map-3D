@@ -3,8 +3,8 @@ var template = require("./demo.tpl.html");
 var ui_router = require('angular-ui-router');
 var ui_router_extras_sticky = require('ct.ui.router.extras.sticky');
 var hexBoard = require("../../common/hexBoard/hexBoard");
-var BackgroundContext = require('../../../../src/contexts/BackgroundContext.js');
-var ForegroundContext = require('../../../../src/contexts/ForegroundContext.js');
+var BackgroundContext = require('../../../../src/contexts/RandomStaryBackgroundContext.js');
+var ForegroundContext = require('../../../../src/contexts/LensFlareForegroundContext.js');
 var GridContext = require('../../../../src/contexts/GridContext.js');
 var CellContext = require('../../../../src/contexts/CellContext.js');
 var VectorDrawnItemFactory = require('../../../../src/drawnItemFactories/VectorDrawnItemFactory.js');
@@ -39,10 +39,12 @@ module.exports = angular.module( 'hexWidget.demo', [
 })
 
 .controller( 'DemoCtrl', function DemoCtrl( $scope ) {
-    $scope.hexDimensions = new HexDefinition(55, 0.5);
-    $scope.backgroundContext = new BackgroundContext();
-    $scope.foregroundContext = new ForegroundContext([{u:0, v:0}]);
-    $scope.gridContext = new GridContext();
+    $scope.contexts = [];
+    $scope.hexDimensions = new HexDefinition(55, 0.5, 0, 3);
+    $scope.contexts.push(new BackgroundContext());
+    
+    $scope.contexts.push(new GridContext($scope.hexDimensions));
+    $scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
     $scope.cellDataSource = new DataSource();
     $scope.simpleDrawnItemFactory = new CellDrawnItemFactory();
     $scope.sphereDrawnItemFactor = new SphereDrawnItemFactory($scope.hexDimensions);
@@ -50,7 +52,11 @@ module.exports = angular.module( 'hexWidget.demo', [
     $scope.cellDrawnItemFactoryMap = {simple: $scope.simpleDrawnItemFactory, sphere: $scope.sphereDrawnItemFactor, arrow: $scope.arrowDrawnItemFactory};
     $scope.cellDrawnItemFactory = new DelegatingDrawnItemFactory($scope.cellDrawnItemFactoryMap);
     $scope.pathDrawnItemFactory = new PathDrawnItemFactory($scope.hexDimensions);
-    $scope.cellContext = new CellContext($scope.cellDataSource, $scope.cellDrawnItemFactory, 5);
+    $scope.cellContext = new CellContext($scope.cellDataSource, $scope.cellDrawnItemFactory, 5, $scope.hexDimensions);
+    $scope.contexts.push($scope.cellContext.belowGridContext);
+    $scope.contexts.push(new GridContext($scope.hexDimensions));
+    $scope.contexts.push($scope.cellContext);
+    $scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
     $scope.gridOverlayDataSource = new DataSource();
     $scope.vectorDrawnItemFactory = new VectorDrawnItemFactory($scope.hexDimensions);
     $scope.gridOverlayDrawnItemFactoryMap = {vector: $scope.vectorDrawnItemFactory, path: $scope.pathDrawnItemFactory};

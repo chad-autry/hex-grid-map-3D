@@ -1,25 +1,29 @@
 "use strict";
+/**
+ * Since only a single constructor is being exported as module.exports this comment isn't documented.
+ * The class and module are the same thing, the contructor comment takes precedence.
+ * @module GridContext
+ */
 var paper = require('browserifyable-paper');
+
 /**
  * This is the context object for creating and managing the grid layer of a board
+ * @implements {Context}
+ * @constructor
+ * @param {external:cartesian-hexagonal} hexDimensions - The DTO defining the hex <--> cartesian relation
  */
- 
-/**
- * The context object constructor
- */
-function GridContext() {
+module.exports = function GridContext(hexDimensions) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof GridContext)) {
         return new GridContext();
     }
     var context = this;
+    context.hexDimensions = hexDimensions;
 
-    /**
-     * The method to be passed to the hex board to instantiate (or re-instantiate) the background
-     */
-    this.initGrid = function(paper, gridGroup, hexDimensions) {
+    // Documentation inherited from Context#init
+    this.init = function(gridGroup) {
         context.gridColor = 'silver';
-        context.hexDimensions = hexDimensions;
+        context.gridGroup = gridGroup;
         //Create the Hex item
         var halfHex = context.createPointUpHalfHex(paper);
         //create the background raster
@@ -29,20 +33,19 @@ function GridContext() {
         context.dxModulo = hexDimensions.hexagon_edge_to_edge_width;
     };
 
-    /**
-     * The method to be passed to the hex board which will be called on drags to update the background
-     */
-    this.updateGridPosition = function(gridGroup, dx, dy) {
+    // Documentation inherited from Context#updatePosition
+    this.updatePosition = function(dx, dy) {
          //Modulo the grid position since it is a finite repeating pattern
-         gridGroup.position.x = dx%context.dxModulo;
-         gridGroup.position.y = dy%context.dyModulo;
+         context.gridGroup.position.x = dx%context.dxModulo;
+         context.gridGroup.position.y = dy%context.dyModulo;
     };
-}
+};
 
 /**
  * Creates a paper.Symbol with half the lines of a hex in a point up orientation for creating a point up oriented grid
+ * @private
  */
-GridContext.prototype.createPointUpHalfHex = function(paper) {
+module.exports.prototype.createPointUpHalfHex = function(paper) {
     //Create the half-hex path which will be duplicated (with different z values) to create the hex grid
     var halfHex = new paper.Group();
     halfHex.pivot = new paper.Point(0,0); //Set the pivot point, else paper.js will try to re-compute it to the center
@@ -68,8 +71,9 @@ GridContext.prototype.createPointUpHalfHex = function(paper) {
 
 /**
  * Creates a raster of a hex grid with the point up
+ * @private
  */
-GridContext.prototype.createPointUpGridRaster = function(halfHexSymbol) {
+module.exports.prototype.createPointUpGridRaster = function(halfHexSymbol) {
     var zeroZeroPixelCoordinates = this.hexDimensions.getPixelCoordinates(0, 0);
     var gridGroup = new paper.Group();
     gridGroup.pivot = new paper.Point(0, 0);
@@ -100,4 +104,15 @@ GridContext.prototype.createPointUpGridRaster = function(halfHexSymbol) {
     gridGroup.remove();
     return raster;
 };
-module.exports = GridContext;
+
+
+// Documentation inherited from Context#mouseDown
+module.exports.prototype.mouseDown = function( x, y) {
+    //This is nothing to click, always return false
+    return false;
+};
+
+// Documentation inherited from Context#mouseDragged
+module.exports.prototype.mouseDragged = function( x, y, dx, dy) {
+    //We never claim mouseDown, so this actually will never be called
+};

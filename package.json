@@ -43,7 +43,7 @@
     "angular-ui-router": "^0.2.13",
     "bootstrap": "^3.3.4",
     "browserifyable-paper": "git+https://git@github.com/chad-autry/paper.js",
-    "cartesian-hexagonal": "0.0.2",
+    "cartesian-hexagonal": "0.0.3",
     "collections": "^1.2.1",
     "ui-router-extras": "0.0.14"
   },

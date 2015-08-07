@@ -1,15 +1,28 @@
 "use strict";
+/**
+ * Since only a single constructor is being exported as module.exports this comment isn't documented.
+ * The class and module are the same thing, the contructor comment takes precedence.
+ * @module CellContext
+ */
+ 
 var paper = require('browserifyable-paper');
 var sortedSet = require('collections/sorted-set');
 /**
- * This is the context object which manages the items in their cells
- * Unlike other contexts, it has two layers it manages, above grid and below grid
+
  */
  
 /**
- * The context object constructor
+ * This is the context object which manages the items in their cells
+ * Unlike other contexts, it has two layers it manages, above grid and below grid
+ * Produce a Context object for the belowgrid group and mouse interaction
+ * @implements {Context}
+ * @constructor
+ * @param {CellDataSource} cellDataSource - The dataSource of items to draw
+ * @param {DrawnItemFactory} drawnItemFactory - The factory which controls how items are drawn
+ * @param {integer} stackStep - The distance in pixels to keep between items
+ * @param {external:cartesian-hexagonal} hexDimensions - The DTO defining the hex <--> cartesian relation
  */
-function CellContext(cellDataSource, drawnItemFactory, stackStep) {
+module.exports = function CellContext(cellDataSource, drawnItemFactory, stackStep, hexDimensions) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof CellContext)) {
         return new CellContext(cellDataSource, drawnItemFactory, stackStep);
@@ -20,7 +33,14 @@ function CellContext(cellDataSource, drawnItemFactory, stackStep) {
     this.dx = 0;
     this.dy = 0;
     this.stackStep = stackStep;
+    this.hexDimensions = hexDimensions;
     this.cellGroupsMap = {}; //empty map object to reference the individual cell groups by co-ordinate
+    
+    /**
+     * The context for the below grid items
+     * @implements {Context}
+     */
+    this.belowGridContext = {};
     var cellGroupCompare = function(val1, val2) {
         return val1.zindex - val2.zindex;
     };
@@ -29,36 +49,29 @@ function CellContext(cellDataSource, drawnItemFactory, stackStep) {
 
     //Add this as a listener to the cell dataSource. this.onCellDataChanged will be called when items change.
     cellDataSource.addListener(this);
-    /**
-     * The method to be passed to the hex board to instantiate (or re-instantiate) the background
-     */
-    this.init = function(paper, belowGridGroup, aboveGridGroup, hexDimensions) {
-        context.belowGridGroup = belowGridGroup;
+
+    // Documentation inherited from Context#init
+    this.init = function(aboveGridGroup) {
         context.aboveGridGroup = aboveGridGroup;
-        context.hexDimensions = hexDimensions;
-        this.paper = paper;
+    };
+    
+    // Documentation inherited from Context#init
+    context.belowGridContext.init = function(belowGridGroup) {
+        context.belowGridGroup = belowGridGroup;
     };
 
-    /**
-     * The method called on mouse down, to hit check the above grid items
-     * Return true if claiming further drag/mouseup events
-     */
-    this.aboveGridMouseDown = function(clickedX, clickedY) {
+    // Documentation inherited from Context#mouseDown
+    this.mouseDown = function(clickedX, clickedY) {
         return this.hitTest(clickedX, clickedY, context.aboveGridGroup);
     };
 
-    /**
-     * The method called on mouse down, to hit check the below grid items
-     * Return true if claiming further drag/mouseup events
-     */
-    this.belowGridMouseDown = function(clickedX, clickedY) {
-        return this.hitTest(clickedX, clickedY, context.belowGridGroup);
+    // Documentation inherited from Context#mouseDown
+    context.belowGridContext.mouseDown = function(clickedX, clickedY) {
+        return context.hitTest(clickedX, clickedY, context.belowGridGroup);
     };
 
-    /**
-     * Method called to update the position of the global view, either through drags or programmatic manpulation
-     */
-    this.updatePosition = function( dx, dy) {
+    // Documentation inherited from Context#updatePosition
+    this.updatePosition = function(dx, dy) {
         context.aboveGridGroup.position.x = dx;
         context.aboveGridGroup.position.y = dy;
         context.belowGridGroup.position.x = dx;
@@ -66,12 +79,14 @@ function CellContext(cellDataSource, drawnItemFactory, stackStep) {
         context.dx = dx;
         context.dy = dy;
     };
+    
+    // Documentation inherited from Context#updatePosition
+    context.belowGridContext.updatePosition = function(dx, dy) {
+        //No need to actually do anything in the second method
+    };
 
-    /**
-     * The method called when the user drags the mouse
-     * The context knows wether it is a general drag, or a drag on a managed cell
-     */
-    this.mouseDragged = function( x, y, eventDx, eventDy, dx, dy) {
+    // Documentation inherited from Context#mouseDragged
+    this.mouseDragged = function( x, y, eventDx, eventDy) {
         var clickedGroup = context.clickedGroup;
         //A group is clicked, perform cell item scrolling/dragging
 
@@ -79,11 +94,11 @@ function CellContext(cellDataSource, drawnItemFactory, stackStep) {
 
         //If trying to scroll upwards past original position, stop at original position
         if (dragDy < this.minGroupDy || clickedGroup.dy + eventDy <= 0) {
-            clickedGroup.position.y = clickedGroup.originalYPosition + dy; //Still setting the position absolutely, not relative to the cell group's group
+            clickedGroup.position.y = clickedGroup.originalYPosition + context.dy; //Still setting the position absolutely, not relative to the cell group's group
             clickedGroup.belowGridGroup.position.y = clickedGroup.position.y;
             clickedGroup.dy = 0;
         } else if(dragDy > this.maxGroupDy || clickedGroup.dy + eventDy > clickedGroup.maxDy) {
-            clickedGroup.position.y = clickedGroup.originalYPosition + dy + clickedGroup.maxDy; //Still setting the position absolutely, not relative to the cell group's group
+            clickedGroup.position.y = clickedGroup.originalYPosition + context.dy + clickedGroup.maxDy; //Still setting the position absolutely, not relative to the cell group's group
             clickedGroup.belowGridGroup.position.y = clickedGroup.position.y;
            clickedGroup.dy = clickedGroup.maxDy;
         } else {
@@ -92,16 +107,19 @@ function CellContext(cellDataSource, drawnItemFactory, stackStep) {
             clickedGroup.belowGridGroup.position.y = clickedGroup.position.y;
             clickedGroup.dy = clickedGroup.dy + eventDy;
         }
-        this.windowCell(clickedGroup);
+        context.windowCell(clickedGroup);
     };
-}
+    
+    // Documentation inherited from Context#mouseDragged
+    context.belowGridContext.mouseDragged = this.mouseDragged;
+};
 
 /**
  * Shared logic to hitcheck the items, and set the context with status
  */
-CellContext.prototype.hitTest = function(clickedX, clickedY, hitTestGroup) {
+module.exports.prototype.hitTest = function(clickedX, clickedY, hitTestGroup) {
     this.clickedY = clickedY;
-    var result = hitTestGroup.hitTest(new this.paper.Point(clickedX, clickedY));
+    var result = hitTestGroup.hitTest(new paper.Point(clickedX, clickedY));
     if (!result) {
         return false;
     }
@@ -115,7 +133,7 @@ CellContext.prototype.hitTest = function(clickedX, clickedY, hitTestGroup) {
 /**
  * Called when objects are added to cells, removed from cells, re-ordered in cells,
  */
-CellContext.prototype.onDataChanged = function(event) {
+module.exports.prototype.onDataChanged = function(event) {
     var changedGroups = {};
 
     //A reminder for the Author: Javascript variables are not at block level. These variables are used in both loops.
@@ -270,7 +288,7 @@ CellContext.prototype.onDataChanged = function(event) {
 * The function used to set the transparency of items in a cell with too many to show everything
 *
 */
-CellContext.prototype.windowCell = function(cellGroup) {
+module.exports.prototype.windowCell = function(cellGroup) {
     //re-set items visibillity and opacity
     var windowStartIndex = Math.floor(cellGroup.dy / this.stackStep);
     var drawnItem = cellGroup.nextDrawnItem;
@@ -303,4 +321,3 @@ CellContext.prototype.windowCell = function(cellGroup) {
         drawnItem = drawnItem.nextDrawnItem;
    }
 };
-module.exports = CellContext;

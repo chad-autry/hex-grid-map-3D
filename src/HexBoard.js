@@ -14,39 +14,24 @@ var paper = require('browserifyable-paper');
 /**
  * Pretty much the controller of a hexagonal map scene using the provided canvas and context objects
  * @constructor
- * @example var hexMap = new (require(hexagonal-map))(hexDimension, params, cellContext, gridOverlayContext);
+ * @param { External:cartesian-hexagonal } hexDimension - The DTO defining the hex <--> cartesian relation
+ * @param canvas - The canvas element to initialize with paper.js
+ * @param { Context[] } contexts - An array of contexts used to control display and interaction with various layers of the map
+ * @example var hexMap = new (require(hexagonal-map))(hexDimension, canvas, contexts);
  */
- module.exports = function HexBoard(hexDimensions, params, cellContext, gridOverlayContext) {
+ module.exports = function HexBoard(hexDimensions, canvas, contexts) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof HexBoard)) {
-        return new HexBoard(params);
+        return new HexBoard(hexDimensions, canvas, contexts);
     }
-    //Get all the variables which come from the parameters
     
-    //The factory which will provide the paper.js Item to draw
-    var drawnItemFactory = params.drawnItemFactory;
-    var canvas = params.canvas;
+    var gridLineWidth = hexDimensions.edgeWidth;
 
-    var gridLineWidth = params.edgeWidth;
+    this.hexDimensions = hexDimensions;
+    this.contexts = contexts;
 
-    this.hexDimensions = hexDimensions; 
-    //Set the background update function if it was passed in
-    if(params.hasOwnProperty('updateBackgroundPosition')) {
-        this.updateBackgroundPosition = params.updateBackgroundPosition;
-    }
 
-    //Set the foreground update function if it was passed in
-    if(params.hasOwnProperty('updateForegroundPosition')) {
-        this.updateForegroundPosition = params.updateForegroundPosition;
-    }
-
-    //Set the grid update function if it was passed in
-    if(params.hasOwnProperty('updateGridPosition')) {
-        this.updateGridPosition = params.updateGridPosition;
-    }
-    this.cellContext = cellContext;
-    this.gridOverlayContext = gridOverlayContext;
-    //Now the board variables which do not comes from the initial params
+    //Initialize variables
     var dx = 0; //The current translation in x of the map
     var dy = 0; // the current translation in y of the map
     
@@ -57,43 +42,14 @@ var paper = require('browserifyable-paper');
     //Setup paper.js
     paper.setup(canvas);
 
-    //Instantiate the groups in the desired z-index order
-    var backgroundGroup = new paper.Group();
-    var belowGridCellsGroup = new paper.Group(); //When there is a stack some items might be drawn below grid, or if there is a large item (sphere) it might have components drawn above and below
-    var gridGroup = new paper.Group();
-    var gridOverlayGroup = new paper.Group();
-    var aboveGridCellsGroup = new paper.Group();
-    var foregroundGroup = new paper.Group();
-
-    //Set the group pivot points, else paper.js will try to re-compute it to the center
-    backgroundGroup.pivot = new paper.Point(0, 0);
-    belowGridCellsGroup.pivot = new paper.Point(0, 0);
-    gridGroup.pivot = new paper.Point(0, 0);
-    gridOverlayGroup.pivot = new paper.Point(0, 0);
-    aboveGridCellsGroup.pivot = new paper.Point(0, 0);
-    foregroundGroup.pivot = new paper.Point(0, 0);
+    //Initialize each context with a group, the contexts should be in the desired z index order
+    contexts.forEach(function(context) {
+        var group = new paper.Group();
+        //Set the group pivot points, else paper.js will try to re-compute it to the center
+        group.pivot = new paper.Point(0, 0);
+        context.init(group);
+    });
     
-    //Init the background if there was an init method on the params
-    if(params.hasOwnProperty('initBackground')) {
-        params.initBackground(paper, backgroundGroup);
-    }
-
-    //Init the foreground if there was an init method on the params
-    if(params.hasOwnProperty('initForeground')) {
-        params.initForeground(paper, foregroundGroup, hexDimensions);
-    }
-    
-    //Init the grid if there was an init method on the params
-    if(params.hasOwnProperty('initGrid')) {
-        params.initGrid(paper, gridGroup, hexDimensions);
-    }
-    
-    //Init the cellContext
-    cellContext.init(paper, belowGridCellsGroup, aboveGridCellsGroup, hexDimensions);
-    
-    //Init the gridOverlayContext
-    gridOverlayContext.init(gridOverlayGroup);
-
     paper.view.draw();
     var tool = new paper.Tool();
 
@@ -111,12 +67,11 @@ var paper = require('browserifyable-paper');
          latestX = e.point.x;
          latestY = e.point.y;
          clickedY = e.point.y;
-         if (board.cellContext.aboveGridMouseDown(e.point.x, e.point.y)) {
-             mouseDownContext = board.cellContext;
-         } else if (board.cellContext.belowGridMouseDown(e.point.x, e.point.y)) {
-             mouseDownContext = board.cellContext;
-         } else if (board.gridOverlayContext.onMouseDown(e.point.x, e.point.y)) {
-             mouseDownContext = board.gridOverlayContext;
+         //Iterate through the contexts in reverse z-index order to see if any of them claim the click event
+         for (var i = board.contexts.length - 1; i > 0; i --) {
+             if (board.contexts[i].mouseDown(e.point.x, e.point.y)) {
+                 mouseDownContext = contexts[i];
+             }
          }
      };
 
@@ -129,7 +84,7 @@ var paper = require('browserifyable-paper');
 
         if (!!mouseDownContext) {
             //A context has claimed further mouse drag
-            mouseDownContext.mouseDragged(e.point.x, e.point.y, e.point.x - latestX, e.point.y - latestY, dx, dy);
+            mouseDownContext.mouseDragged(e.point.x, e.point.y, e.point.x - latestX, e.point.y - latestY);
         } else {
             //general dragging, translate all cell groups. Position the grid to look infinite
             dx = dx + e.point.x - latestX;
@@ -154,17 +109,15 @@ var paper = require('browserifyable-paper');
     };
     tool.onMouseUp = tool.onMouseLeave;
      
-     /**
-      * Update x/y positions based on the current dx and dy
-      * Will call into the background and foreground update functions
-      */
-     this.updatePostion = function() {
-         this.cellContext.updatePosition(dx, dy);
-         this.gridOverlayContext.updatePosition(dx, dy);
-         this.updateGridPosition(gridGroup, dx, dy);
-         this.updateBackgroundPosition(backgroundGroup, dx, dy);
-         this.updateForegroundPosition(foregroundGroup, dx, dy);
-     };
+    /**
+     * Update x/y positions based on the current dx and dy
+     * Will call into the background and foreground update functions
+     */
+    this.updatePostion = function() {
+        board.contexts.forEach(function(context) {
+            context.updatePosition(dx, dy);
+        });
+    };
      
      /**
       * Utility function to center the board on a cell
@@ -180,29 +133,4 @@ var paper = require('browserifyable-paper');
          var date2 = new Date().getTime();
          document.getElementById("result").innerHTML = "Draw Time: " + (date2 - date1) + " ms";
      };
-
-
-
-
-};
-
-/**
- * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired background changes on grid drag
- */
-module.exports.prototype.updateBackgroundPosition = function(backgroundGroup, dx, dy) {
-
-};
-
-/**
- * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired foreground changes on grid drag
- */
-module.exports.prototype.updateForegroundPosition = function(foregroundGroup, dx, dy) {
-
-};
-
-/**
- * A stub, the instantiating application should override (or alternatively provide in the params) to implement the desired grid changes on global drag
- */
-module.exports.prototype.updateGridPosition = function(gridGroup, dx, dy) {
-
 };

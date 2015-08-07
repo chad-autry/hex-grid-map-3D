@@ -2,30 +2,29 @@
 /**
  * Since only a single constructor is being exported as module.exports this comment isn't documented.
  * The class and module are the same thing, the contructor comment takes precedence.
- * @module BackgroundContext
+ * @module RandomStaryBackgroundContext
  */
  
 var paper = require('browserifyable-paper');
-/*
+ 
+/** 
+ * The constructor of a context object to generate a random stary background.
  * This is an example context with methods to draw and update the background of a hexBoard
  * Drawing a starry background, since I'm personally interested in making a space game.
  * However, you could draw water or clouds if doing an ocean or flight game
- */
- 
-/** The context object constructor
+ * @implements {Context}
  * @constructor
+ * @todo This context is a bit hard coded for the demo, needs to be made more useful
  */
- module.exports = function BackgroundContext() {
+ module.exports = function RandomStaryBackgroundContext() {
     //Protect the constructor from being called as a normal method
-    if (!(this instanceof BackgroundContext)) {
-        return new BackgroundContext();
+    if (!(this instanceof RandomStaryBackgroundContext)) {
+        return new RandomStaryBackgroundContext();
     }
     var context = this;
 
-    /**
-     * The method to be passed to the hex board to instantiate (or re-instantiate) the background
-     */
-    this.initBackground = function(paper, backgroundGroup) {
+    // Documentation inherited from Context#init
+    this.init = function(backgroundGroup) {
         //Create a stationary background of dimmer, denser stars
         var farLayer = context.createStarGroup(0.5, 1.1, paper.view.size.width, paper.view.size.height, 1000);
         backgroundGroup.addChild(farLayer);
@@ -38,10 +37,8 @@ var paper = require('browserifyable-paper');
         context.nearLayer = nearLayer;
     };
 
-    /**
-     * The method to be passed to the hex board which will be called on drags to update the background
-     */
-    this.updateBackgroundPosition = function(backgroundGroup, dx, dy) {
+    // Documentation inherited from Context#updatePosition
+    this.updatePosition = function(dx, dy) {
         //Scroll more slowly than the grid, and cap out position. Don't want to bother generating an infinite star field, most of the action will be in the middle
         if (dx > 0) {
             context.nearLayer.position.x = Math.min( -0.5*paper.view.size.width + dx / 10, 0);
@@ -58,8 +55,9 @@ var paper = require('browserifyable-paper');
 };
 
 /**
- * Generate a random integer between min and max
- * TODO Refactor into a starry background extension
+ * Helper method for generating a random number
+ * @param {integer} min - The minimum number to generate
+ * @param {integer} max - The maximum number to generate
  */
 module.exports.prototype.random = function (min, max) {
         return Math.round((Math.random() * max - min) + min);
@@ -68,8 +66,12 @@ module.exports.prototype.random = function (min, max) {
 module.exports.prototype.STAR_COLOURS = ["#ffffff", "#ffe9c4", "#d4fbff"];
 
 /**
- * Helper method, generates a raster containing randomly generated stars
- * TODO Refactor into a starry background extension
+ * Heleper method to create the star group with some variables
+ * @ param {integer} maxBrightness - Controls how bright the stars can be
+ * @ param {integer} maxBrightness - Controls how large the stars can be
+ * @ param {integer} width - The width of the rectangle to generate stars for
+ * @ param {integer} height - The height of the rectangle to generate stars for
+ * @ param {integer} star_number - The number of stars to generate
  */
 module.exports.prototype.createStarGroup = function( maxBrightness, maxRadius, width, height, star_number) {
     var starGroup = new paper.Group();
@@ -89,4 +91,15 @@ module.exports.prototype.createStarGroup = function( maxBrightness, maxRadius, w
     starGroup.remove();
     starRaster.pivot = new paper.Point(0 - starRaster.position.x, 0 - starRaster.position.y);
     return starRaster;
+};
+
+// Documentation inherited from Context#mouseDown
+module.exports.prototype.mouseDown = function( x, y) {
+    //This is nothing to click, always return false
+    return false;
+};
+
+// Documentation inherited from Context#mouseDragged
+module.exports.prototype.mouseDragged = function( x, y, dx, dy) {
+    //We never claim mouseDown, so this actually will never be called
 };

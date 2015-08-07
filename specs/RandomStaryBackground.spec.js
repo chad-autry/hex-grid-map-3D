@@ -2,7 +2,7 @@
  * A set of tests for the main java file
  */
 //Require the Constructor of the object being tested
-var BackgroundContext = require("../src/contexts/BackgroundContext.js");
+var BackgroundContext = require("../src/contexts/RandomStaryBackgroundContext.js");
 
 describe( 'BackgroundContext dummy test', function() {
 
