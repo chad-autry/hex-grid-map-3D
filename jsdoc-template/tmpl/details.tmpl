@@ -50,7 +50,7 @@ if (data.defaultvalue && (data.defaultvaluetype === 'object' || data.defaultvalu
     <dt class="implementations">Implementations:</dt>
     <dd class="implementations"><ul>
         <?js data.implementations.forEach(function(impl) { ?>
-            <li><?js= self.linkto(impl, self.htmlsafe(impl)) ?></li>
+            <li><?js= self.linkto(impl, '', self.htmlsafe(impl)) ?></li>
         <?js }); ?>
     </ul></dd>
     <?js } ?>
@@ -59,7 +59,7 @@ if (data.defaultvalue && (data.defaultvaluetype === 'object' || data.defaultvalu
     <dt class="implements">Implements:</dt>
     <dd class="implements"><ul>
         <?js data.implements.forEach(function(impl) { ?>
-            <li><?js= self.linkto(impl, self.htmlsafe(impl)) ?></li>
+            <li><?js= self.linkto(impl, '', self.htmlsafe(impl)) ?></li>
         <?js }); ?>
     </ul></dd>
     <?js } ?>
