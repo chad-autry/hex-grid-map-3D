@@ -11,7 +11,7 @@ var VectorDrawnItemFactory = require('../../../../src/drawnItemFactories/VectorD
 var PathDrawnItemFactory = require('../../../../src/drawnItemFactories/PathDrawnItemFactory.js');
 var ArrowDrawnItemFactory = require('../../../../src/drawnItemFactories/ArrowDrawnItemFactory.js');
 var DelegatingDrawnItemFactory = require('../../../../src/drawnItemFactories/DelegatingDrawnItemFactory.js');
-var GridOverlayContext = require('../../../../src/contexts/GridOverlayContext.js');
+var DrawnItemContext = require('../../../../src/contexts/DrawnItemContext.js');
 var DataSource = require('../../../../src/dataSources/DataSource.js');
 var CellDrawnItemFactory = require('../../../../src/drawnItemFactories/RegularPolygonDrawnItemFactory');
 var SphereDrawnItemFactory = require('../../../../src/drawnItemFactories/SphereDrawnItemFactory');
@@ -55,13 +55,28 @@ module.exports = angular.module( 'hexWidget.demo', [
     $scope.cellContext = new CellContext($scope.cellDataSource, $scope.cellDrawnItemFactory, 5, $scope.hexDimensions);
     $scope.contexts.push($scope.cellContext.belowGridContext);
     $scope.contexts.push(new GridContext($scope.hexDimensions));
-    $scope.contexts.push($scope.cellContext);
-    $scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
-    $scope.gridOverlayDataSource = new DataSource();
+    
+
+    //Definte and push the paths DataSource, DrawnItemFactory, and Context
+    $scope.pathDataSource = new DataSource();
+    $scope.pathDrawnItemFactory = new PathDrawnItemFactory($scope.hexDimensions);
+    $scope.contexts.push(new DrawnItemContext($scope.pathDataSource, $scope.pathDrawnItemFactory, $scope.hexDimensions));
+    
+    //Definte and push the vector DataSource, DrawnItemFactory, and Context
+    $scope.vectorDataSource = new DataSource();
     $scope.vectorDrawnItemFactory = new VectorDrawnItemFactory($scope.hexDimensions);
+    $scope.contexts.push(new DrawnItemContext($scope.vectorDataSource, $scope.vectorDrawnItemFactory, $scope.hexDimensions));
+    
+    //Push the above grid cell context defined earlier
+    $scope.contexts.push($scope.cellContext);
+
+    //Create and push the LensFlareContext
+    $scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
+
     $scope.gridOverlayDrawnItemFactoryMap = {vector: $scope.vectorDrawnItemFactory, path: $scope.pathDrawnItemFactory};
     $scope.gridOverlayDrawnItemFactory = new DelegatingDrawnItemFactory($scope.gridOverlayDrawnItemFactoryMap);
-    $scope.gridOverlayContext = new GridOverlayContext($scope.gridOverlayDataSource, $scope.gridOverlayDrawnItemFactory, $scope.hexDimensions);
+    
+    
     
     $scope.$on('boardInitialized', function() {
         //Once the board has been initialized, setup the demo scene
@@ -121,6 +136,12 @@ module.exports = angular.module( 'hexWidget.demo', [
         
         //A blue 'space station'
         $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 5, color: 'blue', u:6, v:5}]);
+        
+        //A vector
+        $scope.vectorDataSource.addItems([{shaftWidth: 5, color: 'blue', sourceU:6, sourceV:5, destU:8, destV:8}]);
+        
+        //A path around the Sun, Could represent the danger area for radiation
+        $scope.pathDataSource.addItems([{width: 5, color: 'orange', closed: true, points: [[0,-2],[-2, 0],[-2, 2],[0, 2],[2, 0],[2, -2]]}]);
     });
 })
 

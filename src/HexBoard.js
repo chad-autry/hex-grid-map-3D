@@ -14,7 +14,7 @@ var paper = require('browserifyable-paper');
 /**
  * Pretty much the controller of a hexagonal map scene using the provided canvas and context objects
  * @constructor
- * @param { External:cartesian-hexagonal } hexDimension - The DTO defining the hex <--> cartesian relation
+ * @param { external:cartesian-hexagonal } hexDimension - The DTO defining the hex <--> cartesian relation
  * @param canvas - The canvas element to initialize with paper.js
  * @param { Context[] } contexts - An array of contexts used to control display and interaction with various layers of the map
  * @example var hexMap = new (require(hexagonal-map))(hexDimension, canvas, contexts);

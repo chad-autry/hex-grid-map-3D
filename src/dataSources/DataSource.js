@@ -1,8 +1,15 @@
 "use strict";
-/*
- * This function defines a minimal datasource for items. Expect client applications to impliment their own datasources which will listen to this one, and add filtering/sorting etc
+/**
+ * Since only a single constructor is being exported as module.exports this comment isn't documented.
+ * The class and module are the same thing, the contructor comment takes precedence.
+ * @module DataSource
  */
-function DataSource() {
+ 
+/**
+ * This function defines a minimal datasource for items. Expect dependent applications to impliment their own datasources which will listen to this one adding filtering, sorting, paging functionallity as desired
+ * @constructor
+ */
+module.exports = function DataSource() {
     var listeners = []; //The listeners registered for change events
     var items = []; //The data items
 
@@ -21,6 +28,4 @@ function DataSource() {
         listeners[i].onDataChanged({added:[], removed:items});
         }
     };
-}
-
-module.exports = DataSource;
+};
