@@ -58,9 +58,15 @@ if (data.defaultvalue && (data.defaultvaluetype === 'object' || data.defaultvalu
     <?js if (data.implements && data.implements.length) { ?>
     <dt class="implements">Implements:</dt>
     <dd class="implements"><ul>
-        <?js data.implements.forEach(function(impl) { ?>
+        <?js if (data.kind === 'class' || data.kind === 'module') { ?>
+          <?js data.implements.forEach(function(impl) { ?>
             <li><?js= self.linkto(impl, '', self.htmlsafe(impl)) ?></li>
-        <?js }); ?>
+          <?js }); ?>
+        <?js } else { ?>
+          <?js data.implements.forEach(function(impl) { ?>
+	    <li><?js= self.linkto(impl.split('#')[0], impl.split('#')[1], self.htmlsafe(impl)) ?></li>
+          <?js }); ?>
+        <?js } ?>
     </ul></dd>
     <?js } ?>
 
