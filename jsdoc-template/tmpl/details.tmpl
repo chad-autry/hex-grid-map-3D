@@ -195,14 +195,9 @@ if (data.defaultvalue && (data.defaultvaluetype === 'object' || data.defaultvalu
     <?js if (data.returns && returns.length) { ?>
       <dt class="tag-returns">Returns:</dt>
       <dd class="tag-returns">
-        <?js if (returns.length == 1) { ?>
         <ul><?js returns.forEach(function(r) { ?>
             <li><?js= self.partial('returns.tmpl', r) ?></li>
-        <?js });?></ul><?js } else {
-          returns.forEach(function(r) { ?>
-            <?js= self.partial('returns.tmpl', r) ?>
-          <?js });?>
-        <?js } ?>
+        <?js });?></ul>
       </dd>
     <?js } ?>
 
