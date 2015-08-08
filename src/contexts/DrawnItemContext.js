@@ -43,8 +43,9 @@ module.exports = function DrawnItemContext(dataSource, drawnItemFactory, hexDime
         var result = context.group.hitTest(new paper.Point(clickedX, clickedY));
         if (result) {
             context.clickedItem = result.item.parent;
-            return true;
-            //Check if the clickedItem is one the layer claims further mouse events for
+            if (context.clickedItem.data.hasOwnProperty('onDrag') || context.clickedItem.data.hasOwnProperty('onClick')) {
+                return true;
+            }
         }
         return;
         
@@ -62,7 +63,9 @@ module.exports = function DrawnItemContext(dataSource, drawnItemFactory, hexDime
 
     // Documentation inherited from Context#mouseDragged
     this.mouseDragged = function( x, y, eventDx, eventDy) {
-        context.clickedItem.data.onDrag( x, y, eventDx, eventDy, context.dx, context.dy);
+        if(context.clickedItem.data.hasOwnProperty('onDrag')) {
+            context.clickedItem.data.onDrag( x, y, eventDx, eventDy, context.dx, context.dy);
+        }
     };
 };
 
