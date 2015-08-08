@@ -16,3 +16,8 @@
  * @see {@link https://github.com/chad-autry/cartesian-hexagonal|cartesian-hexagonal~HexagonalCoordinates}
  */
  
+/**
+ * The paper.js Item object
+ * @external Item
+ * @see {@link http://paperjs.org/reference/item/|Item}
+ */ 

@@ -1,19 +1,40 @@
 "use strict";
+/**
+ * Since only a single constructor is being exported as module.exports this comment isn't documented.
+ * The class and module are the same thing, the contructor comment takes precedence.
+ * @module SphereDrawnItemFactory
+ */
+
 var paper = require('browserifyable-paper');
 /**
- * Converts a provided sphere item into a drawn representation
- * Returns the below grid portion as the "belowGridItem" on the main component
+ * A factory to create the paper.js item for Sphere
+ * @constructor
+ * @param {external:cartesian-hexagonal} hexDefinition - The DTO defining the hex <--> cartesian relation
  */
-function SphereDrawnItemFactory(hexDefinition) {
+module.exports = function SphereDrawnItemFactory(hexDefinition) {
     this.hexDefinition = hexDefinition;
 
-}
+};
 
 /**
  * Returns a projected sphere drawn item for the given object
  * Object should have lineWidth, lineColor, backgroundColor, rotation, size, sliceCount, wedgeCount
  */
-SphereDrawnItemFactory.prototype.getDrawnItem = function(item) {
+/**
+ * Returns a vector drawn item for the given object
+ * @param {Object} item - The DTO to produce a paper.js drawn item for
+ * @param {Color} item.backgroundColor - The base color of the sphere
+ * @param {Color} item.lineColor - The color of the latitude and longitude lines
+ * @param {number} item.size - The size to draw the sphere at relative to a hex 100 means 100%
+ * @param {number} item.rotation - Starting as if viewed from above, the rotation of the top of the sphere up and back into the x-y plane
+ * @param {number[]} item.greatCircleAngles - Longitude lines, measured in radians, straight up and down 0, clockwise +, counterclockwise -
+ * @param {number[]} item.latitudeAngles - Latitude lines to draw measured in radians, equator 0, up +, down -
+ * @param {number} item.lineWidth - The thickness of the latitude & longitude lines
+ * @param {external:Star=} item.borderStar - The properties of a paper.js Star to use as the border of the sphere (gives it a serated border)
+ * @returns {external:Item} The paper.js Item representing the vector
+ * @implements {DrawnItemFactory#getDrawnItem}
+ */
+module.exports.prototype.getDrawnItem = function(item) {
     var radius = item.size * this.hexDefinition.hexagon_edge_to_edge_width/200; //Draw it a bit big, we'll trim it into a circle
     var upperClippingCircle = new paper.Path.Circle({center: [0, 0],
     radius: radius - 0.5});
@@ -228,17 +249,22 @@ SphereDrawnItemFactory.prototype.getDrawnItem = function(item) {
     
 };
 
-// Utility method to rotate point by X in a 3D space
-SphereDrawnItemFactory.prototype.rotateX = function(point, radians) {
+/**
+ * Utility method to rotate point by X in a 3D space
+ * @private
+ */
+module.exports.prototype.rotateX = function(point, radians) {
     var z = point.z;
     point.z = (z * Math.cos(radians)) + (point.y * Math.sin(radians));
     point.y = (-1.0*z * Math.sin(radians)) + (point.y * Math.cos(radians));
 };
 
-// Utility method to rotate point by Z in a 3D space
-SphereDrawnItemFactory.prototype.rotateZ = function(point, radians) {
+/**
+ * Utility method to rotate point by Z in a 3D space
+ * @private
+ */
+module.exports.prototype.rotateZ = function(point, radians) {
     var x = point.x;
     point.x = (x * Math.cos(radians)) + (point.y * Math.sin(radians) * -1.0);
     point.y = (x * Math.sin(radians)) + (point.y * Math.cos(radians));
 };
-module.exports = SphereDrawnItemFactory;

@@ -1,22 +1,34 @@
 "use strict";
-var paper = require('browserifyable-paper');
 /**
- * Converts a provided vector item into a drawn representation
- * Assumes a snap-to-center functionallity
- * Sets the pivot point to the base of the vector
+ * Since only a single constructor is being exported as module.exports this comment isn't documented.
+ * The class and module are the same thing, the contructor comment takes precedence.
+ * @module VectorDrawnItemFactory
  */
-function VectorDrawnItemFactory(hexDefinition) {
+ 
+var paper = require('browserifyable-paper');
+
+/**
+ * A factory to create the paper.js items for vectors
+ * @constructor
+ * @param {external:cartesian-hexagonal} hexDefinition - The DTO defining the hex <--> cartesian relation
+ */
+module.exports = function VectorDrawnItemFactory(hexDefinition) {
     this.hexDefinition = hexDefinition;
-    
-    this.vectorOnDrag = function (dx, dy) {
-    };
-}
+};
 
 /**
  * Returns a vector drawn item for the given object
- * Object should have color, sourceU, sourceV, destU, destV, shaftWidth
+ * @param {Object} item - The DTO to produce a paper.js drawn item for
+ * @param {Color} item.color - The color of the vector
+ * @param {number} item.sourceU - The U coordinate of the vector source
+ * @param {number} item.sourceV - The V coordinate of the vector source
+ * @param {number} item.destU - The U coordinate of the vector destination
+ * @param {number} item.destV - The V coordinate of the vector destination
+ * @param {number} item.shaftWidth - The thickness of the vector
+ * @returns {external:Item} The paper.js Item representing the vector
+ * @implements {DrawnItemFactory#getDrawnItem}
  */
-VectorDrawnItemFactory.prototype.getDrawnItem = function(item) {
+module.exports.prototype.getDrawnItem = function(item) {
     //Group together the head and shaft into one item
     var vectorGroup = new paper.Group();
     vectorGroup.pivot = new paper.Point(0, 0);
@@ -119,4 +131,3 @@ VectorDrawnItemFactory.prototype.getDrawnItem = function(item) {
          
     return vectorGroup;
 };
-module.exports = VectorDrawnItemFactory;

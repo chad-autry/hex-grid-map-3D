@@ -1,26 +1,42 @@
 "use strict";
-var paper = require('browserifyable-paper');
-/*
- * This is a drawn item factory which will return RegularPolygons for the input item
+/**
+ * Since only a single constructor is being exported as module.exports this comment isn't documented.
+ * The class and module are the same thing, the contructor comment takes precedence.
+ * @module RegularPolygonDrawnItemFactory
  */
-function RegularPolygonDrawnItemFactory() {
-    
-    /**
-     * This is the one method required of the factory. Returns the paper.js Item to be drawn for the cellItem
-     * My expectation is the application will provide cell items which have the data required to create a paper.js drawn item
-     * Maybe they give an SVG image, maybe they provide info to create a regular polygon, maybe they do a mix.
-     */
-     this.getDrawnItem = function(cellItem) {
-         var drawnItem = new paper.Path.RegularPolygon({
-             center: [0, 0],
-             sides: cellItem.sides,
-             radius: cellItem.radius,
-             fillColor: cellItem.color,
-             strokeColor: 'black'
-         });
-         drawnItem.scale(1, 0.5);
-         return drawnItem;
-     };
-}
+ 
+var paper = require('browserifyable-paper');
 
-module.exports = RegularPolygonDrawnItemFactory;
+/**
+ * Factory which delegates to the paper.js RegularPoloygon constructor
+ * @constructor
+ * @param {external:cartesian-hexagonal} hexDefinition - The DTO defining the hex <--> cartesian relation
+ * @see {@link http://paperjs.org/reference/path/#path-regularpolygon-object | RegularPolygon }
+ */
+module.exports = function RegularPolygonDrawnItemFactory(hexDefinition) {
+    this.hexDefinition = hexDefinition;
+};
+
+/**
+ * Return an arrow path item for the given object
+ * @override
+ * @param {Object} item - The DTO to produce a paper.js drawn item for
+ * @param {Color} item.lineColor - The color of the arrow's border
+ * @param {Color} item.fillColor - The color to fill this item with
+ * @param {integer} item.radius - The radius of the item
+ * @param {number} item.sides - The number of sides of the item
+ * @returns {external:Item} The paper.js Item for the given parameters
+ * @implements {DrawnItemFactory#getDrawnItem}
+ * @todo consider using symbols for performance
+ */
+module.exports.prototype.getDrawnItem = function(item) {
+ var drawnItem = new paper.Path.RegularPolygon({
+     center: [0, 0],
+     sides: item.sides,
+     radius: item.radius,
+     fillColor: item.color,
+     strokeColor: 'black'
+ });
+ drawnItem.scale(1, this.hexDefinition.vScale);
+ return drawnItem;
+};

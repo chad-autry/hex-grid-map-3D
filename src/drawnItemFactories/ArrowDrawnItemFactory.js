@@ -1,17 +1,34 @@
 "use strict";
+/**
+ * Since only a single constructor is being exported as module.exports this comment isn't documented.
+ * The class and module are the same thing, the contructor comment takes precedence.
+ * @module ArrowDrawnItemFactory
+ */
 var paper = require('browserifyable-paper');
 /**
- * Creates an arrow drawn item, such as might represent gravity
+ * Factory for creating arrow drawn items, such as might represent gravity
+ * @constructor
+ * @param {external:cartesian-hexagonal} hexDefinition - The DTO defining the hex <--> cartesian relation
  */
-function ArrowDrawnItemFactory(hexDefinition) {
+module.exports = function ArrowDrawnItemFactory(hexDefinition) {
     this.hexDefinition = hexDefinition;
 
-}
+};
 
 /**
  * Return an arrow path item for the given object
+ * @override
+ * @param {Object} item - The DTO to produce a paper.js drawn item for
+ * @param {integer} item.lineWidth - The extra width of the arrows border
+ * @param {Color} item.lineColor - The color of the arrow's border
+ * @param {Color} item.fillColor - The color to fill this item with
+ * @param {integer} item.rotate - The angle in degrees to rotate, 0 degrees points ???
+ * @param {number} item.scaleLength - Scale to make longer or shorter arrows, (0, 1]
+ * @param {number} item.scaleWidth - Scale to make skinnier or thicker arrows, (0, 1]
+ * @returns {external:Item} The paper.js Item representing the arrow
+ * @implements {DrawnItemFactory#getDrawnItem}
  */
-ArrowDrawnItemFactory.prototype.getDrawnItem = function(item) {
+module.exports.prototype.getDrawnItem = function(item) {
 
     var arrow = new paper.Path({
                 segments: [[-this.hexDefinition.hexagon_edge_to_edge_width/2, 0], //left pointy point
@@ -25,11 +42,10 @@ ArrowDrawnItemFactory.prototype.getDrawnItem = function(item) {
              strokeWidth: item.lineWidth,
              strokeColor: item.lineColor,
              closed: true});
+             arrow.scale(item.scaleLength, item.scaleWidth);
              arrow.rotate(item.rotation);
-             arrow.scale(item.scaleX, item.scaleY);
+             arrow.scale(1, this.hexDefinition.vScale);
+    arrow.data.dto = item;
     return arrow;
-    
-    
 };
 
-module.exports = ArrowDrawnItemFactory;

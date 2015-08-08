@@ -46,7 +46,7 @@ module.exports = angular.module( 'hexWidget.demo', [
     $scope.contexts.push(new GridContext($scope.hexDimensions));
     $scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
     $scope.cellDataSource = new DataSource();
-    $scope.simpleDrawnItemFactory = new CellDrawnItemFactory();
+    $scope.simpleDrawnItemFactory = new CellDrawnItemFactory($scope.hexDimensions);
     $scope.sphereDrawnItemFactor = new SphereDrawnItemFactory($scope.hexDimensions);
     $scope.arrowDrawnItemFactory = new ArrowDrawnItemFactory($scope.hexDimensions);
     $scope.cellDrawnItemFactoryMap = {simple: $scope.simpleDrawnItemFactory, sphere: $scope.sphereDrawnItemFactor, arrow: $scope.arrowDrawnItemFactory};
@@ -98,28 +98,28 @@ module.exports = angular.module( 'hexWidget.demo', [
         
         //Add arrows to represent gravity
         //Gravity around the sun
-        $scope.cellDataSource.addItems([{type:'arrow', u: 0, v: -1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 180, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: -1, v: 0, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 240, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: -1, v: 1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 300, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 0, v: 1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 0, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 1, v: 0, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 60, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 1, v: -1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 120, scaleX: 0.75, scaleY:0.75*0.5}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 0, v: -1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 180, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: -1, v: 0, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 240, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: -1, v: 1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 300, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 0, v: 1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 0, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 1, v: 0, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 60, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 1, v: -1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 120, scaleLength: 0.75, scaleWidth:0.75}]);
         
         //gravity around the planet
-        $scope.cellDataSource.addItems([{type:'arrow', u: 5, v: 4, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 180, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 5, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 240, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 6, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 300, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 5, v: 6, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 0, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 6, v: 5, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 60, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 6, v: 4, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 120, scaleX: 0.75, scaleY:0.75*0.5}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 5, v: 4, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 180, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 5, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 240, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 6, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 300, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 5, v: 6, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 0, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 6, v: 5, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 60, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 6, v: 4, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 120, scaleLength: 0.75, scaleWidth:0.75}]);
         
         //unfilled gravity around the moon
-        $scope.cellDataSource.addItems([{type:'arrow', u: 3, v: 7, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 180, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 2, v: 8, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 240, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 2, v: 9, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 300, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 3, v: 9, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 0, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 8, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 60, scaleX: 0.75, scaleY:0.75*0.5}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 7, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 120, scaleX: 0.75, scaleY:0.75*0.5}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 3, v: 7, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 180, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 2, v: 8, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 240, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 2, v: 9, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 300, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 3, v: 9, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 0, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 8, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 60, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 7, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 120, scaleLength: 0.75, scaleWidth:0.75}]);
         
         //Add a fleet of red 'ships' (triangles) on the dark side of the moon, and a fleet of green ships at the sun
         $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);

@@ -1,23 +1,33 @@
 "use strict";
-var paper = require('browserifyable-paper');
 /**
- * Converts a provided vector item into a drawn representation
- * Assumes a snap-to-center functionallity
- * Sets the pivot point to the base of the vector
+ * Since only a single constructor is being exported as module.exports this comment isn't documented.
+ * The class and module are the same thing, the contructor comment takes precedence.
+ * @module PathDrawnItemFactory
  */
-function PathDrawnItemFactory(hexDefinition) {
-    this.hexDefinition = hexDefinition;
-    
-    this.vectorOnDrag = function (dx, dy) {
-    };
-}
+ 
+var paper = require('browserifyable-paper');
 
 /**
- * Returns a vector drawn item for the given object
- * Object should have color, an array of points, and a width
+ * A factory for a path item, such as might represent where a ship has been, or various boundaries
+ * @constructor
+ * @param {external:cartesian-hexagonal} hexDefinition - The DTO defining the hex <--> cartesian relation
  */
-PathDrawnItemFactory.prototype.getDrawnItem = function(item) {
-    //Group together the head and shaft into one item
+module.exports = function PathDrawnItemFactory(hexDefinition) {
+    this.hexDefinition = hexDefinition;
+};
+
+/**
+ * Return a path item for the given DTO, includes a 1 pixel black border. The path will go through the center of hexes
+ * @override
+ * @param {Object} item - The DTO to produce a paper.js drawn item for
+ * @param {Color} item.color - The color of the path
+ * @param {integer[][]} item.points - An array of U, V points the path goes through
+ * @param {integer} item.width - The width of the path's line
+ * @returns {external:Item} The paper.js Item for the given parameters
+ * @implements {DrawnItemFactory#getDrawnItem}
+ */
+module.exports.prototype.getDrawnItem = function(item) {
+
     var pathGroup = new paper.Group();
     pathGroup.pivot = new paper.Point(0, 0);
    
@@ -46,4 +56,3 @@ PathDrawnItemFactory.prototype.getDrawnItem = function(item) {
          
     return pathGroup;
 };
-module.exports = PathDrawnItemFactory;
