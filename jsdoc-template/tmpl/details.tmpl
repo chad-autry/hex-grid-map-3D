@@ -140,4 +140,76 @@ if (data.defaultvalue && (data.defaultvaluetype === 'object' || data.defaultvalu
         <?js }); ?></ul>
     </dd>
     <?js } ?>
+    
+    
+    <?js if (data.kind !== 'module' && data.requires && data.requires.length) { ?>
+      <dt class="tag-requires">Requires:</dt>
+      <dd class="tag-requires">
+        <ul><?js data.requires.forEach(function(r) { ?>
+          <li><?js= self.linkto(r) ?></li>
+        <?js }); ?></ul>
+      </dd>
+    <?js } ?>
+
+    <?js if (data.fires && fires.length) { ?>
+      <dt class="tag-fires">Fires:</dt>
+      <dd class="tag-fires">
+        <ul><?js fires.forEach(function(f) { ?>
+          <li><?js= self.linkto(f) ?></li>
+        <?js }); ?></ul>
+      </dd>
+    <?js } ?>
+
+    <?js if (data.listens && listens.length) { ?>
+      <dt class="tag-listens">Listens to Events:</dt>
+      <dd class="tag-listens">
+        <ul><?js listens.forEach(function(f) { ?>
+          <li><?js= self.linkto(f) ?></li>
+        <?js }); ?></ul>
+      </dd>
+    <?js } ?>
+
+    <?js if (data.listeners && listeners.length) { ?>
+      <dt class="tag-listeners">Listeners of This Event:</dt>
+      <dd class="tag-listens">
+        <ul><?js listeners.forEach(function(f) { ?>
+          <li><?js= self.linkto(f) ?></li>
+        <?js }); ?></ul>
+      </dd>
+    <?js } ?>
+
+    <?js if (data.exceptions && exceptions.length) { ?>
+      <dt class="tag-exceptions">Throws:</dt>
+      <dd class="tag-listens">
+        <?js if (exceptions.length > 1) { ?>
+        <ul><?js exceptions.forEach(function(r) { ?>
+            <li><?js= self.partial('exceptions.tmpl', r) ?></li>
+        <?js });?></ul><?js } else {
+          exceptions.forEach(function(r) { ?>
+            <?js= self.partial('exceptions.tmpl', r) ?>
+          <?js });?>
+        <?js } ?>
+      </dd>
+    <?js } ?>
+
+    <?js if (data.returns && returns.length) { ?>
+      <dt class="tag-returns">Returns:</dt>
+      <dd class="tag-returns">
+        <?js if (returns.length == 1) { ?>
+        <ul><?js returns.forEach(function(r) { ?>
+            <li><?js= self.partial('returns.tmpl', r) ?></li>
+        <?js });?></ul><?js } else {
+          returns.forEach(function(r) { ?>
+            <?js= self.partial('returns.tmpl', r) ?>
+          <?js });?>
+        <?js } ?>
+      </dd>
+    <?js } ?>
+
+    <?js if (data.examples && examples.length) { ?>
+        <dt class="tag-examples">Example<?js= examples.length > 1? 's':'' ?></dt>
+        <dd class="tag-examples">
+          <?js= this.partial('examples.tmpl', examples) ?>
+        </dd>
+    <?js } ?>
 </dl>
