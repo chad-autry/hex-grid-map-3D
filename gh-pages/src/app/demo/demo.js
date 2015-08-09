@@ -132,15 +132,36 @@ module.exports = angular.module( 'hexWidget.demo', [
         
         //A blue 'space station'
         var onClickStation = function() {
-            $rootScope.$broadcast('addAlert',{type:'success', msg:'success!'});
+            $rootScope.$broadcast('addAlert',{type:'success', msg:"Do you believe I'm a space station? Use your imagination"});
         };
         $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 5, color: 'blue', u:6, v:5, onClick:onClickStation}]);
         
-        //A vector
-        $scope.vectorDataSource.addItems([{shaftWidth: 5, color: 'blue', sourceU:6, sourceV:5, destU:8, destV:8}]);
+        
+        //Dave
+        var onClickDave = function() {
+            if (!$scope.isDaveGoing) {
+               $scope.isDaveGoing = true;
+               $scope.vectorDataSource.addItems([{id:'daveVelocity', shaftWidth: 5, color: 'green', sourceU:0, sourceV:4, destU:0, destV:6}]);
+	       $rootScope.$broadcast('addAlert',{type:'success', msg:'This is Dave. Dave is going places. Go Dave, go.'});
+	    } else {
+	       $scope.isDaveGoing = false;
+	       $rootScope.$broadcast('addAlert',{type:'', msg:'Dave, slow down man.'});
+	    
+	       $scope.vectorDataSource.removeItems([{id:'daveVelocity'}]);
+	    }
+        };
+        
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:0, v:4, onClick:onClickDave}]);
+        
+        //Poetry
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'white', u:3, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'One ship'});}}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'white', u:4, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Two ship'});}}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'white', u:4, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Two ship'});}}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'red', u:5, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Red ship'});}}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Blue ship'});}}]);
         
         //A path around the Sun, Could represent the danger area for radiation
-        $scope.pathDataSource.addItems([{width: 5, color: 'orange', closed: true, points: [[0,-2],[-2, 0],[-2, 2],[0, 2],[2, 0],[2, -2]]}]);
+        $scope.pathDataSource.addItems([{width: 5, color: 'orange', closed: true, points: [[0,-2],[-2, 0],[-2, 2],[0, 2],[2, 0],[2, -2]], onClick:function(){$rootScope.$broadcast('addAlert',{type:'warning', msg:'Radiation! Beware!'});}}]);
     });
 })
 

@@ -42,8 +42,13 @@ module.exports = function DrawnItemContext(dataSource, drawnItemFactory, hexDime
         //Hit test for items
         var result = context.group.hitTest(new paper.Point(clickedX, clickedY));
         if (result) {
-            context.clickedItem = result.item.parent;
-            if (context.clickedItem.data.hasOwnProperty('onDrag') || context.clickedItem.data.hasOwnProperty('onClick')) {
+            context.clickedItem = result.item;
+	    while (!context.clickedItem.data.hasOwnProperty('item') && !!context.clickedItem.parent) {
+	        context.clickedItem = context.clickedItem.parent;
+
+            }
+            //The parent item's data is REALLY expected to have an item property. The second condition of the while was since I didn't like the look of the possibillity of an infinite loop
+            if (context.clickedItem.data.item.hasOwnProperty('onDrag') || !!context.clickedItem.data.item.hasOwnProperty('onClick')) {
                 return true;
             }
         }
@@ -70,8 +75,8 @@ module.exports = function DrawnItemContext(dataSource, drawnItemFactory, hexDime
     
     // Documentation inherited from Context#mouseReleased
     this.mouseReleased = function(wasDrag) {
-        if (!wasDrag && context.clickedItem.data.hasOwnProperty('onClick')) {
-            context.clickedItem.data.onClick();
+        if (!wasDrag && context.clickedItem.data.item.hasOwnProperty('onClick')) {
+            context.clickedItem.data.item.onClick();
         }
     };
 };
@@ -100,6 +105,7 @@ module.exports.prototype.onDataChanged = function(event) {
         drawnItem = this.drawnItemFactory.getDrawnItem(item);
         this.drawnItemCache[item.id] = drawnItem;
         var sourcePixelCoordinates = this.hexDimensions.getPixelCoordinates(item.sourceU, item.sourceV);
+        drawnItem.position = new paper.Point(this.dx, this.dy);
         this.group.addChild(drawnItem);
     }
 

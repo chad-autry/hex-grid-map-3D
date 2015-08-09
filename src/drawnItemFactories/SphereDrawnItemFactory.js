@@ -31,6 +31,7 @@ module.exports = function SphereDrawnItemFactory(hexDefinition) {
  * @param {number[]} item.latitudeAngles - Latitude lines to draw measured in radians, equator 0, up +, down -
  * @param {number} item.lineWidth - The thickness of the latitude & longitude lines
  * @param {external:Star=} item.borderStar - The properties of a paper.js Star to use as the border of the sphere (gives it a serated border)
+ * @param {onClick=} item.onClick - The callback to use when clicking the vector
  * @returns {external:Item} The paper.js Item representing the vector
  * @implements {DrawnItemFactory#getDrawnItem}
  */
@@ -244,6 +245,7 @@ module.exports.prototype.getDrawnItem = function(item) {
         upperGroup.addChild(upperBorderClippingGroup);
         upperBorderClippingGroup.sendToBack();
     }
+    upperGroup.data.item = item;
     return upperGroup;
     
     

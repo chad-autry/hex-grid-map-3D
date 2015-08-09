@@ -23,6 +23,7 @@ module.exports = function PathDrawnItemFactory(hexDefinition) {
  * @param {Color} item.color - The color of the path
  * @param {integer[][]} item.points - An array of U, V points the path goes through
  * @param {integer} item.width - The width of the path's line
+ * @param {onClick=} item.onClick - The callback to use when clicking the vector
  * @returns {external:Item} The paper.js Item for the given parameters
  * @implements {DrawnItemFactory#getDrawnItem}
  */
@@ -53,6 +54,9 @@ module.exports.prototype.getDrawnItem = function(item) {
         closed: item.closed
     });
     pathGroup.addChild(path);
-         
+    item.sourceU = 0;
+    item.sourceV = 0;
+    pathGroup.data.item=item;
     return pathGroup;
+    
 };

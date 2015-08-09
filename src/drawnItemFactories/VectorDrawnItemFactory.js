@@ -25,7 +25,9 @@ module.exports = function VectorDrawnItemFactory(hexDefinition) {
  * @param {number} item.destU - The U coordinate of the vector destination
  * @param {number} item.destV - The V coordinate of the vector destination
  * @param {number} item.shaftWidth - The thickness of the vector
- * @param {onDrag=} item.static - The callback to use when dragging the vector
+ * @param {string} item.id - The id to use for removals
+ * @param {onDrag=} item.onDrag - The callback to use when dragging the vector
+ * @param {onClick=} item.onClick - The callback to use when clicking the vector
  * @returns {external:Item} The paper.js Item representing the vector
  * @implements {DrawnItemFactory#getDrawnItem}
  */
@@ -131,5 +133,6 @@ module.exports.prototype.getDrawnItem = function(item) {
             vectorGroup.data.item.onDrag(x, y, eventDx, eventDy);
         };
     }
+    vectorGroup.data.item = item;
     return vectorGroup;
 };

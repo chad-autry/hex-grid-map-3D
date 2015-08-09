@@ -103,6 +103,9 @@ var paper = require('browserifyable-paper');
             return;
         } 
         down = false;
+        if (!!mouseDownContext) {
+            mouseDownContext.mouseReleased(mousemoved);
+        }
         mouseDownContext = null;
         if (mousemoved) {
             return;

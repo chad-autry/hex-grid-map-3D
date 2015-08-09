@@ -115,8 +115,8 @@ module.exports = function CellContext(cellDataSource, drawnItemFactory, stackSte
     
     // Documentation inherited from Context#mouseReleased
     this.mouseReleased = function(wasDrag) {
-        if (!wasDrag && this.clickedItem.data.hasOwnProperty('onClick')) {
-            this.clickedItem.data.onClick();
+        if (!wasDrag && this.clickedItem.data.item.hasOwnProperty('onClick')) {
+            this.clickedItem.data.item.onClick();
         }
     };
     

@@ -25,6 +25,7 @@ module.exports = function ArrowDrawnItemFactory(hexDefinition) {
  * @param {integer} item.rotate - The angle in degrees to rotate, 0 degrees points ???
  * @param {number} item.scaleLength - Scale to make longer or shorter arrows, (0, 1]
  * @param {number} item.scaleWidth - Scale to make skinnier or thicker arrows, (0, 1]
+ * @param {onClick=} item.onClick - The callback to use when clicking the arrow
  * @returns {external:Item} The paper.js Item representing the arrow
  * @implements {DrawnItemFactory#getDrawnItem}
  */
@@ -45,7 +46,7 @@ module.exports.prototype.getDrawnItem = function(item) {
              arrow.scale(item.scaleLength, item.scaleWidth);
              arrow.rotate(item.rotation);
              arrow.scale(1, this.hexDefinition.vScale);
-    arrow.data.dto = item;
+    arrow.data.item = item;
     return arrow;
 };
 

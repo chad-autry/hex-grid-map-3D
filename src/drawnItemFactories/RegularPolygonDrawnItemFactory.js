@@ -39,8 +39,6 @@ module.exports.prototype.getDrawnItem = function(item) {
      strokeColor: 'black'
  });
  drawnItem.scale(1, this.hexDefinition.vScale);
- if (!!item.onClick) {
-     drawnItem.onClick = item.onClick;
- }
+ drawnItem.data.item = item;
  return drawnItem;
 };
