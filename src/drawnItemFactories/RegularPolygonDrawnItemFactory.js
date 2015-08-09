@@ -40,7 +40,7 @@ module.exports.prototype.getDrawnItem = function(item) {
  });
  drawnItem.scale(1, this.hexDefinition.vScale);
  if (!!item.onClick) {
-     drawnItem.onClick = item.onClick
+     drawnItem.onClick = item.onClick;
  }
  return drawnItem;
 };
