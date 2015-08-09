@@ -43,21 +43,22 @@ module.exports = angular.module( 'hexWidget.demo', [
     $scope.hexDimensions = new HexDefinition(55, 0.5, 0, 3);
     $scope.contexts.push(new BackgroundContext());
     
-    $scope.contexts.push(new GridContext($scope.hexDimensions));
-    $scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
+    //Create the cell items datasource, drawnItemFactories, and special compound contex
     $scope.cellDataSource = new DataSource();
     $scope.simpleDrawnItemFactory = new CellDrawnItemFactory($scope.hexDimensions);
     $scope.sphereDrawnItemFactor = new SphereDrawnItemFactory($scope.hexDimensions);
     $scope.arrowDrawnItemFactory = new ArrowDrawnItemFactory($scope.hexDimensions);
     $scope.cellDrawnItemFactoryMap = {simple: $scope.simpleDrawnItemFactory, sphere: $scope.sphereDrawnItemFactor, arrow: $scope.arrowDrawnItemFactory};
     $scope.cellDrawnItemFactory = new DelegatingDrawnItemFactory($scope.cellDrawnItemFactoryMap);
-    $scope.pathDrawnItemFactory = new PathDrawnItemFactory($scope.hexDimensions);
     $scope.cellContext = new CellContext($scope.cellDataSource, $scope.cellDrawnItemFactory, 5, $scope.hexDimensions);
-    $scope.contexts.push($scope.cellContext.belowGridContext);
-    $scope.contexts.push(new GridContext($scope.hexDimensions));
     
+    //Push the below grid portion of the cell context
+    $scope.contexts.push($scope.cellContext.belowGridContext);
+    
+    //Create and push the grid context
+    $scope.contexts.push(new GridContext($scope.hexDimensions));
 
-    //Definte and push the paths DataSource, DrawnItemFactory, and Context
+    //Define and push the paths DataSource, DrawnItemFactory, and Context
     $scope.pathDataSource = new DataSource();
     $scope.pathDrawnItemFactory = new PathDrawnItemFactory($scope.hexDimensions);
     $scope.contexts.push(new DrawnItemContext($scope.pathDataSource, $scope.pathDrawnItemFactory, $scope.hexDimensions));
@@ -73,11 +74,6 @@ module.exports = angular.module( 'hexWidget.demo', [
     //Create and push the LensFlareContext
     $scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
 
-    $scope.gridOverlayDrawnItemFactoryMap = {vector: $scope.vectorDrawnItemFactory, path: $scope.pathDrawnItemFactory};
-    $scope.gridOverlayDrawnItemFactory = new DelegatingDrawnItemFactory($scope.gridOverlayDrawnItemFactoryMap);
-    
-    
-    
     $scope.$on('boardInitialized', function() {
         //Once the board has been initialized, setup the demo scene
         

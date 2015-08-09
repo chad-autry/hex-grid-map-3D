@@ -207,7 +207,7 @@ module.exports.prototype.getDrawnItem = function(item) {
     //Todo simplify this mess of lines and groups into a single item to be hit-tested/drawn
     //drawn item fatories return only 1 item, but compound items like this (above and below grid) return the lower half as a property of the upper half
     
-    upperGroup.belowGridItem = lowerGroup;
+    upperGroup.data.belowGridItem = lowerGroup;
     var upperBorderItem;
     if (!!item.borderWidth) {
         var backGroundCircle = new paper.Path.Circle({center: [0, 0],

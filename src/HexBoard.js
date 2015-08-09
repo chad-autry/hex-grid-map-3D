@@ -68,9 +68,10 @@ var paper = require('browserifyable-paper');
          latestY = e.point.y;
          clickedY = e.point.y;
          //Iterate through the contexts in reverse z-index order to see if any of them claim the click event
-         for (var i = board.contexts.length - 1; i > 0; i --) {
-             if (board.contexts[i].mouseDown(e.point.x, e.point.y)) {
+         for (var i = contexts.length - 1; i >= 0; i--) {
+             if (contexts[i].mouseDown(e.point.x, e.point.y)) {
                  mouseDownContext = contexts[i];
+                 break;
              }
          }
      };

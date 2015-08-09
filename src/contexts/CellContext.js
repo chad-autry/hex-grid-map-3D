@@ -123,7 +123,12 @@ module.exports.prototype.hitTest = function(clickedX, clickedY, hitTestGroup) {
     if (!result) {
         return false;
     }
-    this.clickedGroup = result.item.parent.aboveGridGroup;
+    var parent = result.item.parent;
+    while (!parent.hasOwnProperty('aboveGridGroup') && !!parent.parent) {
+        parent = parent.parent;
+    }
+    //parent is REALLY expected to have an aboveGridGroup property. The second condition of the while was since I didn't like the look of the possibillity of an infinite loop
+    this.clickedGroup = parent.aboveGridGroup;
     this.maxGroupDy = this.clickedGroup.maxDy - this.clickedGroup.dy;
     this.minGroupDy = -this.clickedGroup.dy;
     return true;
@@ -239,8 +244,8 @@ module.exports.prototype.onDataChanged = function(event) {
             cellGroup.data.drawnItems[item.key] = drawnItem;
         }
         //some item types include pieces drawn below the grid (let the game logic ensure they are the only item in the cell)
-        if (!!drawnItem.belowGridItem) {
-            cellGroup.belowGridGroup.addChild(drawnItem.belowGridItem);
+        if (!!drawnItem.data.belowGridItem) {
+            cellGroup.belowGridGroup.addChild(drawnItem.data.belowGridItem);
         }
         //Some circular logic here. Pun intended
         cellGroup.previousDrawnItem.nextDrawnItem = drawnItem;
@@ -271,8 +276,8 @@ module.exports.prototype.onDataChanged = function(event) {
             drawnItem = cellGroup.nextDrawnItem;
             for (i = 0; i < cellGroup.drawnItemCount; i++) {
                     drawnItem.position = new paper.Point(cellGroup.originalXPosition + this.dx, cellGroup.originalYPosition + this.dy + cellGroup.dy - this.stackStep * i);
-                    if (!!drawnItem.belowGridItem) {
-                        drawnItem.belowGridItem.position = new paper.Point(cellGroup.originalXPosition + this.dx, cellGroup.originalYPosition + this.dy + cellGroup.dy - this.stackStep * i);
+                    if (!!drawnItem.data.belowGridItem) {
+                        drawnItem.data.belowGridItem.position = new paper.Point(cellGroup.originalXPosition + this.dx, cellGroup.originalYPosition + this.dy + cellGroup.dy - this.stackStep * i);
                     }
                     drawnItem = drawnItem.nextDrawnItem;
             }
