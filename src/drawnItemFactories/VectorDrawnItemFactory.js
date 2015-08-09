@@ -25,6 +25,7 @@ module.exports = function VectorDrawnItemFactory(hexDefinition) {
  * @param {number} item.destU - The U coordinate of the vector destination
  * @param {number} item.destV - The V coordinate of the vector destination
  * @param {number} item.shaftWidth - The thickness of the vector
+ * @param {onDrag=} item.static - The callback to use when dragging the vector
  * @returns {external:Item} The paper.js Item representing the vector
  * @implements {DrawnItemFactory#getDrawnItem}
  */
@@ -105,29 +106,30 @@ module.exports.prototype.getDrawnItem = function(item) {
     };
     
     vectorGroup.data.lastRotation = angle;
-         
-    vectorGroup.data.onDrag = function(x, y, eventDx, eventDy, dx, dy) {
-        var normalizedX = x - this.shaftBorder.firstSegment.point.x;
-        var normalizedY = y - this.shaftBorder.firstSegment.point.y;
-        //Get the angle (clockwise in degrees) of the vector
-        var angle = Math.acos(normalizedX / (Math.sqrt(normalizedX*normalizedX + normalizedY*normalizedY))) * 180 / Math.PI;
-        if (normalizedY < 0) {
+    if (!!item.onDrag) {
+        vectorGroup.data.item = item;
+        vectorGroup.data.onDrag = function(x, y, eventDx, eventDy) {
+            var normalizedX = x - this.shaftBorder.firstSegment.point.x;
+            var normalizedY = y - this.shaftBorder.firstSegment.point.y;
+            //Get the angle (clockwise in degrees) of the vector
+            var angle = Math.acos(normalizedX / (Math.sqrt(normalizedX*normalizedX + normalizedY*normalizedY))) * 180 / Math.PI;
+            if (normalizedY < 0) {
             angle = - angle;
-        }
+            }
 
-        this.shaftBorder.firstSegment.next.point.x = x;
-        this.shaftBorder.firstSegment.next.point.y = y;
-        this.headBorder.rotate(angle - this.lastRotation);
-        this.headBorder.position.x = x;
-        this.headBorder.position.y = y;
-        this.vectorShaft.firstSegment.next.point.x = x;
-        this.vectorShaft.firstSegment.next.point.y = y;
-        this.vectorHead.rotate(angle - this.lastRotation);
-        this.vectorHead.position.x = x;
-        this.vectorHead.position.y = y;
-        this.lastRotation = angle;
-        
-    };
-         
+            this.shaftBorder.firstSegment.next.point.x = x;
+            this.shaftBorder.firstSegment.next.point.y = y;
+            this.headBorder.rotate(angle - this.lastRotation);
+            this.headBorder.position.x = x;
+            this.headBorder.position.y = y;
+            this.vectorShaft.firstSegment.next.point.x = x;
+            this.vectorShaft.firstSegment.next.point.y = y;
+            this.vectorHead.rotate(angle - this.lastRotation);
+            this.vectorHead.position.x = x;
+            this.vectorHead.position.y = y;
+            this.lastRotation = angle;
+            vectorGroup.data.item.onDrag(x, y, eventDx, eventDy);
+        };
+    }
     return vectorGroup;
 };

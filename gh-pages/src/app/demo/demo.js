@@ -38,7 +38,7 @@ module.exports = angular.module( 'hexWidget.demo', [
   });
 })
 
-.controller( 'DemoCtrl', function DemoCtrl( $scope ) {
+.controller( 'DemoCtrl', function DemoCtrl( $scope, $rootScope ) {
     $scope.contexts = [];
     $scope.hexDimensions = new HexDefinition(55, 0.5, 0, 3);
     $scope.contexts.push(new BackgroundContext());
@@ -131,7 +131,10 @@ module.exports = angular.module( 'hexWidget.demo', [
         $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
         
         //A blue 'space station'
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 5, color: 'blue', u:6, v:5}]);
+        var onClickStation = function() {
+            $rootScope.$broadcast('addAlert',{type:'success', msg:'success!'});
+        };
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 5, color: 'blue', u:6, v:5, onClick:onClickStation}]);
         
         //A vector
         $scope.vectorDataSource.addItems([{shaftWidth: 5, color: 'blue', sourceU:6, sourceV:5, destU:8, destV:8}]);

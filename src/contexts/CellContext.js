@@ -112,6 +112,16 @@ module.exports = function CellContext(cellDataSource, drawnItemFactory, stackSte
     
     // Documentation inherited from Context#mouseDragged
     context.belowGridContext.mouseDragged = this.mouseDragged;
+    
+    // Documentation inherited from Context#mouseReleased
+    this.mouseReleased = function(wasDrag) {
+        if (!wasDrag && this.clickedItem.data.hasOwnProperty('onClick')) {
+            this.clickedItem.data.onClick();
+        }
+    };
+    
+    // Documentation inherited from Context#mouseReleased
+    context.belowGridContext.mouseReleased = this.mouseReleased;
 };
 
 /**
@@ -124,7 +134,9 @@ module.exports.prototype.hitTest = function(clickedX, clickedY, hitTestGroup) {
         return false;
     }
     var parent = result.item.parent;
+    this.clickedItem = result.item;
     while (!parent.hasOwnProperty('aboveGridGroup') && !!parent.parent) {
+        this.clickedItem = parent;
         parent = parent.parent;
     }
     //parent is REALLY expected to have an aboveGridGroup property. The second condition of the while was since I didn't like the look of the possibillity of an infinite loop

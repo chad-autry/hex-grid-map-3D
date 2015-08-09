@@ -25,6 +25,7 @@ module.exports = function RegularPolygonDrawnItemFactory(hexDefinition) {
  * @param {Color} item.fillColor - The color to fill this item with
  * @param {integer} item.radius - The radius of the item
  * @param {number} item.sides - The number of sides of the item
+ * @param {onClick=} item.onClick - The callback to use when this item is clicked
  * @returns {external:Item} The paper.js Item for the given parameters
  * @implements {DrawnItemFactory#getDrawnItem}
  * @todo consider using symbols for performance
@@ -38,5 +39,8 @@ module.exports.prototype.getDrawnItem = function(item) {
      strokeColor: 'black'
  });
  drawnItem.scale(1, this.hexDefinition.vScale);
+ if (!!item.onClick) {
+     drawnItem.onClick = item.onClick
+ }
  return drawnItem;
 };

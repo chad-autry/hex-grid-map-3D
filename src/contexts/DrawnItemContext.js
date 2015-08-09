@@ -64,7 +64,14 @@ module.exports = function DrawnItemContext(dataSource, drawnItemFactory, hexDime
     // Documentation inherited from Context#mouseDragged
     this.mouseDragged = function( x, y, eventDx, eventDy) {
         if(context.clickedItem.data.hasOwnProperty('onDrag')) {
-            context.clickedItem.data.onDrag( x, y, eventDx, eventDy, context.dx, context.dy);
+            context.clickedItem.data.onDrag( x, y, eventDx, eventDy);
+        }
+    };
+    
+    // Documentation inherited from Context#mouseReleased
+    this.mouseReleased = function(wasDrag) {
+        if (!wasDrag && context.clickedItem.data.hasOwnProperty('onClick')) {
+            context.clickedItem.data.onClick();
         }
     };
 };

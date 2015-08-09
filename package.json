@@ -78,7 +78,7 @@
     ]
   },
   "browser": {
-    "ui.bootstrap": "./node_modules/angular-bootstrap/ui-bootstrap.js",
+    "ui.bootstrap": "./node_modules/angular-bootstrap/ui-bootstrap-tpls.js",
     "ct.ui.router.extras.core": "./node_modules/ui-router-extras/release/modular/ct-ui-router-extras.core.js",
     "ct.ui.router.extras.sticky": "./node_modules/ui-router-extras/release/modular/ct-ui-router-extras.sticky.js"
   },

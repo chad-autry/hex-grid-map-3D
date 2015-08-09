@@ -116,3 +116,8 @@ module.exports.prototype.mouseDown = function( x, y) {
 module.exports.prototype.mouseDragged = function( x, y, dx, dy) {
     //We never claim mouseDown, so this actually will never be called
 };
+
+// Documentation inherited from Context#mouseReleased
+module.exports.prototype.mouseReleased = function(wasDrag) {
+    //We never claim mouseDown, so this actually will never be called
+};

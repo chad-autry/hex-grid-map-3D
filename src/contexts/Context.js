@@ -31,4 +31,10 @@
  * @param {integer} y - The y position of the mouse drag event
  * @param {integer} dx - The x translation since the last event
  * @param {integer} dy - The y translation since the last event
- */ 
+ */
+ 
+/**
+ * Called when the mouse is release, serves double purpose as onMouseUp and onDragStop
+ * @function Context#mouseReleased
+ * @param {boolean} wasDrag - Boolean indicating if the mouse was moved at all before the release
+ */
