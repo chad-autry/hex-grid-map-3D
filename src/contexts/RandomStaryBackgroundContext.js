@@ -52,6 +52,10 @@ var paper = require('browserifyable-paper');
             context.nearLayer.position.y = Math.max( -0.5*paper.view.size.height + dy / 10, -paper.view.size.height);
         }
     };
+    
+    this.reDraw = function(screenResized, mapRotated, mapScaled) {
+        //Eh, don't do anything yet. Only screen resized implemented which this context doesn't care about
+    };
 };
 
 /**

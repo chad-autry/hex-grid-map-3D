@@ -79,6 +79,11 @@ module.exports = function DrawnItemContext(dataSource, drawnItemFactory, hexDime
             context.clickedItem.data.item.onClick();
         }
     };
+    
+    // Documentation inherited from Context#reDraw
+    this.reDraw = function(screenResized, mapRotated, mapScaled) {
+        //Eh, don't do anything yet. Only screen resized implemented which this context doesn't care about
+    };
 };
 
 

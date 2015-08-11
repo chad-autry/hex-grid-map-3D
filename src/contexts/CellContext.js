@@ -122,6 +122,13 @@ module.exports = function CellContext(cellDataSource, drawnItemFactory, stackSte
     
     // Documentation inherited from Context#mouseReleased
     context.belowGridContext.mouseReleased = this.mouseReleased;
+    
+    // Documentation inherited from Context#reDraw
+    this.reDraw = function(screenResized, mapRotated, mapScaled) {
+        //Eh, don't do anything yet. Only screen resized implemented which this context doesn't care about
+    };
+    
+    context.belowGridContext.reDraw = this.reDraw;
 };
 
 /**

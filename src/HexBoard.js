@@ -53,14 +53,34 @@ var paper = require('browserifyable-paper');
     paper.view.draw();
     var tool = new paper.Tool();
 
-     //Set up the psuedo drag for the grid
-     var down = false;
-     var mousemoved = false;
-     var latestX=0;
-     var latestY=0;
-     var clickedY=0;
-     var mouseDownContext; //The context which has "claimed" the mouse down event
-
+    //Set up the psuedo drag for the grid
+    var down = false;
+    var mousemoved = false;
+    var latestX=0;
+    var latestY=0;
+    var clickedY=0;
+    var mouseDownContext; //The context which has "claimed" the mouse down event
+    var viewWidth = paper.view.size.width;
+    var viewHeight = paper.view.size.height;
+     
+    paper.view.onResize = function(event) {
+  
+        //Call each context with redraw, followed by updatePosition
+        board.contexts.forEach(function(context) {
+            context.reDraw(true, false, false);
+        });
+        paper.view.update();
+        /* TODO recentering is giving me a much bigger headache than it should. hexDimensions.getReferencePoint seems broken, but looking it over can't find the mistake
+        //recenter
+        board.centerOnCell(0, 0);
+        //Figure out what the old U, V in the middle was for our original size
+	var hexagonalCoordinates = hexDimensions.getReferencePoint(dx + Math.floor(viewWidth/2), dy +Math.floor(viewHeight/2));
+	viewWidth = paper.view.size.width;
+        viewHeight = paper.view.size.height;
+        //board.centerOnCell(hexagonalCoordinates.u, hexagonalCoordinates.v);
+        */
+    };
+    
      tool.onMouseDown = function(e) {
          down = true;
          var mousemoved = false;
@@ -128,13 +148,11 @@ var paper = require('browserifyable-paper');
       */
      this.centerOnCell = function(u, v) {
          var pixelCoordinates = hexDimensions.getPixelCoordinates(u, v);
-         dx = Math.floor(pixelCoordinates.x + paper.view.size.width/2);
-         dy = Math.floor(pixelCoordinates.y + paper.view.size.height/2);
+         dx = Math.floor(pixelCoordinates.x + viewWidth/2);
+         dy = Math.floor(pixelCoordinates.y + viewHeight/2);
          this.updatePostion();
-         var date1 = new Date().getTime();
 
          paper.view.update();
-         var date2 = new Date().getTime();
-         document.getElementById("result").innerHTML = "Draw Time: " + (date2 - date1) + " ms";
+
      };
 };

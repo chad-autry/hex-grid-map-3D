@@ -39,6 +39,15 @@ module.exports = function GridContext(hexDimensions) {
          context.gridGroup.position.x = dx%context.dxModulo;
          context.gridGroup.position.y = dy%context.dyModulo;
     };
+    
+    this.reDraw = function(screenResized, mapRotated, mapScaled) {
+        if (screenResized) {
+            context.gridGroup.removeChildren();
+            context.gridGroup.position.x = 0;
+            context.gridGroup.position.y = 0;
+            context.init(context.gridGroup);
+        }
+    };
 };
 
 /**

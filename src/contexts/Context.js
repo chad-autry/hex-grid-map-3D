@@ -38,3 +38,11 @@
  * @function Context#mouseReleased
  * @param {boolean} wasDrag - Boolean indicating if the mouse was moved at all before the release
  */
+ 
+/**
+ * Called when the context may need to redraw for some reason
+ * @function Context#reDraw
+ * @param {boolean} screenResized - Indicates if a redraw is required because of a resize (including mobile rotation)
+ * @param {boolean} mapRotated - Indicates if a redraw is required because the map rotated
+ * @param {boolean} mapScaled - Indicates if a redraw is required because the map was zoomed
+ */

@@ -67,6 +67,11 @@ module.exports = function  LensFlareForegroundContext(points, hexDimensions) {
             context.flares[i].flareThree.position = new paper.Point(paper.view.size.width / 2 - 3*xFromMid, paper.view.size.height / 2 - 3*yFromMid);
         }
     };
+    
+    // Documentation inherited from Context#reDraw
+    this.reDraw = function(screenResized, mapRotated, mapScaled) {
+        //Eh, don't do anything yet. Only screen resized implemented which this context doesn't care about
+    };
 };
 
 // Documentation inherited from Context#mouseDown
