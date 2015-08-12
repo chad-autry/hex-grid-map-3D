@@ -17,9 +17,10 @@ var paper = require('browserifyable-paper');
  * @param { external:cartesian-hexagonal } hexDimension - The DTO defining the hex <--> cartesian relation
  * @param canvas - The canvas element to initialize with paper.js
  * @param { Context[] } contexts - An array of contexts used to control display and interaction with various layers of the map
- * @example var hexMap = new (require(hexagonal-map))(hexDimension, canvas, contexts);
+ * @param { mouseClicked= } mouseClicked - A mouse clicked callback if no items were clicked
+ * @example var hexMap = new (require(hexagonal-map))(hexDimension, canvas, contexts, mouseClicked);
  */
- module.exports = function HexBoard(hexDimensions, canvas, contexts) {
+ module.exports = function HexBoard(hexDimensions, canvas, contexts, mouseClicked) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof HexBoard)) {
         return new HexBoard(hexDimensions, canvas, contexts);
@@ -50,6 +51,10 @@ var paper = require('browserifyable-paper');
         context.init(group);
     });
     
+    if (!!mouseClicked) {
+        this.mouseClicked = mouseClicked;
+    }
+    
     paper.view.draw();
     var tool = new paper.Tool();
 
@@ -69,16 +74,14 @@ var paper = require('browserifyable-paper');
         board.contexts.forEach(function(context) {
             context.reDraw(true, false, false);
         });
-        paper.view.update();
-        /* TODO recentering is giving me a much bigger headache than it should. hexDimensions.getReferencePoint seems broken, but looking it over can't find the mistake
+
         //recenter
-        board.centerOnCell(0, 0);
         //Figure out what the old U, V in the middle was for our original size
-	var hexagonalCoordinates = hexDimensions.getReferencePoint(dx + Math.floor(viewWidth/2), dy +Math.floor(viewHeight/2));
+	var hexagonalCoordinates = hexDimensions.getReferencePoint(dx -Math.floor(viewWidth/2),dy - Math.floor(viewHeight/2));
 	viewWidth = paper.view.size.width;
         viewHeight = paper.view.size.height;
-        //board.centerOnCell(hexagonalCoordinates.u, hexagonalCoordinates.v);
-        */
+        board.centerOnCell(hexagonalCoordinates.u, hexagonalCoordinates.v);
+
     };
     
      tool.onMouseDown = function(e) {
@@ -114,6 +117,7 @@ var paper = require('browserifyable-paper');
         }
         latestX = e.point.x;
         latestY = e.point.y;
+        mousemoved = true;
         //paper.view.update();
      };
 
@@ -125,11 +129,11 @@ var paper = require('browserifyable-paper');
         down = false;
         if (!!mouseDownContext) {
             mouseDownContext.mouseReleased(mousemoved);
+        } else if (!!board.mouseClicked && !mousemoved) {
+            mouseClicked(dx, e.point.x,dy, e.point.y);
         }
         mouseDownContext = null;
-        if (mousemoved) {
-            return;
-        }
+        mousemoved = false;
     };
     tool.onMouseUp = tool.onMouseLeave;
      

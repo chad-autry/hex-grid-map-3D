@@ -73,7 +73,10 @@ module.exports = angular.module( 'hexWidget.demo', [
 
     //Create and push the LensFlareContext
     $scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
-
+    $scope.globalMouseClicked = function(dx, x, dy, y){
+        var hexagonalCoordinates = $scope.hexDimensions.getReferencePoint(x - dx, y - dy);
+        $rootScope.$broadcast('addAlert',{type:'info', msg:'Clicked U:'+hexagonalCoordinates.u + ' V:' +hexagonalCoordinates.v});
+    };
     $scope.$on('boardInitialized', function() {
         //Once the board has been initialized, setup the demo scene
         
@@ -152,7 +155,7 @@ module.exports = angular.module( 'hexWidget.demo', [
         };
         
         $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:0, v:4, onClick:onClickDave}]);
-        
+
         //Poetry
         $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'white', u:3, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'One ship'});}}]);
         $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'white', u:4, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Two ship'});}}]);
