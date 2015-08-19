@@ -23,7 +23,7 @@ module.exports = angular.module( 'hexWidget', [
 })
 
 .controller( 'AppCtrl', function AppCtrl ( $scope, $rootScope, $location, $state ) {
-  $rootScope.srcroot = "https://github.com/chad-autry/hex-widget/blob/master/src/";
+  $rootScope.srcroot = "https://github.com/chad-autry/hex-grid-map/blob/master/src/";
   $scope.version = 'master';
   $scope.alerts = [];
   $scope.closeAlert = function(index) {
@@ -36,7 +36,7 @@ module.exports = angular.module( 'hexWidget', [
   });
   $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
     if ( angular.isDefined( toState.data.pageTitle ) ) {
-      $scope.pageTitle = toState.data.pageTitle + ' | hex-widget' ;
+      $scope.pageTitle = toState.data.pageTitle + ' | hex-grid-map' ;
     }
     $scope.isDemo = $state.includes('demo');
     

@@ -1,7 +1,7 @@
 {
-  "name": "hex-widget",
+  "name": "hex-grid-map",
   "version": "0.1.2",
-  "description": "Configureable HTML5 Canvas Hex grid",
+  "description": "A customizeable html5 hexagonally gridded interactive map",
   "main": "index.js",
   "scripts": {
     "test": "npm run jshint && npm run build:specs && npm run karma:single",
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/chad-autry/hex-widget.git"
+    "url": "https://github.com/chad-autry/hex-grid-map.git"
   },
   "keywords": [
     "canvas",
@@ -34,9 +34,9 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chad-autry/hex-widget/issues"
+    "url": "https://github.com/chad-autry/hex-grid-map/issues"
   },
-  "homepage": "https://github.com/chad-autry/hex-widget",
+  "homepage": "https://github.com/chad-autry/hex-grid-map",
   "dependencies": {
     "angular": "^1.3.14",
     "angular-bootstrap": "^0.12.2",
