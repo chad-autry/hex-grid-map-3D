@@ -64,7 +64,7 @@ var paper = require('browserifyable-paper');
  * @param {integer} max - The maximum number to generate
  */
 module.exports.prototype.random = function (min, max) {
-        return Math.round((Math.random() * max - min) + min);
+        return Math.round((Math.random() * (max - min)) + min);
 };
 
 module.exports.prototype.STAR_COLOURS = ["#ffffff", "#ffe9c4", "#d4fbff"];

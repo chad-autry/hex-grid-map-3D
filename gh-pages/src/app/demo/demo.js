@@ -15,6 +15,7 @@ var DrawnItemContext = require('../../../../src/contexts/DrawnItemContext.js');
 var DataSource = require('../../../../src/dataSources/DataSource.js');
 var CellDrawnItemFactory = require('../../../../src/drawnItemFactories/RegularPolygonDrawnItemFactory');
 var SphereDrawnItemFactory = require('../../../../src/drawnItemFactories/SphereDrawnItemFactory');
+var FieldOfSquaresDrawnItemFactory = require('../../../../src/drawnItemFactories/FieldOfSquaresDrawnItemFactory');
 var HexDefinition = require('cartesian-hexagonal'); //external project required in constructors
 
 module.exports = angular.module( 'hexWidget.demo', [
@@ -48,9 +49,13 @@ module.exports = angular.module( 'hexWidget.demo', [
     $scope.simpleDrawnItemFactory = new CellDrawnItemFactory($scope.hexDimensions);
     $scope.sphereDrawnItemFactor = new SphereDrawnItemFactory($scope.hexDimensions);
     $scope.arrowDrawnItemFactory = new ArrowDrawnItemFactory($scope.hexDimensions);
-    $scope.cellDrawnItemFactoryMap = {simple: $scope.simpleDrawnItemFactory, sphere: $scope.sphereDrawnItemFactor, arrow: $scope.arrowDrawnItemFactory};
+    
+    //For Asteroids we use brown grey, brownish grey, greyish brown, grey brown. For debris would probablly go more blue-grey
+    $scope.asteroidFieldDrawnItemFactory = new FieldOfSquaresDrawnItemFactory($scope.hexDimensions, 9, 20, ["#8d8468", "#86775f", "#7a6a4f", "#7f7053"]);
+    $scope.cellDrawnItemFactoryMap = {simple: $scope.simpleDrawnItemFactory, sphere: $scope.sphereDrawnItemFactor, arrow: $scope.arrowDrawnItemFactory, asteroids: $scope.asteroidFieldDrawnItemFactory};
     $scope.cellDrawnItemFactory = new DelegatingDrawnItemFactory($scope.cellDrawnItemFactoryMap);
     $scope.cellContext = new CellContext($scope.cellDataSource, $scope.cellDrawnItemFactory, 5, $scope.hexDimensions);
+    
     
     //Push the below grid portion of the cell context
     $scope.contexts.push($scope.cellContext.belowGridContext);
@@ -132,6 +137,14 @@ module.exports = angular.module( 'hexWidget.demo', [
         $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
         $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
         $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
+        
+        //A small asteroid field. Double asteroids in the middle
+        var onClickAsteroids = function() {
+            $rootScope.$broadcast('addAlert',{type:'success', msg:"Asteroids"});
+        };
+        $scope.cellDataSource.addItems([{type:'asteroids', u:-1, v:10, onClick:onClickAsteroids}, {type:'asteroids', u:-2, v:10, onClick:onClickAsteroids},{type:'asteroids', u:-3, v:10, onClick:onClickAsteroids}]);
+        $scope.cellDataSource.addItems([{type:'asteroids', u:-3, v:11, onClick:onClickAsteroids}, {type:'asteroids', u:-2, v:11, onClick:onClickAsteroids},{type:'asteroids', u:-2, v:10, onClick:onClickAsteroids}]);
+        $scope.cellDataSource.addItems([{type:'asteroids', u:-1, v:9, onClick:onClickAsteroids}, {type:'asteroids', u:-2, v:9, onClick:onClickAsteroids}]);
         
         //A blue 'space station'
         var onClickStation = function() {
