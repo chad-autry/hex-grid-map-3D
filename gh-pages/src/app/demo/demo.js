@@ -41,25 +41,22 @@ module.exports = angular.module( 'hexWidget.demo', [
 
 .controller( 'DemoCtrl', function DemoCtrl( $scope, $rootScope ) {
     $scope.contexts = [];
-    $scope.hexDimensions = new HexDefinition(55, 0.5, 0, 3);
-    $scope.contexts.push(new BackgroundContext());
+    $scope.hexDimensions = new HexDefinition(55, 1, 0, 3);
+    //$scope.contexts.push(new BackgroundContext());
     
     //Create the cell items datasource, drawnItemFactories, and special compound contex
     $scope.cellDataSource = new DataSource();
     $scope.simpleDrawnItemFactory = new CellDrawnItemFactory($scope.hexDimensions);
-    $scope.sphereDrawnItemFactor = new SphereDrawnItemFactory($scope.hexDimensions);
+    $scope.sphereDrawnItemFactory = new SphereDrawnItemFactory($scope.hexDimensions);
     $scope.arrowDrawnItemFactory = new ArrowDrawnItemFactory($scope.hexDimensions);
     
     //For Asteroids we use brown grey, brownish grey, greyish brown, grey brown. For debris would probablly go more blue-grey
     $scope.asteroidFieldDrawnItemFactory = new FieldOfSquaresDrawnItemFactory($scope.hexDimensions, 9, 20, ["#8d8468", "#86775f", "#7a6a4f", "#7f7053"]);
-    $scope.cellDrawnItemFactoryMap = {simple: $scope.simpleDrawnItemFactory, sphere: $scope.sphereDrawnItemFactor, arrow: $scope.arrowDrawnItemFactory, asteroids: $scope.asteroidFieldDrawnItemFactory};
+    $scope.cellDrawnItemFactoryMap = {simple: $scope.simpleDrawnItemFactory, sphere: $scope.sphereDrawnItemFactory,  asteroids: $scope.asteroidFieldDrawnItemFactory, arrow: $scope.arrowDrawnItemFactory};
     $scope.cellDrawnItemFactory = new DelegatingDrawnItemFactory($scope.cellDrawnItemFactoryMap);
     $scope.cellContext = new CellContext($scope.cellDataSource, $scope.cellDrawnItemFactory, 5, $scope.hexDimensions);
     
-    
-    //Push the below grid portion of the cell context
-    $scope.contexts.push($scope.cellContext.belowGridContext);
-    
+
     //Create and push the grid context
     $scope.contexts.push(new GridContext($scope.hexDimensions));
 
@@ -77,7 +74,7 @@ module.exports = angular.module( 'hexWidget.demo', [
     $scope.contexts.push($scope.cellContext);
 
     //Create and push the LensFlareContext
-    $scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
+    //$scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
     $scope.globalMouseClicked = function(dx, x, dy, y){
         var hexagonalCoordinates = $scope.hexDimensions.getReferencePoint(x - dx, y - dy);
         $rootScope.$broadcast('addAlert',{type:'info', msg:'Clicked U:'+hexagonalCoordinates.u + ' V:' +hexagonalCoordinates.v});
@@ -86,57 +83,57 @@ module.exports = angular.module( 'hexWidget.demo', [
         //Once the board has been initialized, setup the demo scene
         
         //Add a star
-        //The rotation is the "nearly isometric" converted to radians.
-        $scope.cellDataSource.addItems([{type:'sphere', size: 100, rotation: 63.435*(Math.PI/180), lineWidth: 3, greatCircleAngles: [-Math.PI/6, Math.PI/6, Math.PI/2], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6], 
-        lineColor: 'orange', backgroundColor: 'yellow', borderStar: {radius1: 3, radius2: 6, points: 20, borderColor: 'orange'}, u:0, v:0}]);
+        //The rotation is the "nearly isometric" converted to radians. #f97306 = xkcd orange
+        $scope.cellDataSource.addItems([{id:'sun', type:'sphere', size: 100, lineWidth: 6, greatCircleAngles: [0, Math.PI/3, -Math.PI/3], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6, -Math.PI/3], 
+        lineColor: '#f97306', backgroundColor: '#ffff14', borderStar: {radius1: 3, radius2: 6, points: 20, borderColor: '#f97306'}, u:0, v:0}]);
         
         //Add a sphere to represent earth
-        $scope.cellDataSource.addItems([{type:'sphere', size: 66, rotation: 63.435*(Math.PI/180), lineWidth: 3, greatCircleAngles: [-Math.PI/6, Math.PI/6, Math.PI/2], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6], 
-        lineColor: '#653700', backgroundColor: 'blue', borderWidth: 2, borderColor: 'white', u:5, v:5}]);
+        $scope.cellDataSource.addItems([{id: 'earth', type:'sphere', size: 66, lineWidth: 4, greatCircleAngles: [0, Math.PI/3, -Math.PI/3], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6, -Math.PI/3], 
+        lineColor: '#653700', backgroundColor: '#0343df', borderWidth: 2, borderColor: '#ffffff', u:5, v:5}]);
         
         //Add a sphere to represent the moon
-        $scope.cellDataSource.addItems([{type:'sphere', size: 33, rotation: 63.435*(Math.PI/180), lineWidth: 2, greatCircleAngles: [-Math.PI/6, Math.PI/6, Math.PI/2], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6], 
-        lineColor: 'grey', backgroundColor: '#E1E1D6', borderWidth: 3, borderColor: 'black', u:3, v:8}]);
+        $scope.cellDataSource.addItems([{id:'moon', type:'sphere', size: 33, lineWidth: 2, greatCircleAngles: [0, Math.PI/3, -Math.PI/3], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6, -Math.PI/3], 
+        lineColor: '#929591', backgroundColor: '#e1e1d6', borderWidth: 3, borderColor: 'black', u:3, v:8}]);
         
         
         
         //Add arrows to represent gravity
         //Gravity around the sun
-        $scope.cellDataSource.addItems([{type:'arrow', u: 0, v: -1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 180, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: -1, v: 0, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 240, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: -1, v: 1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 300, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 0, v: 1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 0, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 1, v: 0, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 60, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 1, v: -1, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 120, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 0, v: -1, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 180, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: -1, v: 0, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 240, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: -1, v: 1, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 300, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 0, v: 1, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 0, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 1, v: 0, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 60, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 1, v: -1, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 120, scaleLength: 0.75, scaleWidth:0.75}]);
         
         //gravity around the planet
-        $scope.cellDataSource.addItems([{type:'arrow', u: 5, v: 4, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 180, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 5, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 240, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 6, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 300, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 5, v: 6, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 0, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 6, v: 5, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 60, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 6, v: 4, fillColor: 'grey', lineWidth: 0, lineColor: 'grey', rotation: 120, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 5, v: 4, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 180, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 5, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 240, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 6, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 300, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 5, v: 6, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 0, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 6, v: 5, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 60, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 6, v: 4, fillColor: '#929591', lineWidth: 3, lineColor: '#929591', rotation: 120, scaleLength: 0.75, scaleWidth:0.75}]);
         
         //unfilled gravity around the moon
-        $scope.cellDataSource.addItems([{type:'arrow', u: 3, v: 7, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 180, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 2, v: 8, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 240, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 2, v: 9, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 300, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 3, v: 9, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 0, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 8, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 60, scaleLength: 0.75, scaleWidth:0.75}]);
-        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 7, fillColor: 'black', lineWidth: 3, lineColor: 'grey', rotation: 120, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 3, v: 7, lineWidth: 3, lineColor: '#929591', rotation: 180, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 2, v: 8, lineWidth: 3, lineColor: '#929591', rotation: 240, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 2, v: 9, lineWidth: 3, lineColor: '#929591', rotation: 300, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 3, v: 9, lineWidth: 3, lineColor: '#929591', rotation: 0, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 8, lineWidth: 3, lineColor: '#929591', rotation: 60, scaleLength: 0.75, scaleWidth:0.75}]);
+        $scope.cellDataSource.addItems([{type:'arrow', u: 4, v: 7, lineWidth: 3, lineColor: '#929591', rotation: 120, scaleLength: 0.75, scaleWidth:0.75}]);
         
         //Add a fleet of red 'ships' (triangles) on the dark side of the moon, and a fleet of green ships at the sun
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: 'red', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {type:'simple', radius: 55, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
         
         //A small asteroid field. Double asteroids in the middle
         var onClickAsteroids = function() {
@@ -150,14 +147,14 @@ module.exports = angular.module( 'hexWidget.demo', [
         var onClickStation = function() {
             $rootScope.$broadcast('addAlert',{type:'success', msg:"Do you believe I'm a space station? Use your imagination"});
         };
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 5, color: 'blue', u:6, v:5, onClick:onClickStation}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 5, color: '#0343df', u:6, v:5, onClick:onClickStation}]);
         
         
         //Dave
         var onClickDave = function() {
             if (!$scope.isDaveGoing) {
                $scope.isDaveGoing = true;
-               $scope.vectorDataSource.addItems([{id:'daveVelocity', shaftWidth: 5, color: 'green', sourceU:0, sourceV:4, destU:0, destV:6}]);
+               $scope.vectorDataSource.addItems([{id:'daveVelocity', shaftWidth: 5, color: '#15b01a', sourceU:0, sourceV:4, destU:0, destV:6}]);
 	       $rootScope.$broadcast('addAlert',{type:'success', msg:'This is Dave. Dave is going places. Go Dave, go.'});
 	    } else {
 	       $scope.isDaveGoing = false;
@@ -167,17 +164,17 @@ module.exports = angular.module( 'hexWidget.demo', [
 	    }
         };
         
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'green', u:0, v:4, onClick:onClickDave}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#15b01a', u:0, v:4, onClick:onClickDave}]);
 
         //Poetry
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'white', u:3, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'One ship'});}}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'white', u:4, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Two ship'});}}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'white', u:4, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Two ship'});}}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'red', u:5, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Red ship'});}}]);
-        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: 'blue', u:6, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Blue ship'});}}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#ffffff', u:3, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'One ship'});}}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#ffffff', u:4, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Two ship'});}}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#ffffff', u:4, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Two ship'});}}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#e50000', u:5, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Red ship'});}}]);
+        $scope.cellDataSource.addItems([{type:'simple', radius: 30, sides: 3, color: '#0343df', u:6, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Blue ship'});}}]);
         
         //A path around the Sun, Could represent the danger area for radiation
-        $scope.pathDataSource.addItems([{width: 5, color: 'orange', closed: true, points: [[0,-2],[-2, 0],[-2, 2],[0, 2],[2, 0],[2, -2]], onClick:function(){$rootScope.$broadcast('addAlert',{type:'warning', msg:'Radiation! Beware!'});}}]);
+        $scope.pathDataSource.addItems([{width: 10, color: '#f97306', closed: true, points: [[0,-2],[-2, 0],[-2, 2],[0, 2],[2, 0],[2, -2]], onClick:function(){$rootScope.$broadcast('addAlert',{type:'warning', msg:'Radiation! Beware!'});}}]);
     });
 })
 

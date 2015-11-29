@@ -5,7 +5,7 @@
  * @module VectorDrawnItemFactory
  */
  
-var paper = require('browserifyable-paper');
+var babylon = require('babylonjs');
 
 /**
  * A factory to create the paper.js items for vectors
@@ -31,10 +31,7 @@ module.exports = function VectorDrawnItemFactory(hexDefinition) {
  * @returns {external:Item} The paper.js Item representing the vector
  * @implements {DrawnItemFactory#getDrawnItem}
  */
-module.exports.prototype.getDrawnItem = function(item) {
-    //Group together the head and shaft into one item
-    var vectorGroup = new paper.Group();
-    vectorGroup.pivot = new paper.Point(0, 0);
+module.exports.prototype.getDrawnItem = function(item, scene) {
    
     //normalize the u, v co-ords
     var normalizedU = item.destU - item.sourceU;
@@ -45,94 +42,74 @@ module.exports.prototype.getDrawnItem = function(item) {
     var destPixelCoordinates = this.hexDefinition.getPixelCoordinates(item.destU, item.destV);
     var normalizedPixelCoordinates = {x: destPixelCoordinates.x - sourcePixelCoordinates.x, y: destPixelCoordinates.y - sourcePixelCoordinates.y};
     
+    //Get the magnitude of the normalized vector
+    var magnitude = Math.sqrt(normalizedPixelCoordinates.x*normalizedPixelCoordinates.x + normalizedPixelCoordinates.y*normalizedPixelCoordinates.y);
     //Get the angle (clockwise in degrees) of the vector
     var angle = Math.acos(normalizedPixelCoordinates.x / (Math.sqrt(normalizedPixelCoordinates.x*normalizedPixelCoordinates.x + normalizedPixelCoordinates.y*normalizedPixelCoordinates.y))) * 180 / Math.PI;
     if (normalizedPixelCoordinates.y < 0) {
         angle = - angle;
     }
-    //First draw the vector in black 1 pixel larger for a border
-    var shaftBorder = new paper.Path.Line({
-         from: [sourcePixelCoordinates.x, sourcePixelCoordinates.y],
-         to: [destPixelCoordinates.x, destPixelCoordinates.y],
-         strokeColor: 'black',
-         strokeCap: 'butt',
-         strokeWidth: item.shaftWidth + 2
-    });
-    vectorGroup.data.shaftBorder = shaftBorder;
     
-    vectorGroup.addChild(shaftBorder);
-    var headBorder = new paper.Path({
-        segments: [[-2*item.shaftWidth, 0], [0, 0], [0, -2*item.shaftWidth]],
-        strokeColor: 'black',
-        strokeWidth: item.shaftWidth + 2,
-        strokeCap: 'round'
-    });
-    headBorder.setPivot(new paper.Point(0, 0));
-    headBorder.position.x = destPixelCoordinates.x;
-    headBorder.position.y = destPixelCoordinates.y;
-    //already rotated 45 degrees
-    headBorder.rotate (angle - 45);
+    //Cap the vector
+    var joint = babylon.Mesh.CreateSphere('sphere', 20, item.shaftWidth, scene);
     
-    vectorGroup.addChild(headBorder);
-    vectorGroup.data.headBorder = headBorder;
+    //Draw it pointing straight on y = 0
+    var vector = babylon.Mesh.CreateTube("tube", [new babylon.Vector3(0, 0, 0), new babylon.Vector3(magnitude - item.shaftWidth, 0, 0), new babylon.Vector3(magnitude - item.shaftWidth, 0, 0), new babylon.Vector3(magnitude, 0, 0)], null, 20, function(i, distance) {
+          if (i === 0 || i === 1) {
+          return item.shaftWidth/2;
+          } else if( i === 2 ) {
+             return item.shaftWidth*1.5;
+          } else {
+              return 0;
+          }
+       }, 0, scene)
     
-    var vectorShaft = new paper.Path.Line({
-         from: [sourcePixelCoordinates.x, sourcePixelCoordinates.y],
-         to: [destPixelCoordinates.x, destPixelCoordinates.y],
-         strokeColor: item.color,
-         strokeCap: 'butt',
-         strokeWidth: item.shaftWidth
-    });
-    vectorGroup.addChild(vectorShaft);
-    vectorGroup.data.vectorShaft = vectorShaft;
-
-    // The head of the vector
-    //Figure out rotation
-    var vectorHead = new paper.Path({
-        segments: [[-2*item.shaftWidth, 0], [0, 0], [0, -2*item.shaftWidth]],
-        strokeColor: item.color,
-        strokeWidth: item.shaftWidth,
-        strokeCap: 'round'
-    });
-    vectorHead.setPivot(new paper.Point(0, 0));
-    vectorHead.position.x = destPixelCoordinates.x;
-    vectorHead.position.y = destPixelCoordinates.y;
-    //already rotated 45 degrees
-    vectorHead.rotate (angle - 45);
-    //vectorHead.scale(1, 0.5);
-    vectorGroup.addChild(vectorHead);
-    vectorGroup.data.vectorHead = vectorHead;
+    //merge the cap and vector
+    var compoundMesh = babylon.Mesh.MergeMeshes([joint, vector]);
+    
+    //color it
+    var rgb = this.hexToRgb(item.color);
+    var material = new babylon.StandardMaterial("vectorMaterial", scene);
+    material.diffuseColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
+    //material.specularColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
+    //material.emissiveColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
+    compoundMesh.material = material;
+    
+    compoundMesh.data = {};
     //Will be used to test if the click was near enough to the head
-    vectorGroup.data.isDrag = function(x, y) {
+    compoundMesh.data.isDrag = function(x, y) {
         return true;
     };
     
-    vectorGroup.data.lastRotation = angle;
+    compoundMesh.rotation.z = angle;
+    compoundMesh.data.sourcePixelCoordinates = sourcePixelCoordinates;
+    compoundMesh.data.lastRotation = angle;
     if (!!item.onDrag) {
-        vectorGroup.data.item = item;
-        vectorGroup.data.onDrag = function(x, y, eventDx, eventDy) {
-            var normalizedX = x - this.shaftBorder.firstSegment.point.x;
-            var normalizedY = y - this.shaftBorder.firstSegment.point.y;
+        compoundMesh.data.onDrag = function(x, y, eventDx, eventDy) {
+            var normalizedPixelCoordinates = {x: x - this.sourcePixelCoordinates.x, y: y - this.sourcePixelCoordinates.y};
             //Get the angle (clockwise in degrees) of the vector
-            var angle = Math.acos(normalizedX / (Math.sqrt(normalizedX*normalizedX + normalizedY*normalizedY))) * 180 / Math.PI;
-            if (normalizedY < 0) {
-            angle = - angle;
+            var angle = Math.acos(normalizedPixelCoordinates.x / (Math.sqrt(normalizedPixelCoordinates.x*normalizedPixelCoordinates.x + normalizedPixelCoordinates.y*normalizedPixelCoordinates.y))) * 180 / Math.PI;
+            if (normalizedPixelCoordinates.y < 0) {
+                angle = - angle;
             }
 
-            this.shaftBorder.firstSegment.next.point.x = x;
-            this.shaftBorder.firstSegment.next.point.y = y;
-            this.headBorder.rotate(angle - this.lastRotation);
-            this.headBorder.position.x = x;
-            this.headBorder.position.y = y;
-            this.vectorShaft.firstSegment.next.point.x = x;
-            this.vectorShaft.firstSegment.next.point.y = y;
-            this.vectorHead.rotate(angle - this.lastRotation);
-            this.vectorHead.position.x = x;
-            this.vectorHead.position.y = y;
+            compoundMesh.rotation.z = angle;
             this.lastRotation = angle;
-            vectorGroup.data.item.onDrag(x, y, eventDx, eventDy);
+            compoundMesh.data.item.onDrag(x, y, eventDx, eventDy);
         };
     }
-    vectorGroup.data.item = item;
-    return vectorGroup;
+
+
+    compoundMesh.data.item = item;
+    
+    return compoundMesh;
+};
+
+module.exports.prototype.hexToRgb = function(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
 };

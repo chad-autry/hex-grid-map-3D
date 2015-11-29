@@ -4,8 +4,8 @@
  * The class and module are the same thing, the contructor comment takes precedence.
  * @module GridContext
  */
-var paper = require('browserifyable-paper');
 
+var babylon = require('babylonjs');
 /**
  * This is the context object for creating and managing the grid layer of a board
  * @implements {Context}
@@ -21,23 +21,32 @@ module.exports = function GridContext(hexDimensions) {
     context.hexDimensions = hexDimensions;
 
     // Documentation inherited from Context#init
-    this.init = function(gridGroup) {
+    this.init = function(scene) {
         context.gridColor = 'silver';
-        context.gridGroup = gridGroup;
+        context.scene = scene;
         //Create the Hex item
-        var halfHex = context.createPointUpHalfHex(paper);
-        //create the background raster
-        var gridRaster = context.createPointUpGridRaster(halfHex);
-        gridGroup.addChild(gridRaster);
-        context.dyModulo = (hexDimensions.hexagon_wide_width + 2*hexDimensions.hexagon_scaled_half_edge_size);
-        context.dxModulo = hexDimensions.hexagon_edge_to_edge_width;
+        context.gridParent = context.createPartialMesh(scene);
+        //create the full grid
+        context.createGrid(context.gridParent);
+        
     };
 
     // Documentation inherited from Context#updatePosition
-    this.updatePosition = function(dx, dy) {
-         //Modulo the grid position since it is a finite repeating pattern
-         context.gridGroup.position.x = dx%context.dxModulo;
-         context.gridGroup.position.y = dy%context.dyModulo;
+    this.updatePosition = function(middleX, middleY) {
+
+         
+         //Convert the middle point to U, V
+         var hexCoordinates = this.hexDimensions.getReferencePoint(middleX, middleY);
+         
+         //Find the center of the hex in cartesian co-ordinates
+         var centerHexPixelCoordinates = this.hexDimensions.getPixelCoordinates(hexCoordinates.u, hexCoordinates.v);
+         
+         //Center our grid there
+         context.gridParent.position.x = centerHexPixelCoordinates.x;
+         context.gridParent.position.y = centerHexPixelCoordinates.y;
+         
+         
+
     };
     
     this.reDraw = function(screenResized, mapRotated, mapScaled) {
@@ -51,67 +60,125 @@ module.exports = function GridContext(hexDimensions) {
 };
 
 /**
- * Creates a paper.Symbol with half the lines of a hex in a point up orientation for creating a point up oriented grid
+ * Creates a mesh for a partial hex which can be copied to form the full grid
  * @private
  */
-module.exports.prototype.createPointUpHalfHex = function(paper) {
-    //Create the half-hex path which will be duplicated (with different z values) to create the hex grid
-    var halfHex = new paper.Group();
-    halfHex.pivot = new paper.Point(0,0); //Set the pivot point, else paper.js will try to re-compute it to the center
+module.exports.prototype.createPartialMesh = function(scene) {
+
+    //Create tubes for 3 sides of a hex
+    
     var zeroZeroPixelCoordinates = this.hexDimensions.getPixelCoordinates(0, 0);
     //The first point of each line is the lower "junction" point of the point up hexagon
+    
     //Draw the vertical line first
-    halfHex.addChild(new paper.Path.Line(new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width), 
-        new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width + 2*this.hexDimensions.hexagon_scaled_half_edge_size)));
+    var vertical = babylon.Mesh.CreateTube("vertical", [
+        new babylon.Vector3(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width, 0), 
+        new babylon.Vector3(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width + 2*this.hexDimensions.hexagon_scaled_half_edge_size, 0)]
+        , 2, 20, null, 0, scene);
+
     //Next the bottom right line
-    halfHex.addChild(new paper.Path.Line(new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width),
-        new paper.Point(zeroZeroPixelCoordinates.x + this.hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_scaled_half_edge_size)));
+    var bottomRight = babylon.Mesh.CreateTube("bottomRight", [
+        new babylon.Vector3(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width, 0),
+        new babylon.Vector3(zeroZeroPixelCoordinates.x + this.hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_scaled_half_edge_size, 0)]
+        , 2, 20, null, 0, scene);
+    
     //Next the bottom left
-    halfHex.addChild(new paper.Path.Line(new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width),
-        new paper.Point(zeroZeroPixelCoordinates.x - this.hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_scaled_half_edge_size)));
+    var bottomLeft = babylon.Mesh.CreateTube("bottomLeft", [
+        new babylon.Vector3(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width, 0),
+        new babylon.Vector3(zeroZeroPixelCoordinates.x - this.hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_scaled_half_edge_size, 0)]
+        , 2, 20, null, 0, scene);
 
-    halfHex.strokeColor = this.gridColor;
-    halfHex.strokeWidth = 3;
-    halfHex.strokeCap = 'square';
+    return babylon.Mesh.MergeMeshes([vertical, bottomRight, bottomLeft]);
 
-    // Create a symbol from the path. Set "don't center" to true. If left default of false, then instances seem to have their co-ordinates recentered to their bounding box
-    return new paper.Symbol(halfHex, true);
 };
 
 /**
- * Creates a raster of a hex grid with the point up
+ * Creates a full grid from the single mesh
  * @private
  */
-module.exports.prototype.createPointUpGridRaster = function(halfHexSymbol) {
+module.exports.prototype.createGrid = function(originalMesh) {
     var zeroZeroPixelCoordinates = this.hexDimensions.getPixelCoordinates(0, 0);
-    var gridGroup = new paper.Group();
-    gridGroup.pivot = new paper.Point(0, 0);
-    //For every hex, place an instance of the symbol. The symbol fills in 3 of the 6 lines, the other 3 being shared with an adjacent hex
+
+    //For every hex, place an instance of the original mesh. The symbol fills in 3 of the 6 lines, the other 3 being shared with an adjacent hex
+
+    //Make a hexagonal grid of hexagons since it is approximately circular.
+    //The radius should be a bit larger than our max viewing distance
+    var u = 0;
+    var v = 0;
+    //For each radius
+    for (var i = 1; i < 50; i++) {
+       
+       //Hold u constant as the radius, add an instance for each v
+       for (v = -i; v <= 0 ; v++) {
+           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(i, v);
+	   var newInstance = originalMesh.createInstance("index: " + i +":" + v);
+	   newInstance.parent = originalMesh;
+	   newInstance.position.y = pixelCoordinates.y
+           newInstance.position.x = pixelCoordinates.x;
+       }
+       
+       //Hold u constant as negative the radius, add an instance for each v
+       for (v = 0; v <= i ; v++) {
+           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(-i, v);
+	   var newInstance = originalMesh.createInstance("index: " + (-i) +":" + v);
+	   newInstance.parent = originalMesh
+	   newInstance.position.y = pixelCoordinates.y
+           newInstance.position.x = pixelCoordinates.x;
+       }
+       
+       //Hold v constant as the radius, add an instance for each u
+       for (u = -i + 1 ; u <= 0 ; u++) {
+           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, i);
+	   var newInstance = originalMesh.createInstance("index: " + u +":" + i);
+	   newInstance.parent = originalMesh
+	   newInstance.position.y = pixelCoordinates.y
+           newInstance.position.x = pixelCoordinates.x;
+       }
+       
+       //Hold v constant as negative the radius, add an instance for each u
+       for (u = 0; u < i ; u++) {
+           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, -i);
+	   var newInstance = originalMesh.createInstance("index: " + u +":" + (-i));
+	   newInstance.parent = originalMesh
+	   newInstance.position.y = pixelCoordinates.y
+           newInstance.position.x = pixelCoordinates.x;
+       }
+       
+       //Hold w constant as the radius, add an instance for each u + v = -i
+       for (u = -i + 1, v = -1 ; v > -i ; u++, v--) {
+           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, v);
+	   var newInstance = originalMesh.createInstance("index: " + u +":" + v);
+	   newInstance.parent = originalMesh
+	   newInstance.position.y = pixelCoordinates.y
+           newInstance.position.x = pixelCoordinates.x;
+       }
+       
+       //Hold w constant as the negative radius, add an instance for each u + v = i
+       for (u = i - 1, v = 1 ; v < i ; u--, v++) {
+           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, v);
+	   var newInstance = originalMesh.createInstance("index: " + u +":" + v);
+	   newInstance.parent = originalMesh
+	   newInstance.position.y = pixelCoordinates.y
+           newInstance.position.x = pixelCoordinates.x;
+       }
+    }
+
+
+/*
     //Top left hex is 0,0
-    var bottomRight = this.hexDimensions.getReferencePoint( paper.view.size.width, paper.view.size.height);
-    var topRight = this.hexDimensions.getReferencePoint(paper.view.size.width, 0);
-
-    //TODO This loop is assuming default orientation of the grid
-
+    var bottomRight = this.hexDimensions.getReferencePoint( 1024, 768);
+    var topRight = this.hexDimensions.getReferencePoint(1024, 0);
     //Note: The (-3) and (+1) values are to give extra slack on the top and bottom for dragging, don't want to see an incomplete grid appear.
     for (var i =  -3; i <= bottomRight.u + 1; i++) {
         //Note: The (-2) and (+2) values are to give extra slack on the left and right for dragging, don't want to see an incomplete grid appear.
         for (var j =  -Math.abs(Math.round(i/2)) - 2; j <= topRight.v - Math.ceil(i/2) + 2; j++) {
             var pixelCoordinates = this.hexDimensions.getPixelCoordinates(i, j);
-            var instance = halfHexSymbol.place();
-            instance.pivot = new paper.Point(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y); //Set the pivot point, Instances do not inherit the parent symbol's pivot!
-            instance.position = new paper.Point(pixelCoordinates.x, pixelCoordinates.y);
-            gridGroup.addChild(instance);
+            var newInstance = originalMesh.createInstance("index: " + i +":" + j);
+            newInstance.position.y = pixelCoordinates.y
+            newInstance.position.x = pixelCoordinates.x;
         }
     }
-
-    //Rasterize the grid to improve performance.
-    var raster = gridGroup.rasterize();
-    //Normalize the raster's pivot to be the current 0,0 position. This value was gotten by experimentation. I suspect it is where crss-browser issues crop up
-    raster.pivot = new paper.Point(0 - raster.position.x, 0 - raster.position.y);
-
-    gridGroup.remove();
-    return raster;
+    */
 };
 
 

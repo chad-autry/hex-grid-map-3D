@@ -5,10 +5,10 @@
  * @module DrawnItemContext
  */
  
-var paper = require('browserifyable-paper');
+var babylon = require('babylonjs');
 
 /**
- * A generic context that draws items from the provided dataSource using the provided factory
+ * A generic context that draws items from the provided dataSource using the provided factory with no special interactions
  * Can do paths, vectors, badges and more without needing to impliment a new context
  * @implements {Context}
  * @constructor
@@ -33,37 +33,28 @@ module.exports = function DrawnItemContext(dataSource, drawnItemFactory, hexDime
     dataSource.addListener(this);
     
     // Documentation inherited from Context#init
-    this.init = function(group) {
-        context.group = group;
+    this.init = function(scene) {
+        context.scene = scene;
     };
 
     // Documentation inherited from Context#mouseDown
     this.mouseDown = function(clickedX, clickedY) {
-        //Hit test for items
-        var result = context.group.hitTest(new paper.Point(clickedX, clickedY));
-        if (result) {
-            context.clickedItem = result.item;
-	    while (!context.clickedItem.data.hasOwnProperty('item') && !!context.clickedItem.parent) {
-	        context.clickedItem = context.clickedItem.parent;
-
-            }
-            //The parent item's data is REALLY expected to have an item property. The second condition of the while was since I didn't like the look of the possibillity of an infinite loop
-            if (context.clickedItem.data.item.hasOwnProperty('onDrag') || !!context.clickedItem.data.item.hasOwnProperty('onClick')) {
-                return true;
-            }
-        }
-        return;
+         var mousePickResult = context.scene.pick(clickedX, clickedY,
+               function(mesh) {
+                   return !!mesh.isGenericContextItem;
+               });
+         if (mousePickResult.hit) {
+             context.clickedItem = mousePickResult.pickedMesh;
+             return true;
+         }
         
     };
 
     /**
      * Method called to update the position of the global view, either through drags or programmatic manpulation
      */
-    this.updatePosition = function( dx, dy) {
-        context.group.position.x = dx;
-        context.group.position.y = dy;
-        context.dx = dx;
-        context.dy = dy;
+    this.updatePosition = function( middleX, middleY) {
+        //Do nothing, the camera moves and the world stay stationary
     };
 
     // Documentation inherited from Context#mouseDragged
@@ -100,19 +91,21 @@ module.exports.prototype.onDataChanged = function(event) {
     for (i = 0; i < event.removed.length; i++) {
         item = event.removed[i];
         drawnItem = this.drawnItemCache[item.id];
-        drawnItem.remove();
+        drawnItem.dispose();
         delete this.drawnItemCache[item.id];
     }
 
     for (i = 0; i < event.added.length; i++) {
         item = event.added[i];
         
-        drawnItem = this.drawnItemFactory.getDrawnItem(item);
+        drawnItem = this.drawnItemFactory.getDrawnItem(item, this.scene);
+        if (item.hasOwnProperty('sourceU')) {
+            var sourcePixelCoordinates = this.hexDimensions.getPixelCoordinates(item.sourceU, item.sourceV);
+            drawnItem.position.x = sourcePixelCoordinates.x;
+            drawnItem.position.y = sourcePixelCoordinates.y;
+        }
+        drawnItem.isGenericContextItem = true;
         this.drawnItemCache[item.id] = drawnItem;
-        var sourcePixelCoordinates = this.hexDimensions.getPixelCoordinates(item.sourceU, item.sourceV);
-        drawnItem.position = new paper.Point(this.dx, this.dy);
-        this.group.addChild(drawnItem);
     }
 
-    paper.view.update();
 };

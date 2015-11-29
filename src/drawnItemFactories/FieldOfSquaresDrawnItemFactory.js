@@ -5,7 +5,7 @@
  * @module FieldOfSquaresDrawnItemFactory
  */
  
-var paper = require('browserifyable-paper');
+var babylon = require('babylonjs');
 
 /**
  * Factory which creates a field of squares with some randomness. Ie not patterned. Intended for asteroids or debris fields.
@@ -32,26 +32,27 @@ module.exports = function FieldOfSquaresDrawnItemFactory(hexDefinition, minSize,
  * @implements {DrawnItemFactory#getDrawnItem}
  * @todo Make the random numbers seeded, so the same field is produced each time
  */
-module.exports.prototype.getDrawnItem = function(item) {
+module.exports.prototype.getDrawnItem = function(item, scene) {
     //Make our group
-    var fieldGroup = new paper.Group();
-    fieldGroup.pivot = new paper.Point(0, 0);
-    fieldGroup.data.item = item;
 
 
-    //Create 4 random diamonds, each located in 1 quarter of the hex
+
+    //Create 4 random cubes, each located in 1 quarter of the hex
 
     //Start with the top left quarter
-    fieldGroup.addChild(this.createSquare(-1*this.hexDefinition.hexagon_edge_to_edge_width/2, 0, -1*this.hexDefinition.hexagon_half_wide_width, 0));
+    var cube1 = this.createSquare(-1*this.hexDefinition.hexagon_edge_to_edge_width/2, 0, -1*this.hexDefinition.hexagon_half_wide_width, 0, scene);
     //Next the top right quarter
-    fieldGroup.addChild(this.createSquare(0, this.hexDefinition.hexagon_edge_to_edge_width/2, -1*this.hexDefinition.hexagon_half_wide_width, 0));
+    var cube2 = this.createSquare(0, this.hexDefinition.hexagon_edge_to_edge_width/2, -1*this.hexDefinition.hexagon_half_wide_width, 0, scene);
     //Next bottom right quarter
-    fieldGroup.addChild(this.createSquare(0, this.hexDefinition.hexagon_edge_to_edge_width/2, 0 , this.hexDefinition.hexagon_half_wide_width));
+    var cube3 = this.createSquare(0, this.hexDefinition.hexagon_edge_to_edge_width/2, 0 , this.hexDefinition.hexagon_half_wide_width, scene);
     //Finally bottom left quarter
-    fieldGroup.addChild(this.createSquare(-1*this.hexDefinition.hexagon_edge_to_edge_width/2, 0, 0,this.hexDefinition.hexagon_half_wide_width));
+    var cube4 = this.createSquare(-1*this.hexDefinition.hexagon_edge_to_edge_width/2, 0, 0,this.hexDefinition.hexagon_half_wide_width, scene);
 
-    //TODO Rasterize the group?
-    return fieldGroup;
+    cube2.parent = cube3.parent = cube4.parent = cube1;
+    
+    cube1.data = {};
+    cube1.data.item = item;
+    return cube1;
 };
 
 /**
@@ -62,7 +63,7 @@ module.exports.prototype.getDrawnItem = function(item) {
  * @param {integer} maxY - The maximum Y coordinate to randomise the square's center
  * @returns {external:Item} The square to include in the group
  */
-module.exports.prototype.createSquare = function (minX, maxX, minY, maxY) {
+module.exports.prototype.createSquare = function (minX, maxX, minY, maxY, scene) {
     var drawnItem;
 
 
@@ -84,19 +85,22 @@ module.exports.prototype.createSquare = function (minX, maxX, minY, maxY) {
     //Pick a random size within limits
     var size = this.random(this.minSize, this.maxSize);
 
-    drawnItem = new paper.Path.RegularPolygon({
-        center: [x, y],
-        sides: 4,
-        radius: size,
-        fillColor: color,
-        strokeColor: 'black'
-    });
-    //Tried a random rotation, but diamonds were more attractive
-    //var rotation = this.random(0, 89); //They're squares. Rotating past 89 is pointless
-    drawnItem.rotate(45);
-    //Scale it
-    drawnItem.scale(1, this.hexDefinition.vScale);
-    return drawnItem;
+    var box = babylon.Mesh.CreateBox("Box1", size, scene);
+    //Rotate randomly
+    box.rotation.x = Math.random() * Math.PI/2;
+    box.rotation.y = Math.random() * Math.PI/2;
+    box.rotation.z = Math.random() * Math.PI/2;
+    
+    box.position.x = x;
+    box.position.y = y;
+    var material = new babylon.StandardMaterial("textureX", scene);
+    var rgb = this.hexToRgb(color);
+    material.diffuseColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
+    //material.specularColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
+    //material.emissiveColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
+    box.material = material;
+    
+    return box;
 };
 
 /**
@@ -106,4 +110,13 @@ module.exports.prototype.createSquare = function (minX, maxX, minY, maxY) {
  */
 module.exports.prototype.random = function (min, max) {
         return Math.round((Math.random() * (max - min)) + min);
+};
+
+module.exports.prototype.hexToRgb = function(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
 };

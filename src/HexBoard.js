@@ -5,7 +5,7 @@
  * @module hexagonal-map
  */
  
-var paper = require('browserifyable-paper');
+var babylon = require('babylonjs/babylon.max.js');
 /*
  * Defines an isometric hexagonal board for web games
  */
@@ -31,45 +31,78 @@ var paper = require('browserifyable-paper');
     this.hexDimensions = hexDimensions;
     this.contexts = contexts;
 
-
     //Initialize variables
-    var dx = 0; //The current translation in x of the map
-    var dy = 0; // the current translation in y of the map
+    var cameraTargetX = 0; //The X point on the Z = 0 plane the camera is pointed
+    var cameraTargetY = 0; //The Y point on the Z = 0 plane the camera is pointed
     
 
     //A reference to the board for functions
     var board = this;
 
-    //Setup paper.js
-    paper.setup(canvas);
-
-    //Initialize each context with a group, the contexts should be in the desired z index order
-    contexts.forEach(function(context) {
-        var group = new paper.Group();
-        //Set the group pivot points, else paper.js will try to re-compute it to the center
-        group.pivot = new paper.Point(0, 0);
-        context.init(group);
-    });
+    //Setup babylonjs
+    var engine = new babylon.Engine(canvas, true);
+    var scene = new babylon.Scene(engine);
+        
+    // Change the scene background color to black.
+    scene.clearColor = new babylon.Color3(0, 0, 0);
     
+    // This creates and positions a free camera
+    //var camera = new babylon.FreeCamera("camera1", new babylon.Vector3(0, 0, 1000), scene);
+    //  Create an ArcRotateCamera aimed at 0,0,0, with no alpha, beta or radius, so be careful.  It will look broken.
+    var camera = new babylon.ArcRotateCamera("ArcRotateCamera", 0, 0, 0, babylon.Vector3.Zero(), scene);
+    camera.setPosition(new babylon.Vector3(0, 1000, 1000));
+    // This targets the camera to scene origin
+    camera.setTarget(babylon.Vector3.Zero());
+    camera.upVector = new babylon.Vector3(0, 0, 1);
+    
+    camera.upperBetaLimit = Math.PI;
+    camera.allowUpsideDown = true;
+   
+    //We use our external canvas controls to control the camera
+        // This attaches the camera to the canvas
+        //camera.attachControl(canvas, false);
+       
+       /*
+       camera.mode = babylon.Camera.ORTHOGRAPHIC_CAMERA;
+       
+       camera.orthoTop = 500;
+       camera.orthoBottom = -500;
+       camera.orthoLeft = -500;
+    camera.orthoRight = 500;
+    */
+    // This creates a light, aiming 0,1,0 - to the sky.
+    var light = new babylon.HemisphericLight("light1", new babylon.Vector3(0, 0, 1), scene);
+
+   // Dim the light a small amount
+   light.intensity = .5;
+   
+   //Make an invisible plane to hit test for the scene's X, Y co-ordinates (not the screens X, Y co-ordinates)
+   var pickerPlane = babylon.Mesh.CreatePlane("pickerPlane", 10000.0, scene);
+   pickerPlane.visible = false;
+
+    //Initialize each context with with the scene
+    contexts.forEach(function(context) {
+        context.init(scene);
+    });
+
+    //Run the engines render loop
+    engine.runRenderLoop(function () {
+            scene.render();
+    });
     if (!!mouseClicked) {
         this.mouseClicked = mouseClicked;
     }
-    
-    paper.view.draw();
-    var tool = new paper.Tool();
 
-    //Set up the psuedo drag for the grid
+
+    //Set up mouse interactions with the contexts
     var down = false;
     var mousemoved = false;
-    var latestX=0;
-    var latestY=0;
-    var clickedY=0;
+    var mouseDownPickResult;
     var mouseDownContext; //The context which has "claimed" the mouse down event
-    var viewWidth = paper.view.size.width;
-    var viewHeight = paper.view.size.height;
      
-    paper.view.onResize = function(event) {
-  
+    // Watch for browser/canvas resize events
+    window.addEventListener("resize", function () {
+        engine.resize();
         //Call each context with redraw, followed by updatePosition
         board.contexts.forEach(function(context) {
             context.reDraw(true, false, false);
@@ -77,52 +110,75 @@ var paper = require('browserifyable-paper');
 
         //recenter
         //Figure out what the old U, V in the middle was for our original size
-	var hexagonalCoordinates = hexDimensions.getReferencePoint(dx -Math.floor(viewWidth/2),dy - Math.floor(viewHeight/2));
-	viewWidth = paper.view.size.width;
-        viewHeight = paper.view.size.height;
+        var hexagonalCoordinates = hexDimensions.getReferencePoint(cameraTargetX, cameraTargetY);
+        
         board.centerOnCell(hexagonalCoordinates.u, hexagonalCoordinates.v);
-
-    };
+    });
     
-     tool.onMouseDown = function(e) {
+     canvas.onmousedown = function(e) {
          down = true;
          var mousemoved = false;
-         latestX = e.point.x;
-         latestY = e.point.y;
-         clickedY = e.point.y;
+         var relativeX = e.pageX - canvas.offsetLeft;
+         var relativeY = e.pageY - canvas.offsetTop;
+         //Pick the point on the invisible picker plane at the screen co-ordinates under the mouse
+         mouseDownPickResult = scene.pick(relativeX, relativeY,
+            function(mesh) {
+                return mesh === pickerPlane;
+            });
          //Iterate through the contexts in reverse z-index order to see if any of them claim the click event
          for (var i = contexts.length - 1; i >= 0; i--) {
-             if (contexts[i].mouseDown(e.point.x, e.point.y)) {
+             if (contexts[i].mouseDown(relativeX, relativeY)) {
                  mouseDownContext = contexts[i];
                  break;
              }
          }
      };
-
-
-    tool.onMouseMove = function(e) {
+     
+     
+    canvas.onmousemove = function(e) {
         if (down === false) {
             return;
         }
+         var relativeX = e.pageX - canvas.offsetLeft;
+         var relativeY = e.pageY - canvas.offsetTop;
 
 
         if (!!mouseDownContext) {
             //A context has claimed further mouse drag
-            mouseDownContext.mouseDragged(e.point.x, e.point.y, e.point.x - latestX, e.point.y - latestY);
+            mouseDownContext.mouseDragged(relativeX, relativeY);
         } else {
-            //general dragging, translate all cell groups. Position the grid to look infinite
-            dx = dx + e.point.x - latestX;
-            dy = dy + e.point.y - latestY;
+        
+            //Figure out where the camera needs to be targeted, for the initial mouse down position to stay under the mouse
+            
+            //The current point under the mouse is related to the current center of the screen, as the initial point under the mouse needs to be related to the new center
+            
+            //Pick the point on the invisible picker plane at the screen co-ordinates under the mouse
+            var pickResult = scene.pick(relativeX, relativeY,
+                function(mesh) {
+                    return mesh === pickerPlane;
+                });
+                
+            //Find how that relates to the point on the plane in the middle of the screen
+            var planeDx = pickResult.pickedPoint.x - cameraTargetX;
+            var planeDy = pickResult.pickedPoint.y - cameraTargetY;
+                
+            //Solve for the new cameraTarget co-ordinates relative to the original mouse down point
+            cameraTargetX = mouseDownPickResult.pickedPoint.x - planeDx;
+            cameraTargetY = mouseDownPickResult.pickedPoint.y - planeDy;
+
             board.updatePostion();
+
+            //Next, re-center our finite pickerPlane
+            pickerPlane.position.x = cameraTargetX;
+            pickerPlane.position.y = cameraTargetY;
+            
+            
+            
         }
-        latestX = e.point.x;
-        latestY = e.point.y;
         mousemoved = true;
-        //paper.view.update();
      };
 
-    //TODO onMouseOut does not seem to work. However, mouse events still seem to happen when outside of the paper.js view. So the annoying effects onMouseOut was intended to fix don't show up anyways
-    tool.onMouseLeave = function(e) {
+    canvas.onmouseleave = function(e) {
         if (down === false) {
             return;
         } 
@@ -130,20 +186,29 @@ var paper = require('browserifyable-paper');
         if (!!mouseDownContext) {
             mouseDownContext.mouseReleased(mousemoved);
         } else if (!!board.mouseClicked && !mousemoved) {
-            mouseClicked(dx, e.point.x,dy, e.point.y);
+            var relativeX =  e.pageX - canvas.offsetLeft;
+            var relativeY = e.pageY - canvas.offsetTop;
+            var pickResult = scene.pick(relativeX, relativeY,
+               function(mesh) {
+                   return mesh === pickerPlane;
+               });
+            mouseClicked(cameraTargetX, pickResult.pickedPoint.x + cameraTargetX, cameraTargetY, pickResult.pickedPoint.y + cameraTargetY);
         }
         mouseDownContext = null;
         mousemoved = false;
     };
-    tool.onMouseUp = tool.onMouseLeave;
-     
+    canvas.onmouseup = canvas.onmouseleave;
+
     /**
      * Update x/y positions based on the current dx and dy
      * Will call into the background and foreground update functions
      */
     this.updatePostion = function() {
+        //TODO Animate the camera pan with some sort of easeing function
+        camera.target.x = cameraTargetX;
+        camera.target.y = cameraTargetY;
         board.contexts.forEach(function(context) {
-            context.updatePosition(dx, dy);
+            context.updatePosition(cameraTargetX, cameraTargetY);
         });
     };
      
@@ -155,8 +220,5 @@ var paper = require('browserifyable-paper');
          dx = Math.floor(pixelCoordinates.x + viewWidth/2);
          dy = Math.floor(pixelCoordinates.y + viewHeight/2);
          this.updatePostion();
-
-         paper.view.update();
-
      };
 };

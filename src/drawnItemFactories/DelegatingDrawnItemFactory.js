@@ -24,10 +24,9 @@ module.exports = function DelegatingDrawnItemFactory(drawnItemFactoryMap) {
  * @returns {external:Item} The paper.js Item for the given parameters
  * @implements {DrawnItemFactory#getDrawnItem}
  */
-module.exports.prototype.getDrawnItem = function(item) {
-    var drawnItem;
+module.exports.prototype.getDrawnItem = function(item, scene) {
     if (this.drawnItemFactoryMap.hasOwnProperty(item.type)) {
-        return this.drawnItemFactoryMap[item.type].getDrawnItem(item);
+        return this.drawnItemFactoryMap[item.type].getDrawnItem(item, scene);
     }
-    return drawnItem;
+    return;
 };

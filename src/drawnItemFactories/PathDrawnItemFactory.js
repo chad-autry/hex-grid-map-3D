@@ -5,7 +5,7 @@
  * @module PathDrawnItemFactory
  */
  
-var paper = require('browserifyable-paper');
+var babylon = require('babylonjs');
 
 /**
  * A factory for a path item, such as might represent where a ship has been, or various boundaries
@@ -17,7 +17,7 @@ module.exports = function PathDrawnItemFactory(hexDefinition) {
 };
 
 /**
- * Return a path item for the given DTO, includes a 1 pixel black border. The path will go through the center of hexes
+ * Return a solid tubular path item for the given DTO. The path will go through the center of hexes
  * @override
  * @param {Object} item - The DTO to produce a paper.js drawn item for
  * @param {Color} item.color - The color of the path
@@ -27,36 +27,62 @@ module.exports = function PathDrawnItemFactory(hexDefinition) {
  * @returns {external:Item} The paper.js Item for the given parameters
  * @implements {DrawnItemFactory#getDrawnItem}
  */
-module.exports.prototype.getDrawnItem = function(item) {
+module.exports.prototype.getDrawnItem = function(item, scene) {
 
-    var pathGroup = new paper.Group();
-    pathGroup.pivot = new paper.Point(0, 0);
-   
-    var xyPoints = [];
+    var points = [];
     //Convert the item's array of u, v points into x, y
     for (var i = 0; i < item.points.length; i++) {
         var pixelCoordinates = this.hexDefinition.getPixelCoordinates(item.points[i][0], item.points[i][1]);
-        xyPoints.push([pixelCoordinates.x, pixelCoordinates.y]);
+        points.push(new babylon.Vector3(pixelCoordinates.x, pixelCoordinates.y, 0))
     }
     
-    var backgroundPath = new paper.Path({
-        segments: xyPoints,
-        strokeColor: 'black',
-        strokeWidth: item.width+2,
-        closed: item.closed
+    var items = [];
+    var lastPoint;
+    var joint = babylon.Mesh.CreateSphere('sphere', 20, item.width, scene);
+    joint.position.x = points[0].x;
+    joint.position.y = points[0].y;
+    items.push(joint);
+    points.forEach(function(point) {
+        if (!lastPoint) {
+            lastPoint = point;
+            return; //like a continue for a forEach
+        }
+        //A tube for the segment
+        items.push(babylon.Mesh.CreateTube("tube", [lastPoint, point], item.width/2, 20, null, 0, scene));
+        //And a sphere for the joint
+        joint = babylon.Mesh.CreateSphere('sphere', 20, item.width, scene);
+        joint.position.x = point.x;
+        joint.position.y = point.y;
+        items.push(joint);
+        lastPoint = point;
     });
-    pathGroup.addChild(backgroundPath);
-
-    var path = new paper.Path({
-        segments: xyPoints,
-        strokeColor: item.color,
-        strokeWidth: item.width,
-        closed: item.closed
-    });
-    pathGroup.addChild(path);
-    item.sourceU = 0;
-    item.sourceV = 0;
-    pathGroup.data.item=item;
-    return pathGroup;
     
+    if (!!item.closed) {
+        //A tube for the segment
+        items.push(babylon.Mesh.CreateTube("tube", [points[0], points[points.length - 1]], item.width/2, 20, null, 0, scene));
+    }
+    
+
+
+    var compoundMesh = babylon.Mesh.MergeMeshes(items);
+    
+    var material = new babylon.StandardMaterial("pathMaterial", scene);
+    var rgb = this.hexToRgb(item.color);
+    material.diffuseColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
+    material.specularColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
+    material.emissiveColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
+    compoundMesh.material = material;
+    compoundMesh.data = {item: item};
+    
+    return compoundMesh;
+    
+};
+
+module.exports.prototype.hexToRgb = function(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
 };
