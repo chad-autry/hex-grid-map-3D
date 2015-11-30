@@ -4,7 +4,6 @@ var ui_router = require('angular-ui-router');
 var ui_router_extras_sticky = require('ct.ui.router.extras.sticky');
 var hexBoard = require("../../common/hexBoard/hexBoard");
 var BackgroundContext = require('../../../../src/contexts/RandomStaryBackgroundContext.js');
-var ForegroundContext = require('../../../../src/contexts/LensFlareForegroundContext.js');
 var GridContext = require('../../../../src/contexts/GridContext.js');
 var CellContext = require('../../../../src/contexts/CellContext.js');
 var VectorDrawnItemFactory = require('../../../../src/drawnItemFactories/VectorDrawnItemFactory.js');
