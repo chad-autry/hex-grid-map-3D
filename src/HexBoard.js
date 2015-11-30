@@ -20,7 +20,7 @@ var babylon = require('babylonjs/babylon.max.js');
  * @param { mouseClicked= } mouseClicked - A mouse clicked callback if no items were clicked
  * @example var hexMap = new (require(hexagonal-map))(hexDimension, canvas, contexts, mouseClicked);
  */
- module.exports = function HexBoard(hexDimensions, canvas, contexts, mouseClicked) {
+ module.exports = function HexBoard(hexDimensions, canvas, contexts, mouseClicked, window) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof HexBoard)) {
         return new HexBoard(hexDimensions, canvas, contexts);
@@ -74,7 +74,7 @@ var babylon = require('babylonjs/babylon.max.js');
     var light = new babylon.HemisphericLight("light1", new babylon.Vector3(0, 0, 1), scene);
 
    // Dim the light a small amount
-   light.intensity = .5;
+   light.intensity = 0.5;
    
    //Make an invisible plane to hit test for the scene's X, Y co-ordinates (not the screens X, Y co-ordinates)
    var pickerPlane = babylon.Mesh.CreatePlane("pickerPlane", 10000.0, scene);
@@ -101,19 +101,21 @@ var babylon = require('babylonjs/babylon.max.js');
     var mouseDownContext; //The context which has "claimed" the mouse down event
      
     // Watch for browser/canvas resize events
-    window.addEventListener("resize", function () {
-        engine.resize();
-        //Call each context with redraw, followed by updatePosition
-        board.contexts.forEach(function(context) {
-            context.reDraw(true, false, false);
-        });
+    if (!!window) {
+        window.addEventListener("resize", function () {
+            engine.resize();
+            //Call each context with redraw, followed by updatePosition
+            board.contexts.forEach(function(context) {
+                context.reDraw(true, false, false);
+            });
 
-        //recenter
-        //Figure out what the old U, V in the middle was for our original size
-        var hexagonalCoordinates = hexDimensions.getReferencePoint(cameraTargetX, cameraTargetY);
+            //recenter
+            //Figure out what the old U, V in the middle was for our original size
+            var hexagonalCoordinates = hexDimensions.getReferencePoint(cameraTargetX, cameraTargetY);
         
-        board.centerOnCell(hexagonalCoordinates.u, hexagonalCoordinates.v);
-    });
+            board.centerOnCell(hexagonalCoordinates.u, hexagonalCoordinates.v);
+        });
+    }
     
      canvas.onmousedown = function(e) {
          down = true;
@@ -217,8 +219,8 @@ var babylon = require('babylonjs/babylon.max.js');
       */
      this.centerOnCell = function(u, v) {
          var pixelCoordinates = hexDimensions.getPixelCoordinates(u, v);
-         dx = Math.floor(pixelCoordinates.x + viewWidth/2);
-         dy = Math.floor(pixelCoordinates.y + viewHeight/2);
+         cameraTargetX = pixelCoordinates.x;
+         cameraTargetY = pixelCoordinates.y;
          this.updatePostion();
      };
 };

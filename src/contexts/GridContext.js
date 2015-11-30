@@ -50,12 +50,6 @@ module.exports = function GridContext(hexDimensions) {
     };
     
     this.reDraw = function(screenResized, mapRotated, mapScaled) {
-        if (screenResized) {
-            context.gridGroup.removeChildren();
-            context.gridGroup.position.x = 0;
-            context.gridGroup.position.y = 0;
-            context.init(context.gridGroup);
-        }
     };
 };
 
@@ -73,20 +67,20 @@ module.exports.prototype.createPartialMesh = function(scene) {
     //Draw the vertical line first
     var vertical = babylon.Mesh.CreateTube("vertical", [
         new babylon.Vector3(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width, 0), 
-        new babylon.Vector3(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width + 2*this.hexDimensions.hexagon_scaled_half_edge_size, 0)]
-        , 2, 20, null, 0, scene);
+        new babylon.Vector3(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width + 2*this.hexDimensions.hexagon_scaled_half_edge_size, 0)],
+        2, 20, null, 0, scene);
 
     //Next the bottom right line
     var bottomRight = babylon.Mesh.CreateTube("bottomRight", [
         new babylon.Vector3(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width, 0),
-        new babylon.Vector3(zeroZeroPixelCoordinates.x + this.hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_scaled_half_edge_size, 0)]
-        , 2, 20, null, 0, scene);
+        new babylon.Vector3(zeroZeroPixelCoordinates.x + this.hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_scaled_half_edge_size, 0)],
+        2, 20, null, 0, scene);
     
     //Next the bottom left
     var bottomLeft = babylon.Mesh.CreateTube("bottomLeft", [
         new babylon.Vector3(zeroZeroPixelCoordinates.x, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_half_wide_width, 0),
-        new babylon.Vector3(zeroZeroPixelCoordinates.x - this.hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_scaled_half_edge_size, 0)]
-        , 2, 20, null, 0, scene);
+        new babylon.Vector3(zeroZeroPixelCoordinates.x - this.hexDimensions.hexagon_edge_to_edge_width/2, zeroZeroPixelCoordinates.y + this.hexDimensions.hexagon_scaled_half_edge_size, 0)],
+        2, 20, null, 0, scene);
 
     return babylon.Mesh.MergeMeshes([vertical, bottomRight, bottomLeft]);
 
@@ -98,6 +92,7 @@ module.exports.prototype.createPartialMesh = function(scene) {
  */
 module.exports.prototype.createGrid = function(originalMesh) {
     var zeroZeroPixelCoordinates = this.hexDimensions.getPixelCoordinates(0, 0);
+    var newInstance, pixelCoordinates;
 
     //For every hex, place an instance of the original mesh. The symbol fills in 3 of the 6 lines, the other 3 being shared with an adjacent hex
 
@@ -110,55 +105,55 @@ module.exports.prototype.createGrid = function(originalMesh) {
        
        //Hold u constant as the radius, add an instance for each v
        for (v = -i; v <= 0 ; v++) {
-           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(i, v);
-	   var newInstance = originalMesh.createInstance("index: " + i +":" + v);
+           pixelCoordinates = this.hexDimensions.getPixelCoordinates(i, v);
+	   newInstance = originalMesh.createInstance("index: " + i +":" + v);
 	   newInstance.parent = originalMesh;
-	   newInstance.position.y = pixelCoordinates.y
+	   newInstance.position.y = pixelCoordinates.y;
            newInstance.position.x = pixelCoordinates.x;
        }
        
        //Hold u constant as negative the radius, add an instance for each v
        for (v = 0; v <= i ; v++) {
-           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(-i, v);
-	   var newInstance = originalMesh.createInstance("index: " + (-i) +":" + v);
-	   newInstance.parent = originalMesh
-	   newInstance.position.y = pixelCoordinates.y
+           pixelCoordinates = this.hexDimensions.getPixelCoordinates(-i, v);
+	   newInstance = originalMesh.createInstance("index: " + (-i) +":" + v);
+	   newInstance.parent = originalMesh;
+	   newInstance.position.y = pixelCoordinates.y;
            newInstance.position.x = pixelCoordinates.x;
        }
        
        //Hold v constant as the radius, add an instance for each u
        for (u = -i + 1 ; u <= 0 ; u++) {
-           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, i);
-	   var newInstance = originalMesh.createInstance("index: " + u +":" + i);
-	   newInstance.parent = originalMesh
-	   newInstance.position.y = pixelCoordinates.y
+           pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, i);
+	   newInstance = originalMesh.createInstance("index: " + u +":" + i);
+	   newInstance.parent = originalMesh;
+	   newInstance.position.y = pixelCoordinates.y;
            newInstance.position.x = pixelCoordinates.x;
        }
        
        //Hold v constant as negative the radius, add an instance for each u
        for (u = 0; u < i ; u++) {
-           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, -i);
-	   var newInstance = originalMesh.createInstance("index: " + u +":" + (-i));
-	   newInstance.parent = originalMesh
-	   newInstance.position.y = pixelCoordinates.y
+           pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, -i);
+	   newInstance = originalMesh.createInstance("index: " + u +":" + (-i));
+	   newInstance.parent = originalMesh;
+	   newInstance.position.y = pixelCoordinates.y;
            newInstance.position.x = pixelCoordinates.x;
        }
        
        //Hold w constant as the radius, add an instance for each u + v = -i
        for (u = -i + 1, v = -1 ; v > -i ; u++, v--) {
-           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, v);
-	   var newInstance = originalMesh.createInstance("index: " + u +":" + v);
-	   newInstance.parent = originalMesh
-	   newInstance.position.y = pixelCoordinates.y
+           pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, v);
+	   newInstance = originalMesh.createInstance("index: " + u +":" + v);
+	   newInstance.parent = originalMesh;
+	   newInstance.position.y = pixelCoordinates.y;
            newInstance.position.x = pixelCoordinates.x;
        }
        
        //Hold w constant as the negative radius, add an instance for each u + v = i
        for (u = i - 1, v = 1 ; v < i ; u--, v++) {
-           var pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, v);
-	   var newInstance = originalMesh.createInstance("index: " + u +":" + v);
-	   newInstance.parent = originalMesh
-	   newInstance.position.y = pixelCoordinates.y
+           pixelCoordinates = this.hexDimensions.getPixelCoordinates(u, v);
+	   newInstance = originalMesh.createInstance("index: " + u +":" + v);
+	   newInstance.parent = originalMesh;
+	   newInstance.position.y = pixelCoordinates.y;
            newInstance.position.x = pixelCoordinates.x;
        }
     }
@@ -174,7 +169,7 @@ module.exports.prototype.createGrid = function(originalMesh) {
         for (var j =  -Math.abs(Math.round(i/2)) - 2; j <= topRight.v - Math.ceil(i/2) + 2; j++) {
             var pixelCoordinates = this.hexDimensions.getPixelCoordinates(i, j);
             var newInstance = originalMesh.createInstance("index: " + i +":" + j);
-            newInstance.position.y = pixelCoordinates.y
+            newInstance.position.y = pixelCoordinates.y;
             newInstance.position.x = pixelCoordinates.x;
         }
     }

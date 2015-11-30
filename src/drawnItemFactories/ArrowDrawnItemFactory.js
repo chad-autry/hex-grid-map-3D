@@ -35,8 +35,8 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     //left pointy point then up and right
     var segment1 = babylon.Mesh.CreateTube("segment1", [
             new babylon.Vector3(-this.hexDefinition.hexagon_edge_to_edge_width/2, 0, 0), 
-            new babylon.Vector3(0, -1*this.hexDefinition.hexagon_half_wide_width, 0)]
-        , item.lineWidth, 20, null, 0, scene);
+            new babylon.Vector3(0, -1*this.hexDefinition.hexagon_half_wide_width, 0)],
+            item.lineWidth, 20, null, 0, scene);
 
     var sphere1 = babylon.Mesh.CreateSphere('sphere1', 20, 2*item.lineWidth, scene);
     sphere1.position.x = 0;
@@ -45,8 +45,8 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     //Then straight down
     var segment2 = babylon.Mesh.CreateTube("segment2", [
             new babylon.Vector3(0, -1*this.hexDefinition.hexagon_half_wide_width, 0), 
-            new babylon.Vector3(0, -this.hexDefinition.edgeSize/2, 0)]
-        , item.lineWidth, 20, null, 0, scene);
+            new babylon.Vector3(0, -this.hexDefinition.edgeSize/2, 0)],
+            item.lineWidth, 20, null, 0, scene);
         
     var sphere2 = babylon.Mesh.CreateSphere('sphere2', 20, 2*item.lineWidth, scene);
     sphere2.position.x = 0;
@@ -55,8 +55,8 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     //Then right
     var segment3 = babylon.Mesh.CreateTube("new", [
             new babylon.Vector3(0, -this.hexDefinition.edgeSize/2, 0), 
-            new babylon.Vector3(this.hexDefinition.hexagon_edge_to_edge_width/2, -this.hexDefinition.edgeSize/2, 0)]
-        , item.lineWidth, 20, null, 0, scene);
+            new babylon.Vector3(this.hexDefinition.hexagon_edge_to_edge_width/2, -this.hexDefinition.edgeSize/2, 0)],
+            item.lineWidth, 20, null, 0, scene);
         
         
     var sphere3 = babylon.Mesh.CreateSphere('sphere1', 20, 2*item.lineWidth, scene);
@@ -66,8 +66,8 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     //Then down again for the butt of the arrow
     var segment4 = babylon.Mesh.CreateTube("segment4", [
             new babylon.Vector3(this.hexDefinition.hexagon_edge_to_edge_width/2, -this.hexDefinition.edgeSize/2, 0), 
-            new babylon.Vector3(this.hexDefinition.hexagon_edge_to_edge_width/2, this.hexDefinition.edgeSize/2, 0)]
-        , item.lineWidth, 20, null, 0, scene);
+            new babylon.Vector3(this.hexDefinition.hexagon_edge_to_edge_width/2, this.hexDefinition.edgeSize/2, 0)],
+            item.lineWidth, 20, null, 0, scene);
 
 
     var sphere4 = babylon.Mesh.CreateSphere('sphere4', 20, 2*item.lineWidth, scene);
@@ -77,8 +77,8 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     //Then back left
     var segment5 = babylon.Mesh.CreateTube("segment5", [
             new babylon.Vector3(this.hexDefinition.hexagon_edge_to_edge_width/2, this.hexDefinition.edgeSize/2, 0), 
-            new babylon.Vector3(0, this.hexDefinition.edgeSize/2, 0)]
-        , item.lineWidth, 20, null, 0, scene);
+            new babylon.Vector3(0, this.hexDefinition.edgeSize/2, 0)],
+            item.lineWidth, 20, null, 0, scene);
         
     var sphere5 = babylon.Mesh.CreateSphere('sphere5', 20, 2*item.lineWidth, scene);
     sphere5.position.x = 0;
@@ -87,8 +87,8 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     //Then down
     var segment6 = babylon.Mesh.CreateTube("segment6", [
             new babylon.Vector3(0, this.hexDefinition.edgeSize/2, 0), 
-            new babylon.Vector3(0, this.hexDefinition.hexagon_half_wide_width, 0)]
-       , item.lineWidth, 20, null, 0, scene);
+            new babylon.Vector3(0, this.hexDefinition.hexagon_half_wide_width, 0)],
+            item.lineWidth, 20, null, 0, scene);
 
     var sphere6 = babylon.Mesh.CreateSphere('sphere1', 20, 2*item.lineWidth, scene);
     sphere6.position.x = 0;
@@ -97,8 +97,8 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     //Then back to the point
     var segment7 = babylon.Mesh.CreateTube("segment7", [
             new babylon.Vector3(0, this.hexDefinition.hexagon_half_wide_width, 0), 
-            new babylon.Vector3(-this.hexDefinition.hexagon_edge_to_edge_width/2, 0, 0)]
-        , item.lineWidth, 20, null, 0, scene);
+            new babylon.Vector3(-this.hexDefinition.hexagon_edge_to_edge_width/2, 0, 0)],
+            item.lineWidth, 20, null, 0, scene);
 
     var sphere7 = babylon.Mesh.CreateSphere('sphere7', 20, 2*item.lineWidth, scene);
     sphere7.position.x = -this.hexDefinition.hexagon_edge_to_edge_width/2;

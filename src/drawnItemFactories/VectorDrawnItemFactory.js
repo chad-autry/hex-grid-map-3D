@@ -62,7 +62,7 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
           } else {
               return 0;
           }
-       }, 0, scene)
+       }, 0, scene);
     
     //merge the cap and vector
     var compoundMesh = babylon.Mesh.MergeMeshes([joint, vector]);
