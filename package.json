@@ -1,5 +1,5 @@
 {
-  "name": "hex-grid-map-3D",
+  "name": "hex-grid-map-3d",
   "version": "0.8.0",
   "description": "A customizeable html5 webGL hexagonally gridded interactive map",
   "main": "index.js",
