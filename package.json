@@ -44,7 +44,6 @@
     "bootstrap": "^3.3.4",
     "babylonjs": "2.2.0",
     "cartesian-hexagonal": "0.0.3",
-    "collections": "^1.2.1",
     "ui-router-extras": "0.0.14"
   },
   "devDependencies": {

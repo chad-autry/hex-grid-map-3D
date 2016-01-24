@@ -5,7 +5,6 @@
  * @module CellContext
  */
  
-var sortedSet = require('collections/sorted-set');
 /**
 
  */
@@ -34,12 +33,6 @@ module.exports = function CellContext(cellDataSource, drawnItemFactory, stackSte
     this.stackStep = stackStep;
     this.hexDimensions = hexDimensions;
     this.cellGroupsMap = {}; //empty map object to reference the individual cell groups by co-ordinate
-    
-    var cellGroupCompare = function(val1, val2) {
-        return val1.zindex - val2.zindex;
-    };
-    this.zindexSplayTree = sortedSet([], function(val1, val2){ return val1.zindex == val2.zindex;},cellGroupCompare); // A search tree used to keep the individual cell groups sorted for insertion into the parent cell group
-
 
     //Add this as a listener to the cell dataSource. this.onCellDataChanged will be called when items change.
     cellDataSource.addListener(this);
@@ -160,9 +153,6 @@ module.exports.prototype.onDataChanged = function(event) {
             //Use a search tree with the unmodified Y co-ord as primary index, and unmodified X coordinate as the secondary
             var zindex = parseFloat(pixelCoordinates.y +"."+pixelCoordinates.x);
             cellGroup.zindex = zindex;
-            this.zindexSplayTree.add(cellGroup);
-            //Insert group into cellsGroup before the found child
-            var node = this.zindexSplayTree.findGreatestLessThan({zindex:zindex});
 
             //Set the doubly linked list references, makes a circle with the cellGroup itself as a node. Means don't need to null check
             cellGroup.previousDrawnItem = cellGroup;
