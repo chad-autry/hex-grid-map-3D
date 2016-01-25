@@ -37,7 +37,9 @@ var babylon = require('babylonjs/babylon.max.js');
 
     //Run the engines render loop
     this.engine.runRenderLoop(function () {
+        if (!!board.scene) {
             board.scene.render();
+        }
     });
 
 
