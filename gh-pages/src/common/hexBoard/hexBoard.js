@@ -7,7 +7,7 @@ module.exports = angular.module( 'hexBoard', [] )
     link: function( scope, element, attrs ) {
     
 
-      scope.board = new Board(scope.hexDimensions, element[0], scope.contexts, scope.globalMouseClicked, $window);
+      scope.board = new Board(element[0], $window);
       scope.$emit('boardInitialized');
       
       
