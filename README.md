@@ -19,7 +19,7 @@ The [hexagonal-map](http://chad-autry.github.io/hex-grid-map/#/jsdoc/module-hexa
 
 ## API Reference
 
-[API](http://chad-autry.github.io/hex-grid-map/#/jsdoc)
+[API](http://chad-autry.github.io/hex-grid-map-3D/#/jsdoc)
 
 ## Demo
 
