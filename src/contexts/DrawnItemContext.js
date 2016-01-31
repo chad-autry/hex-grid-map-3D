@@ -16,21 +16,17 @@ var babylon = require('babylonjs');
  * @param {DrawnItemFactory} drawnItemFactory - The factory which produces the paper.js representation of the dataSource items
  * @param {external:cartesian-hexagonal} hexDimensions - The DTO defining the hex <--> cartesian relation
  */
-module.exports = function DrawnItemContext(dataSource, drawnItemFactory, hexDimensions) {
+module.exports = function DrawnItemContext(drawnItemFactory, hexDimensions) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof DrawnItemContext)) {
-        return new DrawnItemContext(dataSource, drawnItemFactory, hexDimensions);
+        return new DrawnItemContext(drawnItemFactory, hexDimensions);
     }
     var context = this;
-    this.dataSource = dataSource;
     this.drawnItemFactory = drawnItemFactory;
     this.hexDimensions = hexDimensions;
     this.dx = 0;
     this.dy = 0;
     this.drawnItemCache = {};
-
-    //Add this as a listener to the dataSource. this.onDataChanged will be called when items change.
-    dataSource.addListener(this);
     
     // Documentation inherited from Context#init
     this.init = function(scene) {
@@ -74,6 +70,12 @@ module.exports = function DrawnItemContext(dataSource, drawnItemFactory, hexDime
     // Documentation inherited from Context#reDraw
     this.reDraw = function(screenResized, mapRotated, mapScaled) {
         //Eh, don't do anything yet. Only screen resized implemented which this context doesn't care about
+    };
+    
+    this.setDataSource = function(dataSource) {
+        this.dataSource = dataSource;
+        var context = this;
+        dataSource.addListener('dataChanged', function(event){context.onDataChanged.call(context, event);});
     };
 };
 

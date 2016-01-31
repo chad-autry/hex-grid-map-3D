@@ -20,22 +20,18 @@
  * @param {integer} stackStep - The distance in pixels to keep between items
  * @param {external:cartesian-hexagonal} hexDimensions - The DTO defining the hex <--> cartesian relation
  */
-module.exports = function CellContext(cellDataSource, drawnItemFactory, stackStep, hexDimensions) {
+module.exports = function CellContext(drawnItemFactory, stackStep, hexDimensions) {
     //Protect the constructor from being called as a normal method
     if (!(this instanceof CellContext)) {
-        return new CellContext(cellDataSource, drawnItemFactory, stackStep);
+        return new CellContext(drawnItemFactory, stackStep);
     }
     var context = this;
-    this.cellDataSource = cellDataSource;
     this.drawnItemFactory = drawnItemFactory;
     this.dx = 0;
     this.dy = 0;
     this.stackStep = stackStep;
     this.hexDimensions = hexDimensions;
     this.cellGroupsMap = {}; //empty map object to reference the individual cell groups by co-ordinate
-
-    //Add this as a listener to the cell dataSource. this.onCellDataChanged will be called when items change.
-    cellDataSource.addListener(this);
 
     // Documentation inherited from Context#init
     this.init = function(scene) {
@@ -80,6 +76,11 @@ module.exports = function CellContext(cellDataSource, drawnItemFactory, stackSte
         //Eh, don't do anything yet. Only screen resized implemented which this context doesn't care about
     };
     
+    this.setDataSource = function(dataSource) {
+        this.dataSource = dataSource;
+        var context = this;
+        dataSource.addListener('dataChanged', function(event){context.onDataChanged.call(context, event);});
+    };
 };
 
 /**

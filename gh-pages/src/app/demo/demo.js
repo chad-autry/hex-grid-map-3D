@@ -11,11 +11,11 @@ var PathDrawnItemFactory = require('../../../../src/drawnItemFactories/PathDrawn
 var ArrowDrawnItemFactory = require('../../../../src/drawnItemFactories/ArrowDrawnItemFactory.js');
 var DelegatingDrawnItemFactory = require('../../../../src/drawnItemFactories/DelegatingDrawnItemFactory.js');
 var DrawnItemContext = require('../../../../src/contexts/DrawnItemContext.js');
-var DataSource = require('../../../../src/dataSources/DataSource.js');
 var CellDrawnItemFactory = require('../../../../src/drawnItemFactories/RegularPolygonDrawnItemFactory');
 var SphereDrawnItemFactory = require('../../../../src/drawnItemFactories/SphereDrawnItemFactory');
 var FieldOfSquaresDrawnItemFactory = require('../../../../src/drawnItemFactories/FieldOfSquaresDrawnItemFactory');
 var HexDefinition = require('cartesian-hexagonal'); //external project required in constructors
+var EmittingDataSource = require('data-chains/src/EmittingDataSource.js');
 
 module.exports = angular.module( 'hexWidget.demo', [
   ui_router,
@@ -44,7 +44,7 @@ module.exports = angular.module( 'hexWidget.demo', [
     //$scope.contexts.push(new BackgroundContext());
     
     //Create the cell items datasource, drawnItemFactories, and special compound contex
-    $scope.cellDataSource = new DataSource();
+    $scope.cellDataSource = new EmittingDataSource();
     $scope.simpleDrawnItemFactory = new CellDrawnItemFactory($scope.hexDimensions);
     $scope.sphereDrawnItemFactory = new SphereDrawnItemFactory($scope.hexDimensions);
     $scope.arrowDrawnItemFactory = new ArrowDrawnItemFactory($scope.hexDimensions);
@@ -53,19 +53,21 @@ module.exports = angular.module( 'hexWidget.demo', [
     $scope.asteroidFieldDrawnItemFactory = new FieldOfSquaresDrawnItemFactory($scope.hexDimensions, 9, 20, ["#8d8468", "#86775f", "#7a6a4f", "#7f7053"]);
     $scope.cellDrawnItemFactoryMap = {simple: $scope.simpleDrawnItemFactory, sphere: $scope.sphereDrawnItemFactory,  asteroids: $scope.asteroidFieldDrawnItemFactory, arrow: $scope.arrowDrawnItemFactory};
     $scope.cellDrawnItemFactory = new DelegatingDrawnItemFactory($scope.cellDrawnItemFactoryMap);
-    $scope.cellContext = new CellContext($scope.cellDataSource, $scope.cellDrawnItemFactory, 5, $scope.hexDimensions);
-    
+    $scope.cellContext = new CellContext($scope.cellDrawnItemFactory, 5, $scope.hexDimensions);
+    $scope.cellContext.setDataSource($scope.cellDataSource);
 
     //Create and push the grid context
     $scope.contexts.push(new GridContext($scope.hexDimensions));
 
     //Define and push the paths DataSource, DrawnItemFactory, and Context
-    $scope.pathDataSource = new DataSource();
+    $scope.pathDataSource = new EmittingDataSource();
     $scope.pathDrawnItemFactory = new PathDrawnItemFactory($scope.hexDimensions);
-    $scope.contexts.push(new DrawnItemContext($scope.pathDataSource, $scope.pathDrawnItemFactory, $scope.hexDimensions));
+    $scope.pathContext = new DrawnItemContext($scope.pathDrawnItemFactory, $scope.hexDimensions);
+    $scope.pathContext.setDataSource($scope.pathDataSource);
+    $scope.contexts.push($scope.pathContext);
     
     //Definte and push the vector DataSource, DrawnItemFactory, and Context
-    $scope.vectorDataSource = new DataSource();
+    $scope.vectorDataSource = new EmittingDataSource();
     $scope.vectorDrawnItemFactory = new VectorDrawnItemFactory($scope.hexDimensions);
     $scope.contexts.push(new DrawnItemContext($scope.vectorDataSource, $scope.vectorDrawnItemFactory, $scope.hexDimensions));
     
