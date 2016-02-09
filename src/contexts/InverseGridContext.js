@@ -52,7 +52,7 @@ var rgb = hexToRgb('#15b01a');
       //particle.rotation.x = Math.random() * 3.15;
       //particle.rotation.y = Math.random() * 3.15;
       particle.rotation.z = Math.PI/2;
-      particle.color = new babylon.Color4(.5, .5, .5, 0.5);
+      particle.color = new babylon.Color4(0.5, 0.5, 0.5, 0.5);
   };
  
    // model : triangle
