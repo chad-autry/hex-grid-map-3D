@@ -48,6 +48,8 @@ var babylon = require('babylonjs/babylon.max.js');
     var mousemoved = false;
     var mouseDownPickResult;
     var mouseDownContext; //The context which has "claimed" the mouse down event
+    var initialDownX;
+    var initialDownY;
      
     // Watch for browser/canvas resize events
     if (!!window) {
@@ -70,7 +72,9 @@ var babylon = require('babylonjs/babylon.max.js');
          down = true;
          mousemoved = false;
          var relativeX = e.pageX - canvas.offsetLeft;
+         initialDownX = relativeX;
          var relativeY = e.pageY - canvas.offsetTop;
+         initialDownY = relativeY;
          //Pick the point on the invisible picker plane at the screen co-ordinates under the mouse
          mouseDownPickResult = board.scene.pick(relativeX, relativeY,
             function(mesh) {
@@ -92,7 +96,11 @@ var babylon = require('babylonjs/babylon.max.js');
         }
          var relativeX = e.pageX - canvas.offsetLeft;
          var relativeY = e.pageY - canvas.offsetTop;
-
+         
+        //Check for a minimum drag distance before this is counted as a drag
+        if (!(initialDownX > 5 || initialDownY > 5)) {
+            return;
+        }
 
         if (!!mouseDownContext) {
             //A context has claimed further mouse drag

@@ -69,7 +69,9 @@ module.exports = angular.module( 'hexWidget.demo', [
     //Definte and push the vector DataSource, DrawnItemFactory, and Context
     $scope.vectorDataSource = new EmittingDataSource();
     $scope.vectorDrawnItemFactory = new VectorDrawnItemFactory($scope.hexDimensions);
-    $scope.contexts.push(new DrawnItemContext($scope.vectorDataSource, $scope.vectorDrawnItemFactory, $scope.hexDimensions));
+    var vectorContext = new DrawnItemContext($scope.vectorDrawnItemFactory, $scope.hexDimensions)
+    vectorContext.setDataSource($scope.vectorDataSource);
+    $scope.contexts.push(vectorContext);
     
     //Push the above grid cell context defined earlier
     $scope.contexts.push($scope.cellContext);
