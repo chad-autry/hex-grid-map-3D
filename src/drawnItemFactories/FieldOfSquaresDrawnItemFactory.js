@@ -48,11 +48,13 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     //Finally bottom left quarter
     var cube4 = this.createSquare(-1*this.hexDefinition.hexagon_edge_to_edge_width/2, 0, 0,this.hexDefinition.hexagon_half_wide_width, scene);
 
-    cube2.parent = cube3.parent = cube4.parent = cube1;
-    
-    cube1.data = {};
-    cube1.data.item = item;
-    return cube1;
+    var parent = babylon.Mesh.CreateBox("Box1", 0, scene);
+    parent.visibility = 0;
+    cube1.parent = cube2.parent = cube3.parent = cube4.parent = parent;
+
+    parent.data = {};
+    parent.data.item = item;
+    return parent;
 };
 
 /**
@@ -90,7 +92,6 @@ module.exports.prototype.createSquare = function (minX, maxX, minY, maxY, scene)
     box.rotation.x = Math.random() * Math.PI/2;
     box.rotation.y = Math.random() * Math.PI/2;
     box.rotation.z = Math.random() * Math.PI/2;
-    
     box.position.x = x;
     box.position.y = y;
     var material = new babylon.StandardMaterial("textureX", scene);
