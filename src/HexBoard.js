@@ -102,21 +102,21 @@ var babylon = require('babylonjs/babylon.max.js');
             return;
         }
 
+        //Pick the point on the invisible picker plane at the screen co-ordinates under the mouse
+        var pickResult = board.scene.pick(relativeX, relativeY,
+            function(mesh) {
+                return mesh === board.pickerPlane;
+            }
+        );
+            
         if (!!mouseDownContext) {
             //A context has claimed further mouse drag
-            mouseDownContext.mouseDragged(relativeX, relativeY);
+            mouseDownContext.mouseDragged(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y);
         } else {
         
             //Figure out where the camera needs to be targeted, for the initial mouse down position to stay under the mouse
             
             //The current point under the mouse is related to the current center of the screen, as the initial point under the mouse needs to be related to the new center
-            
-            //Pick the point on the invisible picker plane at the screen co-ordinates under the mouse
-            var pickResult = board.scene.pick(relativeX, relativeY,
-                function(mesh) {
-                    return mesh === board.pickerPlane;
-                });
-                
             //Find how that relates to the point on the plane in the middle of the screen
             var planeDx = pickResult.pickedPoint.x - board.cameraTargetX;
             var planeDy = pickResult.pickedPoint.y - board.cameraTargetY;

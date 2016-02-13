@@ -40,7 +40,7 @@ module.exports = function CellContext(drawnItemFactory, stackStep, hexDimensions
     
 
     // Documentation inherited from Context#mouseDown
-    this.mouseDown = function(clickedX, clickedY) {
+    this.mouseDown = function(clickedX, clickedY, planarX, planarY) {
          var mousePickResult = context.scene.pick(clickedX, clickedY,
                function(mesh) {
                    return !!mesh.isCellItem;
@@ -51,31 +51,29 @@ module.exports = function CellContext(drawnItemFactory, stackStep, hexDimensions
          }
     };
 
-
     // Documentation inherited from Context#updatePosition
     this.updatePosition = function( middleX, middleY) {
         //Do nothing, the camera moves and the world stay stationary
     };
-    
+
     // Documentation inherited from Context#mouseDragged
-    this.mouseDragged = function( x, y, eventDx, eventDy) {
-        //Don't have any logic to directlly drag cell items
+    this.mouseDragged = function( screenX, screenY, planarX, planarY) {
+        if (!!this.clickedItem.data.item.onDrag) {
+            this.clickedItem.data.item.onDrag(screenX, screenY, planarX, planarY);
+        }
     };
     
 
     
     // Documentation inherited from Context#mouseReleased
     this.mouseReleased = function(wasDrag) {
-        if (!wasDrag && this.clickedItem.data.item.hasOwnProperty('onClick')) {
+        if (!wasDrag && !!this.clickedItem.data.item.onClick) {
             this.clickedItem.data.item.onClick();
+        } else if (wasDrag && !!this.clickedItem.data.item.onRelease) {
+            this.clickedItem.data.item.onRelease();
         }
     };
-    
-    // Documentation inherited from Context#reDraw
-    this.reDraw = function(screenResized, mapRotated, mapScaled) {
-        //Eh, don't do anything yet. Only screen resized implemented which this context doesn't care about
-    };
-    
+
     this.setDataSource = function(dataSource) {
         this.dataSource = dataSource;
         var context = this;
