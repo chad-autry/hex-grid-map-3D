@@ -26,49 +26,121 @@ module.exports = function SphereDrawnItemFactory(hexDefinition) {
  * @param {Color} item.backgroundColor - The base color of the sphere
  * @param {Color} item.lineColor - The color of the latitude and longitude lines
  * @param {number} item.size - The size to draw the sphere at relative to a hex 100 means 100%
- * @param {number} item.rotation - Starting as if viewed from above, the rotation of the top of the sphere up and back into the x-y plane
- * @param {number[]} item.greatCircleAngles - Longitude lines, measured in radians, straight up and down 0, clockwise +, counterclockwise -
- * @param {number[]} item.latitudeAngles - Latitude lines to draw measured in radians, equator 0, up +, down -
  * @param {number} item.lineWidth - The thickness of the latitude & longitude lines
- * @param {external:Star=} item.borderStar - The properties of a paper.js Star to use as the border of the sphere (gives it a serated border)
+ * @param {boolean} item.bright - True if this item is a star
  * @param {onClick=} item.onClick - The callback to use when clicking the vector
- * @returns {external:Item} The paper.js Item representing the vector
+ * @returns {external:Mesh} The babylon.js Mesh representing the item
  * @implements {DrawnItemFactory#getDrawnItem}
  */
 module.exports.prototype.getDrawnItem = function(item, scene) {
-    var diameter = item.size * this.hexDefinition.hexagon_edge_to_edge_width/100; //Draw it a bit big, we'll trim it into a circle
+    var diameter = item.size * this.hexDefinition.hexagon_edge_to_edge_width/100;
     var sphere = babylon.Mesh.CreateSphere(item.id, 16, diameter, scene);
-    var material = new babylon.StandardMaterial("textureX", scene);
-    var rgb = this.hexToRgb(item.backgroundColor);
-    material.diffuseColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
-    material.specularColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
-    material.emissiveColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
-    sphere.material = material;
     
     
-    //Use a colored torus for the latitude and longitude lines (look at switching to a texture later)
-    material = new babylon.StandardMaterial("textureX", scene);
-    rgb = this.hexToRgb(item.lineColor);
-    material.diffuseColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
-    material.specularColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
-    material.emissiveColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
-    var torus;
-    item.greatCircleAngles.forEach(function(angle) {
-        torus = babylon.Mesh.CreateTorus("torus", diameter, item.lineWidth, 16, scene, false);
-        torus.rotation.z = angle;
-        torus.material = material;
-        torus.parent = sphere;
-    });
+    var latitudeTexture = new babylon.DynamicTexture("dynamic texture", 512, scene, true);
+
+    var latitudeMaterial = new babylon.StandardMaterial('mat', scene);
+    latitudeMaterial.diffuseTexture = latitudeTexture;
+    latitudeMaterial.specularColor = new babylon.Color3(0, 0, 0);
+    latitudeMaterial.emissiveColor = new babylon.Color3(0.1, 0.1, 0.1);
+    latitudeMaterial.backFaceCulling = true;
+    latitudeMaterial.zOffset = -5;
     
-    item.latitudeAngles.forEach(function(angle) {
-        torus = babylon.Mesh.CreateTorus("torus", diameter*Math.cos(angle), item.lineWidth, 16, scene, false);
-        //rotate it flat
-        torus.position.z = diameter*Math.sin(angle)/2;
-        torus.rotation.x = Math.PI/2;
-        torus.material = material;
-        torus.parent = sphere;
-    });
+    sphere.material = latitudeMaterial;
+
+    var context = latitudeTexture.getContext();
+    var size = latitudeTexture.getSize();
+	
+
+    context.fillStyle = item.backgroundColor;
+    context.fillRect(0, 0, size.width, size.height);
     
+    //With how a texture is mapped against a sphere, we can do all the latitude lines and they have a consistent thickness
+    var lineWidth = 2 * (item.lineWidth / (Math.PI * diameter)) * size.height; //Ratio of Latitudinal circumference to texture height
+    context.lineWidth = lineWidth;
+    context.strokeStyle = item.lineColor;
+    
+    context.beginPath();
+    context.moveTo(0, size.height/2);
+    context.lineTo(size.width, size.height/2);
+    context.stroke();
+    
+    context.beginPath();
+    context.moveTo(0, size.height/6);
+    context.lineTo(size.width, size.height/6);
+    context.stroke();
+    
+    context.beginPath();
+    context.moveTo(0, size.height/3);
+    context.lineTo(size.width, size.height/3);
+    context.stroke();
+    
+    context.beginPath();
+    context.moveTo(0, 2*size.height/3);
+    context.lineTo(size.width, 2*size.height/3);
+    context.stroke();
+    
+    context.beginPath();
+    context.moveTo(0, 5*size.height/6);
+    context.lineTo(size.width, 5*size.height/6);
+    context.stroke();
+    
+    
+    //For the longitudinal lines, if we just drew them straight they'd be shrunk at the poles.
+    //Draw them bit by bit, with the width appropriate for the longitude
+    context.lineWidth = 1;
+    var equatorLineWidth = lineWidth;
+    for (var i = 0; i < size.height; i++) {
+        //What's our compresion ratio? The ratio of the equator circumference to the current slice's circumference
+        lineWidth = equatorLineWidth * ((Math.PI * diameter) / (2 * Math.PI * (diameter * Math.sin(Math.PI * i / size.height))));
+        
+        //Draw the wide line just like a printer
+        //The 0.5 is a twiddle factor because canvas co-ordinates are between pixels
+
+        //Each path is one line. 2 lines meeting look turn into a great circle around the sphere.
+        //Hard coded to 6 great circle, someone could make them configureable again if desired.
+        context.beginPath();
+        context.moveTo((size.height/12) - 0.5 * lineWidth , i + 0.5);
+        context.lineTo((size.height/12) + 0.5 * lineWidth, i + 0.5);
+        context.stroke();
+        
+        context.beginPath();
+        context.moveTo((size.height/4) - 0.5 * lineWidth , i + 0.5);
+        context.lineTo((size.height/4) + 0.5 * lineWidth, i + 0.5);
+        context.stroke();
+        
+        context.beginPath();
+        context.moveTo((5*size.height/12) - 0.5 * lineWidth , i + 0.5);
+        context.lineTo((5*size.height/12) + 0.5 * lineWidth, i + 0.5);
+        context.stroke();
+        
+        context.beginPath();
+        context.moveTo((7*size.height/12) - 0.5 * lineWidth , i + 0.5);
+        context.lineTo((7*size.height/12) + 0.5 * lineWidth, i + 0.5);
+        context.stroke();
+        
+        context.beginPath();
+        context.moveTo((9*size.height/12) - 0.5 * lineWidth , i + 0.5);
+        context.lineTo((9*size.height/12) + 0.5 * lineWidth, i + 0.5);
+        context.stroke();
+        
+        context.beginPath();
+        context.moveTo((11*size.height/12) - 0.5 * lineWidth , i + 0.5);
+        context.lineTo((11*size.height/12) + 0.5 * lineWidth, i + 0.5);
+        context.stroke();
+    }
+    latitudeTexture.update(true);
+    if(!!item.bright) {
+        //The item is a star, give it an Emissive Color
+        latitudeMaterial.emissiveColor = new babylon.Color3(0.5, 0.5, 0.5);
+        //Give it a corona effect, if you want to get really cool and distracting could give it a procedural fire texture
+        var vls = new babylon.VolumetricLightScatteringPostProcess('vls', { postProcessRatio: 1.0, passRatio: 1.0 }, item.camera, sphere, 150, babylon.Texture.BILINEAR_SAMPLINGMODE, item.engine, false);
+    }
+
+//item.lineColor
+
+    //My native co-ordinate system is rotated from Babylon.js
+    sphere.rotation.x = Math.PI/2;
     sphere.data = {};
     sphere.data.item = item;
     return sphere;
