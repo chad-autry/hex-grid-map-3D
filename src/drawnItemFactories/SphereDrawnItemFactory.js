@@ -44,7 +44,6 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     latitudeMaterial.specularColor = new babylon.Color3(0, 0, 0);
     latitudeMaterial.emissiveColor = new babylon.Color3(0.1, 0.1, 0.1);
     latitudeMaterial.backFaceCulling = true;
-    latitudeMaterial.zOffset = -5;
     
     sphere.material = latitudeMaterial;
 
