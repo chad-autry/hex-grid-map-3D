@@ -94,7 +94,7 @@ module.exports = angular.module( 'hexWidget.demo', [
         
         //Add a star
         //The rotation is the "nearly isometric" converted to radians. #f97306 = xkcd orange
-        $scope.cellDataSource.addItems([{id:'sun', type:'sphere', camera:$scope.board.camera, engine:$scope.board.engine, bright: true, size: 100, lineWidth: 10, greatCircleAngles: [0, Math.PI/3, -Math.PI/3], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6, -Math.PI/3], 
+        $scope.cellDataSource.addItems([{id:'sun', type:'sphere', size: 100, lineWidth: 5, greatCircleAngles: [0, Math.PI/3, -Math.PI/3], latitudeAngles: [0, Math.PI/6, Math.PI/3, -Math.PI/6, -Math.PI/3], 
         lineColor: '#f97306', backgroundColor: '#ffff14', borderStar: {radius1: 3, radius2: 6, points: 20, borderColor: '#f97306'}, u:0, v:0}]);
         
         //Add a sphere to represent earth

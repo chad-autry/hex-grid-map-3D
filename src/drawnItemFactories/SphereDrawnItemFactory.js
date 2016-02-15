@@ -130,14 +130,57 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
         context.stroke();
     }
     latitudeTexture.update(true);
-    if(!!item.bright) {
+    if(!!item.borderStar) {
+    
         //The item is a star, give it an Emissive Color
-        latitudeMaterial.emissiveColor = new babylon.Color3(0.5, 0.5, 0.5);
-        //Give it a corona effect, if you want to get really cool and distracting could give it a procedural fire texture
-        var vls = new babylon.VolumetricLightScatteringPostProcess('vls', { postProcessRatio: 1.0, passRatio: 1.0 }, item.camera, sphere, 150, babylon.Texture.BILINEAR_SAMPLINGMODE, item.engine, false);
-    }
+        latitudeMaterial.emissiveColor = new babylon.Color3(1, 1, 1);
+        //Give it a corona billboard
+        var corona = babylon.MeshBuilder.CreateDisc("t", {radius: diameter/2 + item.borderStar.radius2, tessellation: 20, sideOrientation: babylon.Mesh.DOUBLESIDE}, scene);
+        
+        var coronaTexture = new babylon.DynamicTexture("dynamic texture", 512, scene, true);
+        coronaTexture.hasAlpha = true;
+	
+	var coronaMaterial = new babylon.StandardMaterial('mat', scene);
+	coronaMaterial.emissiveColor = new babylon.Color3(1, 1, 1);
+        coronaMaterial.diffuseTexture = coronaTexture;
+        corona.material = coronaMaterial;
+        
+        context = coronaTexture.getContext();
+	size = coronaTexture.getSize();
+		
+        var rot = Math.PI / 2 * 3;
+        var x = size.width/2;
+        var y = size.height/2;
+        var step = Math.PI / item.borderStar.points;
 
-//item.lineColor
+        var outerRadius = size.width / 2;
+        var innerRadius = (outerRadius / (diameter/2 + item.borderStar.radius2)) * (diameter/2 + item.borderStar.radius1);
+
+        context.beginPath();
+        context.moveTo(size.width/2, size.height/2 - outerRadius);
+        for (i = 0; i < item.borderStar.points; i++) {
+            x = size.width/2 + Math.cos(rot) * outerRadius;
+            y = size.height/2 + Math.sin(rot) * outerRadius;
+            context.lineTo(x, y);
+            rot += step;
+
+            x = size.width/2 + Math.cos(rot) * innerRadius;
+            y = size.height/2 + Math.sin(rot) * innerRadius;
+            context.lineTo(x, y);
+            rot += step;
+        }
+        context.lineTo(size.width/2, size.height/2 - outerRadius);
+        context.closePath();
+        context.lineWidth = 0;
+        context.strokeStyle = item.lineColor;
+        context.stroke();
+        context.fillStyle = item.borderStar.borderColor;
+        context.fill();
+        coronaTexture.update(true);
+        corona.billboardMode = babylon.Mesh.BILLBOARDMODE_ALL;
+        corona.parent = sphere;
+        
+    }
 
     //My native co-ordinate system is rotated from Babylon.js
     sphere.rotation.x = Math.PI/2;
