@@ -48,8 +48,10 @@ module.exports.prototype.onDataChanged = function(event) {
         }
         mesh = this.drawnItemFactory.getDrawnItem(item, this.scene);
         if (!mesh) {
-            //Couldn't make a mesh out of the item
+            //Couldn't make a mesh out of the item, onther link should deal with it
+            added.push(event.added[i]);
             continue;
+            
         }
         mesh.data = {};
         mesh.data.item = item;

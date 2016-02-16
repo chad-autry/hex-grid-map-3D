@@ -4,11 +4,7 @@
  * The class and module are the same thing, the contructor comment takes precedence.
  * @module CellContext
  */
- 
-/**
-
- */
- 
+  
 /**
  * This is the context object which manages the click interaction of Cell items
  * @implements {Context}
@@ -61,5 +57,21 @@ module.exports = function CellContext() {
         } else if (wasDrag && !!this.clickedItem.data.item.onRelease) {
             this.clickedItem.data.item.onRelease();
         }
+    };
+
+    /*
+     * Listen for added items which can claim the mouse down for dragging
+     */
+    this.setDataSource = function(dataSource) {
+        this.dataSource = dataSource;
+        var context = this;
+        dataSource.addListener('dataChanged', function(event){
+           for (var i = 0; i < event.added.length; i++) {
+               if (event.added[i].isCellItem && !!event.added[i].data.item.dragged) {
+                   //The item was 'dragged' into existence and should take over the mouse interaction
+                   context.clickedItem = event.added[i];
+               }
+           }
+        });
     };
 };

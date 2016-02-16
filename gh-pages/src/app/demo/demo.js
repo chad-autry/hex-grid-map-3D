@@ -17,6 +17,7 @@ var FieldOfSquaresDrawnItemFactory = require('../../../../src/drawnItemFactories
 var DrawnItemDataLink = require('../../../../src/dataLinks/DrawnItemDataLink');
 var PlanarPositioningDataLink = require('../../../../src/dataLinks/PlanarPositioningDataLink');
 var ZStackingDataLink = require('../../../../src/dataLinks/ZStackingDataLink');
+var CloningDataLink = require('../../../../src/dataLinks/CloningDataLink');
 var HexDefinition = require('cartesian-hexagonal'); //external project required in constructors
 var EmittingDataSource = require('data-chains/src/EmittingDataSource.js');
 
@@ -60,9 +61,11 @@ module.exports = angular.module( 'hexWidget.demo', [
     $scope.drawnItemDataLink = new DrawnItemDataLink($scope.cellDrawnItemFactory);
     $scope.drawnItemDataLink.setDataSource($scope.cellDataSource);
 
+    $scope.cloningDataLink = new CloningDataLink();
+    $scope.cloningDataLink.setDataSource($scope.drawnItemDataLink);
 
     $scope.planarPositioningDataLink = new PlanarPositioningDataLink($scope.hexDimensions);
-    $scope.planarPositioningDataLink.setDataSource($scope.drawnItemDataLink);
+    $scope.planarPositioningDataLink.setDataSource($scope.cloningDataLink);
     
     $scope.ZStackingDataLink = new ZStackingDataLink(5);
     $scope.ZStackingDataLink.setDataSource($scope.planarPositioningDataLink);
@@ -87,7 +90,8 @@ module.exports = angular.module( 'hexWidget.demo', [
     //Push the above grid cell context defined earlier
     $scope.contexts.push($scope.cellContext);
 
-    //Create and push the LensFlareContext
+
+    $scope.cellContext.setDataSource($scope.ZStackingDataLink);
     //$scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
     $scope.globalMouseClicked = function(dx, x, dy, y){
         var hexagonalCoordinates = $scope.hexDimensions.getReferencePoint(x - dx, y - dy);
@@ -188,7 +192,14 @@ module.exports = angular.module( 'hexWidget.demo', [
 	    }
         };
         
-        $scope.cellDataSource.addItems([{id:'dave', type:'simple', radius: 30, sides: 3, color: '#15b01a', u:0, v:4, onClick:onClickDave}]);
+        var onDragDave = function(screenX, screenY, planarX, planarY) {
+            if (!this.hasVelocity) {
+                $scope.cellDataSource.addItems([{id:'daveVelocity', type:'clone', clonesId:'dave', cloneAlpha:0.5, cloneScale: 0.75, dragged:true, u:0, v:4}]);
+                this.hasVelocity = true;
+            }
+        }
+        
+        $scope.cellDataSource.addItems([{id:'dave', type:'simple', radius: 30, sides: 3, color: '#15b01a', u:0, v:4, onClick:onClickDave, onDrag: onDragDave}]);
 
         //Poetry
         $scope.cellDataSource.addItems([{id:'oneShip',type:'simple', radius: 30, sides: 3, color: '#ffffff', u:3, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'One ship'});}}]);

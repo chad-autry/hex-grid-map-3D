@@ -65,7 +65,7 @@ module.exports.prototype.onDataChanged = function(event) {
         
     }
     
-    this.emitEvent('dataChanged', [{added:event.updated, removed:event.updated, updated:event.updated}]);
+    this.emitEvent('dataChanged', [{added:event.added, removed:event.removed, updated:event.updated}]);
 };
 
 module.exports.prototype.setScene = function(scene) {
