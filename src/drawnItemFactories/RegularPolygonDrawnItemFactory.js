@@ -32,17 +32,18 @@ module.exports = function RegularPolygonDrawnItemFactory(hexDefinition) {
  * @todo consider using symbols for performance
  */
 module.exports.prototype.getDrawnItem = function(item, scene) {
-    
-   var cylinder = babylon.Mesh.CreateCylinder("test"+this.internalId++, 
-        2, item.radius, item.radius - 5, item.sides, 2, scene, true);
-        var material = new babylon.StandardMaterial("textureX"+this.internalId, scene);
-        var rgb = this.hexToRgb(item.color);
-    material.diffuseColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
-    cylinder.material = material;
+   //var cap = babylon.MeshBuilder.CreateDisc(item.id, {diameter: item.diameter - item.thickness, tessellation: item.sides,height:thickness, sideOrientation: babylon.Mesh.DOUBLESIDE}, scene); 
+   var cylinder = babylon.MeshBuilder.CreateCylinder(item.id, {diameterTop: item.diameter - item.thickness, diameterBottom: item.diameter, tessellation: item.sides, height:item.thickness, sideOrientation: babylon.Mesh.DOUBLESIDE}, scene);
+   var material = new babylon.StandardMaterial("textureX"+this.internalId, scene);
+   var rgb = this.hexToRgb(item.color);
+   material.diffuseColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
+   cylinder.material = material;
+   
    this.internalId++;
    cylinder.data = {};
    cylinder.data.item = item;
-   cylinder.rotation.x = -Math.PI/2;
+   cylinder.rotation.y = -Math.PI/2;
+   cylinder.rotation.z = -Math.PI/2;
    return cylinder;
    /*
        var radius = item.radius * this.hexDefinition.hexagon_edge_to_edge_width/200; //Draw it a bit big, we'll trim it into a circle

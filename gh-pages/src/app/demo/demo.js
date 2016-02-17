@@ -67,7 +67,7 @@ module.exports = angular.module( 'hexWidget.demo', [
     $scope.planarPositioningDataLink = new PlanarPositioningDataLink($scope.hexDimensions);
     $scope.planarPositioningDataLink.setDataSource($scope.cloningDataLink);
     
-    $scope.ZStackingDataLink = new ZStackingDataLink(5);
+    $scope.ZStackingDataLink = new ZStackingDataLink(10);
     $scope.ZStackingDataLink.setDataSource($scope.planarPositioningDataLink);
     
     //Create and push the grid context
@@ -151,17 +151,17 @@ module.exports = angular.module( 'hexWidget.demo', [
         $scope.cellDataSource.addItems([{id:'ma6',type:'arrow', u: 4, v: 7, lineWidth: 3, lineColor: '#929591', rotation: 120, scaleLength: 0.75, scaleWidth:0.75}]);
         
         //Add a fleet of red 'ships' (triangles) on the dark side of the moon, and a fleet of green ships at the sun
-        $scope.cellDataSource.addItems([{id:'gs1',type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs1',type:'simple', radius: 55, sides: 3, color: '#e50000', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{id:'gs2',type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs2',type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{id:'gs3',type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs3',type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{id:'gs4',type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs4',type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{id:'gs5',type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs5',type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{id:'gs6',type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs6',type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{id:'gs7',type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs7',type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{id:'gs8',type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs8',type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{id:'gs9',type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs9',type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{id:'gs10',type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs10',type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
-        $scope.cellDataSource.addItems([{id:'gs11',type:'simple', radius: 30, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs11',type:'simple', radius: 30, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{id:'gs1',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs1',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{id:'gs2',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs2',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{id:'gs3',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs3',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{id:'gs4',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs4',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{id:'gs5',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs5',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{id:'gs6',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs6',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{id:'gs7',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs7',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{id:'gs8',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs8',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{id:'gs9',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs9',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{id:'gs10',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs10',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:2, v:9}]);
+        $scope.cellDataSource.addItems([{id:'gs11',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:1, v:0}, {id:'rs11',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:2, v:9}]);
 
         //A small asteroid field. Double asteroids in the middle
         var onClickAsteroids = function() {
@@ -175,7 +175,7 @@ module.exports = angular.module( 'hexWidget.demo', [
         var onClickStation = function() {
             $rootScope.$broadcast('addAlert',{type:'success', msg:"Do you believe I'm a space station? Use your imagination"});
         };
-        $scope.cellDataSource.addItems([{id:'station', type:'simple', radius: 30, sides: 5, color: '#0343df', u:6, v:5, onClick:onClickStation}]);
+        $scope.cellDataSource.addItems([{id:'station', type:'simple', diameter: 40, thickness:5, sides: 5, color: '#0343df', u:6, v:5, onClick:onClickStation}]);
         
         
         //Dave
@@ -199,14 +199,14 @@ module.exports = angular.module( 'hexWidget.demo', [
             }
         }
         
-        $scope.cellDataSource.addItems([{id:'dave', type:'simple', radius: 30, sides: 3, color: '#15b01a', u:0, v:4, onClick:onClickDave, onDrag: onDragDave}]);
+        $scope.cellDataSource.addItems([{id:'dave', type:'simple', diameter: 40, thickness:5, sides: 3, color: '#15b01a', u:0, v:4, onClick:onClickDave, onDrag: onDragDave}]);
 
         //Poetry
-        $scope.cellDataSource.addItems([{id:'oneShip',type:'simple', radius: 30, sides: 3, color: '#ffffff', u:3, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'One ship'});}}]);
-        $scope.cellDataSource.addItems([{id:'twoShip',type:'simple', radius: 30, sides: 3, color: '#ffffff', u:4, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Two ship'});}}]);
-        $scope.cellDataSource.addItems([{id:'twoShip2',type:'simple', radius: 30, sides: 3, color: '#ffffff', u:4, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Two ship'});}}]);
-        $scope.cellDataSource.addItems([{id:'redShip',type:'simple', radius: 30, sides: 3, color: '#e50000', u:5, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Red ship'});}}]);
-        $scope.cellDataSource.addItems([{id:'blueShip',type:'simple', radius: 30, sides: 3, color: '#0343df', u:6, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Blue ship'});}}]);
+        $scope.cellDataSource.addItems([{id:'oneShip',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#ffffff', u:3, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'One ship'});}}]);
+        $scope.cellDataSource.addItems([{id:'twoShip',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#ffffff', u:4, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Two ship'});}}]);
+        $scope.cellDataSource.addItems([{id:'twoShip2',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#ffffff', u:4, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Two ship'});}}]);
+        $scope.cellDataSource.addItems([{id:'redShip',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#e50000', u:5, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Red ship'});}}]);
+        $scope.cellDataSource.addItems([{id:'blueShip',type:'simple', diameter: 40, thickness:5, sides: 3, color: '#0343df', u:6, v:0, onClick:function(){$rootScope.$broadcast('addAlert',{type:'info', msg:'Blue ship'});}}]);
         
         //A path around the Sun, Could represent the danger area for radiation
         $scope.pathDataSource.addItems([{width: 10, color: '#f97306', closed: true, points: [[0,-2],[-2, 0],[-2, 2],[0, 2],[2, 0],[2, -2]], onClick:function(){$rootScope.$broadcast('addAlert',{type:'warning', msg:'Radiation! Beware!'});}}]);
