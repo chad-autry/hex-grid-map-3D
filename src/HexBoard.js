@@ -98,7 +98,7 @@ var babylon = require('babylonjs/babylon.max.js');
          var relativeY = e.pageY - canvas.offsetTop;
          
         //Check for a minimum drag distance before this is counted as a drag
-        if (!(initialDownX > 5 || initialDownY > 5)) {
+        if (!(Math.abs(initialDownX - relativeX) > 5 || Math.abs(initialDownY - relativeY) > 5)) {
             return;
         }
 
