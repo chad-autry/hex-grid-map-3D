@@ -24,7 +24,7 @@ module.exports.prototype.onDataChanged = function(event) {
 
     var i, mesh, item, groupKey, cellGroup;
     var added = [];
-    var updated = []
+    var updated = [];
     for (i = 0; i < event.added.length; i++) {
         if (!!event.added[i].clonesId) {
             mesh = this.meshMap[event.added[i].clonesId];

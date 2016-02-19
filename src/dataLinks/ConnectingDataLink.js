@@ -25,7 +25,7 @@ module.exports.prototype.onDataChanged = function(event) {
 
     var i, mesh, item, groupKey, cellGroup;
     var added = [];
-    var updated = []
+    var updated = [];
     for (i = 0; i < event.added.length; i++) {
         
         if (!!event.added[i].target && !!event.added[i].source) {
@@ -49,8 +49,8 @@ module.exports.prototype.onDataChanged = function(event) {
 	        particleSystem.emitter = emitter0;
 	        particleSystem.emitRate = 5;
 	        //particleSystem.blendMode = babylon.ParticleSystem.BLENDMODE_ONEONE;
-	        particleSystem.direction1 = target.position
-	        particleSystem.direction2 = target.position
+	        particleSystem.direction1 = target.position;
+	        particleSystem.direction2 = target.position;
 	        //particleSystem.color1 = new babylon.Color4(1, 1, 0, 1);
 	        //particleSystem.color2 = new babylon.Color4(1, 0.5, 0, 1);
 	        //particleSystem.gravity = new babylon.Vector3(0, -1.0, 0);

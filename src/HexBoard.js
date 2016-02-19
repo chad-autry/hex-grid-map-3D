@@ -69,11 +69,20 @@ var babylon = require('babylonjs/babylon.max.js');
     }
     
      canvas.onmousedown = function(e) {
+         e.preventDefault();
          down = true;
          mousemoved = false;
-         var relativeX = e.pageX - canvas.offsetLeft;
+         
+         var pageX = e.pageX;
+         var pageY = e.pageY;
+
+         if (!!e.touches) {
+             pageX = e.touches[0].pageX;
+            pageY = e.touches[0].pageY;
+         }
+         var relativeX = pageX - canvas.offsetLeft;
          initialDownX = relativeX;
-         var relativeY = e.pageY - canvas.offsetTop;
+         var relativeY = pageY - canvas.offsetTop;
          initialDownY = relativeY;
          //Pick the point on the invisible picker plane at the screen co-ordinates under the mouse
          mouseDownPickResult = board.scene.pick(relativeX, relativeY,
@@ -91,11 +100,20 @@ var babylon = require('babylonjs/babylon.max.js');
      
      
     canvas.onmousemove = function(e) {
+        e.preventDefault();
         if (down === false) {
             return;
         }
-         var relativeX = e.pageX - canvas.offsetLeft;
-         var relativeY = e.pageY - canvas.offsetTop;
+        var pageX = e.pageX;
+        var pageY = e.pageY;
+        
+        if (!!e.touches) {
+            pageX = e.touches[0].pageX;
+            pageY = e.touches[0].pageY;
+        }
+        
+        var relativeX = pageX - canvas.offsetLeft;
+        var relativeY = pageY - canvas.offsetTop;
          
         //Check for a minimum drag distance before this is counted as a drag
         if (!(Math.abs(initialDownX - relativeX) > 5 || Math.abs(initialDownY - relativeY) > 5)) {
@@ -136,8 +154,12 @@ var babylon = require('babylonjs/babylon.max.js');
         }
         mousemoved = true;
      };
+     
+    canvas.addEventListener('touchmove', canvas.onmousemove, false);
+    canvas.addEventListener('touchstart', canvas.onmousedown, false);
 
     canvas.onmouseleave = function(e) {
+        e.preventDefault();
         if (down === false) {
             return;
         } 
@@ -157,6 +179,7 @@ var babylon = require('babylonjs/babylon.max.js');
         mousemoved = false;
     };
     canvas.onmouseup = canvas.onmouseleave;
+    canvas.addEventListener('touchend', canvas.onmouseup, false);
     
     /**
      * Clears the canvas so the HexBoard may be re-used
