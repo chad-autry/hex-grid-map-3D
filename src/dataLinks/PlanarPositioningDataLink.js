@@ -33,8 +33,11 @@ module.exports.prototype.onDataChanged = function(event) {
         mesh.position.y = pixelCoordinates.y;
     }
     for (i = 0; i < event.updated.length; i++) {
-        mesh = event.added[i];
+        mesh = event.updated[i];
         item = mesh.data.item;
+        if (!!item.skipCellCentering) {
+            continue;
+        }
         pixelCoordinates = this.hexDimensions.getPixelCoordinates(item.u, item.v);
         mesh.position.x = pixelCoordinates.x;
         mesh.position.y = pixelCoordinates.y;

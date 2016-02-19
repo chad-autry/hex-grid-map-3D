@@ -2,7 +2,7 @@
 /**
  * Since only a single constructor is being exported as module.exports this comment isn't documented.
  * The class and module are the same thing, the contructor comment takes precedence.
- * @module ZStackingDataLink
+ * @module CloningDataLink
  */
  
  var makeDataLink = require('data-chains/src/DataLinkMixin');
@@ -24,6 +24,7 @@ module.exports.prototype.onDataChanged = function(event) {
 
     var i, mesh, item, groupKey, cellGroup;
     var added = [];
+    var updated = []
     for (i = 0; i < event.added.length; i++) {
         if (!!event.added[i].clonesId) {
             mesh = this.meshMap[event.added[i].clonesId];
@@ -41,6 +42,7 @@ module.exports.prototype.onDataChanged = function(event) {
             cloned.data.item = event.added[i];
             cloned.isCellItem = mesh.isCellItem;
             added.push(cloned);
+            this.meshMap[event.added[i].id] = cloned;
             
         } else {
             this.meshMap[event.added[i].data.item.id] = event.added[i];
@@ -48,8 +50,16 @@ module.exports.prototype.onDataChanged = function(event) {
         }
        
     }
-    
-    this.emitEvent('dataChanged', [{added:added, removed:event.removed, updated:event.updated}]);
+    for (i = 0; i < event.updated.length; i++) {
+        if (!!event.updated[i].clonesId) {
+            this.meshMap[event.updated[i].id].data.item = event.updated[i];
+            updated.push(this.meshMap[event.updated[i].id]);
+            
+        } else {
+            updated.push(event.updated[i]);
+        }
+    }
+    this.emitEvent('dataChanged', [{added:added, removed:event.removed, updated:updated}]);
 };
 
 module.exports.prototype.setScene = function(scene) {

@@ -18,6 +18,7 @@ var DrawnItemDataLink = require('../../../../src/dataLinks/DrawnItemDataLink');
 var PlanarPositioningDataLink = require('../../../../src/dataLinks/PlanarPositioningDataLink');
 var ZStackingDataLink = require('../../../../src/dataLinks/ZStackingDataLink');
 var CloningDataLink = require('../../../../src/dataLinks/CloningDataLink');
+var ConnectingDataLink = require('../../../../src/dataLinks/ConnectingDataLink');
 var HexDefinition = require('cartesian-hexagonal'); //external project required in constructors
 var EmittingDataSource = require('data-chains/src/EmittingDataSource.js');
 
@@ -70,6 +71,12 @@ module.exports = angular.module( 'hexWidget.demo', [
     $scope.ZStackingDataLink = new ZStackingDataLink(10);
     $scope.ZStackingDataLink.setDataSource($scope.planarPositioningDataLink);
     
+    $scope.ConnectingDataLink = new ConnectingDataLink();
+    $scope.ConnectingDataLink.setDataSource($scope.ZStackingDataLink);
+    
+    $scope.connectingDataSource = new EmittingDataSource();
+    $scope.ConnectingDataLink.setDataSource($scope.connectingDataSource);
+    
     //Create and push the grid context
     $scope.contexts.push(new GridContext($scope.hexDimensions));
 
@@ -107,6 +114,7 @@ module.exports = angular.module( 'hexWidget.demo', [
         
         //Initialize the board
         $scope.board.init();
+        $scope.ConnectingDataLink.scene = $scope.board.scene;
         
        $scope.drawnItemDataLink.setScene($scope.board.scene);
 
@@ -192,9 +200,28 @@ module.exports = angular.module( 'hexWidget.demo', [
 	    }
         };
         
+        
+        var daveMiniMe = {id:'daveVelocity', type:'clone', clonesId:'dave', cloneAlpha:0.5, cloneScale: 0.75, dragged:true, u:0, v:4};
+        daveMiniMe.onDrag = function(screenX, screenY, planarX, planarY, mesh) {
+            if (!this.lastPlanarX) {
+                this.lastPlanarX = planarX;
+                this.lastPlanarY = planarY;
+                this.skipCellCentering = true;
+            }
+
+            var dx = planarX - this.lastPlanarX;
+            var dy = planarY - this.lastPlanarY;
+            this.lastPlanarX = planarX;
+            this.lastPlanarY = planarY;
+            mesh.position.x = mesh.position.x + dx;
+            mesh.position.y = mesh.position.y + dy;
+            //TODO Directlly update any interested item (like a graphics connection) that this position has changed
+            $scope.connectingDataSource.addItems([{target:daveMiniMe.id, source: 'dave'}]);
+        }
+        
         var onDragDave = function(screenX, screenY, planarX, planarY) {
             if (!this.hasVelocity) {
-                $scope.cellDataSource.addItems([{id:'daveVelocity', type:'clone', clonesId:'dave', cloneAlpha:0.5, cloneScale: 0.75, dragged:true, u:0, v:4}]);
+                $scope.cellDataSource.addItems([daveMiniMe, {target:daveMiniMe.id, source: 'dave'}]);
                 this.hasVelocity = true;
             }
         }

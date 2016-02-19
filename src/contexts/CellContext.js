@@ -44,7 +44,7 @@ module.exports = function CellContext() {
     // Documentation inherited from Context#mouseDragged
     this.mouseDragged = function( screenX, screenY, planarX, planarY) {
         if (!!this.clickedItem.data.item.onDrag) {
-            this.clickedItem.data.item.onDrag(screenX, screenY, planarX, planarY);
+            this.clickedItem.data.item.onDrag(screenX, screenY, planarX, planarY, this.clickedItem);
         }
     };
     
