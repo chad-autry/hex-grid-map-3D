@@ -207,6 +207,7 @@ module.exports = angular.module( 'hexWidget.demo', [
                 this.lastPlanarX = planarX;
                 this.lastPlanarY = planarY;
                 this.skipCellCentering = true;
+                $scope.connectingDataSource.addItems([{id:mesh.position.x, target:daveMiniMe.id, source: 'dave'}]);
             }
 
             var dx = planarX - this.lastPlanarX;
@@ -216,7 +217,7 @@ module.exports = angular.module( 'hexWidget.demo', [
             mesh.position.x = mesh.position.x + dx;
             mesh.position.y = mesh.position.y + dy;
             //TODO Directlly update any interested item (like a graphics connection) that this position has changed
-            $scope.connectingDataSource.addItems([{target:daveMiniMe.id, source: 'dave'}]);
+            
         }
         
         var onDragDave = function(screenX, screenY, planarX, planarY) {

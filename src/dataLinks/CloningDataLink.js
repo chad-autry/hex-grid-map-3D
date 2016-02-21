@@ -36,6 +36,7 @@ module.exports.prototype.onDataChanged = function(event) {
             }
             
             if (!!event.added[i].cloneAlpha) {
+                cloned.material = cloned.material.clone();
                 cloned.material.alpha = event.added[i].cloneAlpha;
             }
             cloned.data = {};

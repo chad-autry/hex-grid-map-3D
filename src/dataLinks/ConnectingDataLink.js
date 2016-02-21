@@ -29,35 +29,50 @@ module.exports.prototype.onDataChanged = function(event) {
     for (i = 0; i < event.added.length; i++) {
         
         if (!!event.added[i].target && !!event.added[i].source) {
-	    var path = [];
-	    var target = this.meshMap[event.added[i].target];
-	    var source = this.meshMap[event.added[i].source];
-	    path.push(target.position);
-	    path.push(source.position);
-            //var emitter0 = BABYLON.Mesh.CreateBox("emitter0", 0.1, scene);
-	    var emitter0 = babylon.Mesh.CreateLines("lines", path, this.scene, true);
+            var path = [];
+            var target = this.meshMap[event.added[i].target];
+            var source = this.meshMap[event.added[i].source];
+            var emitter0 = babylon.Mesh.CreateBox("emitter" + event.added[i].id, 0.1, this.scene);
+            emitter0.position = source.position;
+
             var particleSystem = new babylon.ParticleSystem("particles", 2000, this.scene, null);
             
             
-                particleSystem.particleTexture = new babylon.FireProceduralTexture("fire", 256, this.scene);
-	        particleSystem.minSize = 1.0;
-	        particleSystem.maxSize = 1.0;
-	        particleSystem.minLifeTime = 0.5;
-	        particleSystem.maxLifeTime = 0.5;
-	        //particleSystem.minEmitPower = 0.5;
-	        //particleSystem.maxEmitPower = 3.0;
-	        particleSystem.emitter = emitter0;
-	        particleSystem.emitRate = 5;
-	        //particleSystem.blendMode = babylon.ParticleSystem.BLENDMODE_ONEONE;
-	        particleSystem.direction1 = target.position;
-	        particleSystem.direction2 = target.position;
-	        //particleSystem.color1 = new babylon.Color4(1, 1, 0, 1);
-	        //particleSystem.color2 = new babylon.Color4(1, 0.5, 0, 1);
-	        //particleSystem.gravity = new babylon.Vector3(0, -1.0, 0);
-	        particleSystem.start();
-	    	
-	      particleSystem.minEmitBox = source.position;
-              particleSystem.maxEmitBox = target.position;
+            particleSystem.particleTexture = new babylon.DynamicTexture("dynamic texture", 512, this.scene, true);
+            var context = particleSystem.particleTexture.getContext();
+            var radius = particleSystem.particleTexture.getSize().height/2;
+            context.beginPath();
+            context.arc(radius, radius, radius, 0, 2 * Math.PI, false);
+            context.fillStyle = 'white';
+            context.fill();
+            context.lineWidth = 5;
+            context.strokeStyle = 'white';
+            context.stroke();
+            var relativePosition = target.position.subtract(source.position);
+            var distance = relativePosition.length();
+            particleSystem.particleTexture.update(true);
+            particleSystem.minSize = 5.0;
+            particleSystem.maxSize = 10.0;
+            particleSystem.minEmitPower = particleSystem.maxEmitPower = 1000.0;
+            particleSystem.minLifeTime = particleSystem.maxLifeTime = distance/particleSystem.maxEmitPower;
+
+            particleSystem.emitter = emitter0;
+            particleSystem.emitRate = 100;
+            //particleSystem.blendMode = babylon.ParticleSystem.BLENDMODE_ONEONE;
+            particleSystem.direction1 = particleSystem.direction2 = relativePosition.normalize();
+            //particleSystem.direction2 = target.position;
+            //particleSystem.color1 = new babylon.Color4(1, 1, 0, 1);
+            //particleSystem.color2 = new babylon.Color4(1, 0.5, 0, 1);
+            //particleSystem.gravity = new babylon.Vector3(0, -1.0, 0);
+            particleSystem.minEmitBox = new babylon.Vector3(0, 0, 0);
+            particleSystem.maxEmitBox = new babylon.Vector3(0, 0, 0);
+            particleSystem.start();
+            
+            //Update when the item is dragged
+            if (!!target.data.item.onDrag) {
+                this.decorateTargetOnDrag(particleSystem, target, source);
+            }
+
         } else {
             this.meshMap[event.added[i].data.item.id] = event.added[i];
         }
@@ -70,5 +85,14 @@ module.exports.prototype.setScene = function(scene) {
     this.scene = scene;
 };
 
-
+module.exports.prototype.decorateTargetOnDrag = function(particleSystem, target, source) {
+    var targetOnDrag = target.data.item.onDrag;
+    target.data.item.onDrag = function (screenX, screenY, planarX, planarY, clickedItem) {
+        targetOnDrag(screenX, screenY, planarX, planarY, clickedItem);
+        var relativePosition = clickedItem.position.subtract(source.position);
+        var distance = relativePosition.length();
+        particleSystem.direction1 = particleSystem.direction2 = relativePosition.normalize();
+        particleSystem.minLifeTime = particleSystem.maxLifeTime = distance/particleSystem.maxEmitPower;
+    };
+};
 
