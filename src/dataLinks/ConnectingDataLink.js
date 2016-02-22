@@ -107,7 +107,7 @@ module.exports.prototype.decorateTargetOnDrag = function(target, source, pathMes
             //Increase
             for ( ; itemCounter < numberOfItems; itemCounter++) {
                 pathMeshArray.push(pathMesh.clone());
-                pathMeshArray[itemCounter].position = relativePosition.scale((itemCounter + 1)*separation).addInPlace( source.position);
+                pathMeshArray[itemCounter].position = relativePosition.scale((itemCounter + 1)*separation + sourceGap).addInPlace( source.position);
             }
     };
 };
