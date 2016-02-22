@@ -207,7 +207,7 @@ module.exports = angular.module( 'hexWidget.demo', [
                 this.lastPlanarX = planarX;
                 this.lastPlanarY = planarY;
                 this.skipCellCentering = true;
-                $scope.connectingDataSource.addItems([{id:mesh.position.x, target:daveMiniMe.id, source: 'dave'}]);
+                $scope.connectingDataSource.addItems([{id:mesh.position.x, distance:20, color:'grey', radius:5, sourceGap:15, destGap:10, target:daveMiniMe.id, source: 'dave'}]);
             }
 
             var dx = planarX - this.lastPlanarX;
