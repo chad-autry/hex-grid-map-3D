@@ -171,16 +171,16 @@ var babylon = require('babylonjs/babylon.max.js');
             pageX = e.changedTouches[0].pageX;
             pageY = e.changedTouches[0].pageY;
         }
-
+        var relativeX =  pageX - canvas.offsetLeft;
+        var relativeY = pageY - canvas.offsetTop;
+        var pickResult = board.scene.pick(relativeX, relativeY,
+           function(mesh) {
+               return mesh === board.pickerPlane;
+           });
         if (!!mouseDownContext) {
-            mouseDownContext.mouseReleased(mousemoved);
+            mouseDownContext.mouseReleased(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, mousemoved);
         } else if (!!board.mouseClicked && !mousemoved) {
-            var relativeX =  pageX - canvas.offsetLeft;
-            var relativeY = pageY - canvas.offsetTop;
-            var pickResult = board.scene.pick(relativeX, relativeY,
-               function(mesh) {
-                   return mesh === board.pickerPlane;
-               });
+
             board.mouseClicked(board.cameraTargetX, pickResult.pickedPoint.x + board.cameraTargetX, board.cameraTargetY, pickResult.pickedPoint.y + board.cameraTargetY);
         }
         mouseDownContext = null;

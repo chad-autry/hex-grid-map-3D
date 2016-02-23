@@ -51,11 +51,11 @@ module.exports = function CellContext() {
 
     
     // Documentation inherited from Context#mouseReleased
-    this.mouseReleased = function(wasDrag) {
+    this.mouseReleased = function(screenX, screenY, planarX, planarY, wasDrag) {
         if (!wasDrag && !!this.clickedItem.data.item.onClick) {
-            this.clickedItem.data.item.onClick();
+            this.clickedItem.data.item.onClick(screenX, screenY, planarX, planarY, this.clickedItem);
         } else if (wasDrag && !!this.clickedItem.data.item.onRelease) {
-            this.clickedItem.data.item.onRelease();
+            this.clickedItem.data.item.onRelease(screenX, screenY, planarX, planarY, this.clickedItem);
         }
     };
 
