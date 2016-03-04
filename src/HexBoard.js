@@ -130,8 +130,13 @@ var babylon = require('babylonjs/babylon.max.js');
         if (!!mouseDownContext) {
             //A context has claimed further mouse drag
             mouseDownContext.mouseDragged(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y);
+            if (!!board.mouseDragged ){
+                board.mouseDragged(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, true);
+            }
         } else {
-        
+            if (!!board.mouseDragged ){
+                board.mouseDragged(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, false);
+            }
             //Figure out where the camera needs to be targeted, for the initial mouse down position to stay under the mouse
             
             //The current point under the mouse is related to the current center of the screen, as the initial point under the mouse needs to be related to the new center
@@ -179,9 +184,12 @@ var babylon = require('babylonjs/babylon.max.js');
            });
         if (!!mouseDownContext) {
             mouseDownContext.mouseReleased(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, mousemoved);
-        } else if (!!board.mouseClicked && !mousemoved) {
-
-            board.mouseClicked(board.cameraTargetX, pickResult.pickedPoint.x + board.cameraTargetX, board.cameraTargetY, pickResult.pickedPoint.y + board.cameraTargetY);
+            //Call the final global mouse clicked, but pass true to say it was claimed
+            if (!!board.mouseClicked) {
+            board.mouseClicked(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, true, mousemoved);
+            }
+        } else if (!!board.mouseClicked) {
+            board.mouseClicked(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, false, mousemoved);
         }
         mouseDownContext = null;
         mousemoved = false;
@@ -274,10 +282,18 @@ var babylon = require('babylonjs/babylon.max.js');
     
     /**
      * Set the function to be called when no context claims a mouse/touch interaction
-     * @param { mouseClicked= } mouseClicked - A mouse clicked callback if no items were clicked
+     * @param { mouseClicked= } mouseClicked - A global mouse clicked callback, with parameter if an item was clicked
      */
     this.setMouseClicked = function(mouseClicked) {
         board.mouseClicked = mouseClicked;
+    };
+    
+    /**
+     * Set the function to be called when no context claims a mouse/touch interaction
+     * @param { mouseDragged= } mouseDragged - A global mouse dragged, with a parameter if an item was dragged
+     */
+    this.setMouseDragged = function(mouseDragged) {
+        board.mouseDragged = mouseDragged;
     };
 
     /**
@@ -285,7 +301,6 @@ var babylon = require('babylonjs/babylon.max.js');
      * Will call into the background and foreground update functions
      */
     this.updatePostion = function() {
-        //TODO Animate the camera pan with some sort of easeing function
         board.camera.target.x = board.cameraTargetX;
         board.camera.target.y = board.cameraTargetY;
         board.contexts.forEach(function(context) {

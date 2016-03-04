@@ -100,9 +100,11 @@ module.exports = angular.module( 'hexWidget.demo', [
 
     $scope.cellContext.setDataSource($scope.ZStackingDataLink);
     //$scope.contexts.push(new ForegroundContext([{u:0, v:0}], $scope.hexDimensions));
-    $scope.globalMouseClicked = function(dx, x, dy, y){
-        var hexagonalCoordinates = $scope.hexDimensions.getReferencePoint(x - dx, y - dy);
-        $rootScope.$broadcast('addAlert',{type:'info', msg:'Clicked U:'+hexagonalCoordinates.u + ' V:' +hexagonalCoordinates.v});
+    $scope.globalMouseClicked = function(screenX, screenY, planarX, planarY, wasClaimed, wasDragged){
+        if (!wasClaimed && !wasDragged) {
+            var hexagonalCoordinates = $scope.hexDimensions.getReferencePoint(planarX, planarY);
+            $rootScope.$broadcast('addAlert',{type:'info', msg:'Clicked U:'+hexagonalCoordinates.u + ' V:' +hexagonalCoordinates.v});
+        }
     };
     $scope.$on('boardInitialized', function() {
         //Once the board has been initialized, setup the demo scene
