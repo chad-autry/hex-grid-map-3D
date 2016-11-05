@@ -176,13 +176,34 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
         context.fillStyle = item.borderStar.borderColor;
         context.fill();
         coronaTexture.update(true);
-        corona.billboardMode = babylon.Mesh.BILLBOARDMODE_ALL;
-        corona.parent = sphere;
+        
+        //Strongly control the rotation with 2 parent gimbol meshes
+        //Create them from the inside, out. Since that is the order the rotations are applied in
+        var coronaXGimbol = new babylon.Mesh.CreateBox("coronaXGimbol", 1, scene);
+        
+        coronaXGimbol.billboardMode = babylon.Mesh.BILLBOARDMODE_X;
+
+        //The outer parent, created second so its billboard is applied second
+        var coronaZGimbol = new babylon.Mesh.CreateBox("coronaZGimbol", 1, scene);
+        
+        //Note: BillboardMode is switched to Y since that actually looks nicer for a corona. (so there is no 'rolling')
+        // To keep a single side pointed 'up' use Z as the variable names indicate
+        // Comments left in place to base later work off of (a gimboled 2d sprite)
+        coronaZGimbol.billboardMode = babylon.Mesh.BILLBOARDMODE_Y;
+        
+        coronaXGimbol.parent = coronaZGimbol;
+        corona.parent = coronaXGimbol;
+        
+        coronaZGimbol.parent = sphere;
+        //TODO Didn't totally work out why, but a further rotation about Y was needed so the item isn't on edge
+        // When the outer gimbol is about the Z axis
+        //corona.rotation.y = Math.PI/2;
         
     }
 
     //My native co-ordinate system is rotated from Babylon.js
     sphere.rotation.x = Math.PI/2;
+
     sphere.data = {};
     sphere.data.item = item;
     return sphere;
