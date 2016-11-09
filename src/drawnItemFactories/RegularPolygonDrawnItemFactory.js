@@ -18,6 +18,8 @@ module.exports = function RegularPolygonDrawnItemFactory(hexDefinition) {
     this.internalId = 0;
 };
 
+module.exports.prototype.hexToRgb = require('../HexToRGB.js');
+
 /**
  * Return an arrow path item for the given object
  * @override
@@ -55,13 +57,4 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
        sphere.data.item = item;
     return sphere;
     */
-};
-
-module.exports.prototype.hexToRgb = function(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
 };

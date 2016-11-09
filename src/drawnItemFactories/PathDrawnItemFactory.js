@@ -16,6 +16,8 @@ module.exports = function PathDrawnItemFactory(hexDefinition) {
     this.hexDefinition = hexDefinition;
 };
 
+module.exports.prototype.hexToRgb = require('../HexToRGB.js');
+
 /**
  * Return a solid tubular path item for the given DTO. The path will go through the center of hexes
  * @override
@@ -76,13 +78,4 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     
     return compoundMesh;
     
-};
-
-module.exports.prototype.hexToRgb = function(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
 };

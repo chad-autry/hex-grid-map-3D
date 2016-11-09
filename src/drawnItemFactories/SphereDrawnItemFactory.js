@@ -16,6 +16,8 @@ module.exports = function SphereDrawnItemFactory(hexDefinition) {
 
 };
 
+module.exports.prototype.hexToRgb = require('../HexToRGB.js');
+
 /**
  * Returns a projected sphere drawn item for the given object
  * Object should have lineWidth, lineColor, backgroundColor, rotation, size, sliceCount, wedgeCount
@@ -209,13 +211,4 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     return sphere;
     
     
-};
-
-module.exports.prototype.hexToRgb = function(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
 };

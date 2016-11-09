@@ -23,6 +23,8 @@ module.exports = function FieldOfSquaresDrawnItemFactory(hexDefinition, minSize,
     this.colors = colors;
 };
 
+module.exports.prototype.hexToRgb = require('../HexToRGB.js');
+
 /**
  * Return a group of items representing the field
  * @override
@@ -111,13 +113,4 @@ module.exports.prototype.createSquare = function (minX, maxX, minY, maxY, scene)
  */
 module.exports.prototype.random = function (min, max) {
         return Math.round((Math.random() * (max - min)) + min);
-};
-
-module.exports.prototype.hexToRgb = function(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
 };
