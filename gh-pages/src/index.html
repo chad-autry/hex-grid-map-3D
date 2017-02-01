@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html ng-app="hexWidget" ng-controller="AppCtrl">
+  <head>
+    <title ng-bind="pageTitle"></title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- font awesome from BootstrapCDN -->
+    <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+
+    <!-- compiled JavaScript -->
+    <script type="text/javascript" src="bundle.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="navbar navbar-default">
+        <!--Note: I don't care about giving a different mouse icon for collapsing, since it is mainly for mobile -->
+        <div class="navbar-header" ng-click="menuCollapsed = ! menuCollapsed" ng-init="menuCollapsed = true">
+          <div class="navbar-toggle">
+            <span class="sr-only">Toggle navigation</span>
+            <i ng-class="menuCollapsed ? 'fa fa-chevron-right' : 'fa fa-chevron-down'"></i>
+          </div>
+          <div class="navbar-brand">
+            hex-grid-map-3D
+            <small>
+              <a class="navbar-link" href="https://github.com/chad-autry/hex-grid-map-3D/tree/{{version}}">
+                {{version}}
+              </a>
+            </small>
+          </div>
+        </div>
+        <div class="collapse navbar-collapse" collapse="menuCollapsed">
+          <ul class="nav navbar-nav">
+            <li ui-sref-active="active">
+              <a href ui-sref="demo">
+                <i class="fa fa-picture-o"></i>
+                Demo
+              </a>
+            </li>
+            <li ui-sref-active="active">
+              <a href ui-sref="jsdoc">
+                <i class="fa fa-book"></i>
+                JSDoc
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/chad-autry/hex-grid-map-3D">
+                <i class="fa fa-github-alt"></i>
+                Github
+              </a>
+            </li>
+            <li>
+              <a href="https://github.com/chad-autry/hex-grid-map-3D/issues">
+                <i class="fa fa-comments"></i>
+                Support
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
+    </div>
+
+    <div ui-view></div>
+    <div ui-view="demo" ng-show="isDemo"/> <!--Sticky (stateful) States require their own view which has to be hidden-->
+  </body>
+</html>
