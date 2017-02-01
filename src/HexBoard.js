@@ -77,7 +77,7 @@ var babylon = require('babylonjs/babylon.max.js');
          var pageY = e.pageY;
 
          if (!!e.touches) {
-             pageX = e.touches[0].pageX;
+            pageX = e.touches[0].pageX;
             pageY = e.touches[0].pageY;
          }
          var relativeX = pageX - canvas.offsetLeft;
@@ -85,10 +85,9 @@ var babylon = require('babylonjs/babylon.max.js');
          var relativeY = pageY - canvas.offsetTop;
          initialDownY = relativeY;
          //Pick the point on the invisible picker plane at the screen co-ordinates under the mouse
-         mouseDownPickResult = board.scene.pick(relativeX, relativeY,
-            function(mesh) {
-                return mesh === board.pickerPlane;
-            });
+         var tRay = board.scene.createPickingRay(relativeX, relativeY,
+            babylon.Matrix.Identity(), board.camera);
+         mouseDownPickResult = board.intersectRayPlane(tRay, board.pickerPlane); 
          //Iterate through the contexts in reverse z-index order to see if any of them claim the click event
          for (var i = board.contexts.length - 1; i >= 0; i--) {
              if (board.contexts[i].mouseDown(relativeX, relativeY)) {
@@ -121,11 +120,9 @@ var babylon = require('babylonjs/babylon.max.js');
         }
 
         //Pick the point on the invisible picker plane at the screen co-ordinates under the mouse
-        var pickResult = board.scene.pick(relativeX, relativeY,
-            function(mesh) {
-                return mesh === board.pickerPlane;
-            }
-        );
+        var tRay = board.scene.createPickingRay(relativeX, relativeY,
+            babylon.Matrix.Identity(), board.camera);
+        var pickResult = board.intersectRayPlane(tRay, board.pickerPlane);
             
         if (!!mouseDownContext) {
             //A context has claimed further mouse drag
@@ -141,21 +138,14 @@ var babylon = require('babylonjs/babylon.max.js');
             
             //The current point under the mouse is related to the current center of the screen, as the initial point under the mouse needs to be related to the new center
             //Find how that relates to the point on the plane in the middle of the screen
-            var planeDx = pickResult.pickedPoint.x - board.cameraTargetX;
-            var planeDy = pickResult.pickedPoint.y - board.cameraTargetY;
+            var planeDx = pickResult.x - board.cameraTargetX;
+            var planeDy = pickResult.y - board.cameraTargetY;
                 
             //Solve for the new cameraTarget co-ordinates relative to the original mouse down point
-            board.cameraTargetX = mouseDownPickResult.pickedPoint.x - planeDx;
-            board.cameraTargetY = mouseDownPickResult.pickedPoint.y - planeDy;
+            board.cameraTargetX = mouseDownPickResult.x - planeDx;
+            board.cameraTargetY = mouseDownPickResult.y - planeDy;
 
             board.updatePostion();
-
-            //Next, re-center our finite pickerPlane
-            board.pickerPlane.position.x = board.cameraTargetX;
-            board.pickerPlane.position.y = board.cameraTargetY;
-            
-            
-            
         }
         mousemoved = true;
      };
@@ -178,18 +168,18 @@ var babylon = require('babylonjs/babylon.max.js');
         }
         var relativeX =  pageX - canvas.offsetLeft;
         var relativeY = pageY - canvas.offsetTop;
-        var pickResult = board.scene.pick(relativeX, relativeY,
-           function(mesh) {
-               return mesh === board.pickerPlane;
-           });
+        var tRay = board.scene.createPickingRay(relativeX, relativeY, 
+            babylon.Matrix.Identity(), board.camera);
+        var pickResult = board.intersectRayPlane(tRay, board.pickerPlane); 
+
         if (!!mouseDownContext) {
             mouseDownContext.mouseReleased(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, mousemoved);
             //Call the final global mouse clicked, but pass true to say it was claimed
             if (!!board.mouseClicked) {
-            board.mouseClicked(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, true, mousemoved);
+            board.mouseClicked(relativeX, relativeY, pickResult.x, pickResult.y, true, mousemoved);
             }
         } else if (!!board.mouseClicked) {
-            board.mouseClicked(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, false, mousemoved);
+            board.mouseClicked(relativeX, relativeY, pickResult.x, pickResult.y, false, mousemoved);
         }
         mouseDownContext = null;
         mousemoved = false;
@@ -209,7 +199,7 @@ var babylon = require('babylonjs/babylon.max.js');
      */
     this.init = function() {
     
-        board.gridLineWidth = board.hexDimensions.edgeWidth;
+    board.gridLineWidth = board.hexDimensions.edgeWidth;
         
     board.scene = new babylon.Scene(board.engine);
         
@@ -245,8 +235,8 @@ var babylon = require('babylonjs/babylon.max.js');
        light.intensity = 0.5;
    
        //Make an invisible plane to hit test for the scene's X, Y co-ordinates (not the screens X, Y co-ordinates)
-       board.pickerPlane = babylon.Mesh.CreatePlane("pickerPlane", 10000.0, board.scene);
-       board.pickerPlane.visible = false;
+       board.pickerPlane = new babylon.Plane.FromPositionAndNormal(babylon.Vector3.Zero(), 
+        new babylon.Vector3(0, 0, 1));
 
 
         //Initialize variables
@@ -317,4 +307,21 @@ var babylon = require('babylonjs/babylon.max.js');
          board.cameraTargetY = pixelCoordinates.y;
          this.updatePostion();
      };
+
+    /**
+     * Helper function to get intersection between ray and plane
+     */
+    this. intersectRayPlane = function (pRay, pPlane)
+    {
+        var tIsecPoint = null;
+        var tDot = babylon.Vector3.Dot(pRay.direction, pPlane.normal);
+        if (tDot !== 0.0) {
+            var t = -pPlane.signedDistanceTo(pRay.origin) / tDot;
+            if (t >= 0.0) {
+                var tDirS = pRay.direction.scale(t);
+                tIsecPoint = pRay.origin.add(tDirS);
+            }
+        }
+        return (tIsecPoint);
+    };
 };
