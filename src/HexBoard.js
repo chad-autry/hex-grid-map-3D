@@ -126,13 +126,13 @@ var babylon = require('babylonjs/babylon.max.js');
             
         if (!!mouseDownContext) {
             //A context has claimed further mouse drag
-            mouseDownContext.mouseDragged(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y);
+            mouseDownContext.mouseDragged(relativeX, relativeY, pickResult.x, pickResult.y);
             if (!!board.mouseDragged ){
-                board.mouseDragged(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, true);
+                board.mouseDragged(relativeX, relativeY, pickResult.x, pickResult.y, true);
             }
         } else {
             if (!!board.mouseDragged ){
-                board.mouseDragged(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, false);
+                board.mouseDragged(relativeX, relativeY, pickResult.x, pickResult.y, false);
             }
             //Figure out where the camera needs to be targeted, for the initial mouse down position to stay under the mouse
             
@@ -173,7 +173,7 @@ var babylon = require('babylonjs/babylon.max.js');
         var pickResult = board.intersectRayPlane(tRay, board.pickerPlane); 
 
         if (!!mouseDownContext) {
-            mouseDownContext.mouseReleased(relativeX, relativeY, pickResult.pickedPoint.x, pickResult.pickedPoint.y, mousemoved);
+            mouseDownContext.mouseReleased(relativeX, relativeY, pickResult.x, pickResult.y, mousemoved);
             //Call the final global mouse clicked, but pass true to say it was claimed
             if (!!board.mouseClicked) {
             board.mouseClicked(relativeX, relativeY, pickResult.x, pickResult.y, true, mousemoved);
