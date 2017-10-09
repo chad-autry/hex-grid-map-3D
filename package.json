@@ -4,18 +4,20 @@
   "description": "A customizeable html5 webGL hexagonally gridded interactive map",
   "main": "index.js",
   "scripts": {
-    "test": "npm run jshint && npm run build:specs && npm run karma:single",
+    "test": "npm run build:specs && npm run karma:single",
     "karma:single": "karma start karma-conf.js --log-level debug --single-run",
     "watch:test": "parallelshell \"npm run watch:specs\" \"npm run watch:karma\"",
     "watch:karma": "karma start karma-conf.js",
     "build:specs": "mkdirp ./target/test && browserify ./specs/*.spec.js --debug -o ./target/test/built.specs.js",
     "watch:specs": "mkdirp ./target/test && watchify ./specs/*.spec.js --debug -o ./target/test/built.specs.js",
-    "build:demo": "mkdirp ./target/gh-pages && npm run jsdoc &&  npm run less && npm run copy:demoHTML && browserify ./gh-pages/src/app/app.js --debug -o ./target/gh-pages/bundle.js",
-    "watch:demo": "mkdirp ./target/gh-pages && npm run copy:demoHTML && watchify ./gh-pages/src/app/app.js --debug -v -o ./target/gh-pages/bundle.js",
-    "jshint": "jshint ./src",
-    "less": "lessc ./gh-pages/src/less/main.less > ./target/gh-pages/styles.css",
-    "copy:demoHTML": "copyfiles -f ./gh-pages/src/index.html ./target/gh-pages",
-    "jsdoc": "jsdoc -t ./jsdoc-template -r ./src -d ./target/jsdoc"
+    "jsdoc": "jsdoc -t ./jsdoc-template -r ./src -d ./target/jsdoc",
+    "build": "mkdirp ./target/webapp/hex-grid-map-3D && npm run less && npm run copy:HTML && webpack --config ./webpack-prod.config.js",
+    "eslint:fix": "eslint --fix ./src/**/*.js && eslint --fix ./gh-pages/**/*.js && eslint --fix ./gh-pages/**/*.jsx",
+    "clean": "rimraf ./target",
+    "copy:HTML": "copyfiles -f ./gh-pages/src/index.html ./target/webapp/hex-grid-map-3D",
+    "less": "lessc ./gh-pages/src/less/main.less > ./target/webapp/hex-grid-map-3D/styles.css",
+    "start": "webpack-dev-server --content-base ./target/webapp --port 8080",
+    "precommit": "lint-staged"
   },
   "repository": {
     "type": "git",
@@ -38,71 +40,43 @@
   },
   "homepage": "https://github.com/chad-autry/hex-grid-map-3D",
   "dependencies": {
-    "angular": "1.3.14",
-    "angular-bootstrap": "0.12.2",
-    "angular-ui-router": "0.2.13",
     "babylonjs": "2.4.1",
-    "bootstrap": "3.3.4",
     "cartesian-hexagonal": "0.0.3",
-    "data-chains": "0.4.0",
-    "ui-router-extras": "0.0.14"
+    "data-chains": "0.4.0"
   },
   "devDependencies": {
-    "angular-mocks": "1.3.15",
-    "browserify": "git+https://git@github.com/chad-autry/node-browserify",
-    "browserify-shim": "3.8.3",
-    "copyfiles": "0.2.1",
-    "jsdoc": "3.3.2",
-    "jshint": "2.6.3",
-    "karma": "0.12.9",
-    "karma-cli": "0.0.4",
-    "karma-firefox-launcher": "0.1.3",
-    "karma-jasmine": "0.1.5",
-    "less": "2.4.0",
-    "mkdirp": "0.5.1",
-    "npm-watch": "0.0.0",
-    "parallelshell": "1.1.1",
-    "watchify": "3.1.0"
+    "babel-cli": "^6.18.0",
+    "babel-core": "^6.18.2",
+    "babel-loader": "^6.2.7",
+    "babel-plugin-transform-object-rest-spread": "^6.19.0",
+    "babel-preset-latest": "^6.16.0",
+    "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "babel-register": "^6.18.0",
+    "bootstrap": "^3.3.6",
+    "copyfiles": "^0.2.1",
+    "eslint": "^4.4.1",
+    "eslint-config-prettier": "^2.3.0",
+    "eslint-plugin-prettier": "^2.1.2",
+    "eslint-plugin-react": "^7.2.0",
+    "husky": "^0.14.3",
+    "jquery": "^2.2.3",
+    "less": "^2.5.3",
+    "lint-staged": "^4.0.3",
+    "mkdirp": "^0.5.1",
+    "prettier": "^1.5.3",
+    "react": "^15.0.1",
+    "react-dom": "^15.0.1",
+    "react-router-dom": "^4.0.0",
+    "rimraf": "^2.4.4",
+    "webpack": "^1.13.3",
+    "webpack-dev-server": "^1.16.2",
+    "react-measure": "^1.4.5"
   },
-  "optionalDependencies": {
-    "browserify-ng-html2js": "1.0.0"
-  },
-  "jshintConfig": {
-    "node": "true",
-    "predef": [
-      "document"
+  "lint-staged": {
+    "*.js, *.jsx": [
+      "eslint",
+      "git add"
     ]
-  },
-  "browserify": {
-    "transform": [
-      "browserify-ng-html2js",
-      "browserify-shim"
-    ]
-  },
-  "browser": {
-    "ui.bootstrap": "./node_modules/angular-bootstrap/ui-bootstrap-tpls.js",
-    "ct.ui.router.extras.core": "./node_modules/ui-router-extras/release/modular/ct-ui-router-extras.core.js",
-    "ct.ui.router.extras.sticky": "./node_modules/ui-router-extras/release/modular/ct-ui-router-extras.sticky.js"
-  },
-  "browserify-shim": {
-    "ui.bootstrap": {
-      "depends": [
-        "angular"
-      ],
-      "exports": "angular.module('ui.bootstrap').name"
-    },
-    "ct.ui.router.extras.core": {
-      "depends": [
-        "angular"
-      ],
-      "exports": "angular.module('ct.ui.router.extras.core').name"
-    },
-    "ct.ui.router.extras.sticky": {
-      "depends": [
-        "angular",
-        "ct.ui.router.extras.core"
-      ],
-      "exports": "angular.module('ct.ui.router.extras.sticky').name"
-    }
   }
 }

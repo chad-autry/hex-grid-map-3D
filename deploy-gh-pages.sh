@@ -1,6 +1,6 @@
 #!/bin/bash
 set -ev;
-cd target/gh-pages
+cd target/webapp-hex-grid-map-3D
 git init
 git config user.name ${GH_NAME}
 git config user.email ${GH_EMAIL}

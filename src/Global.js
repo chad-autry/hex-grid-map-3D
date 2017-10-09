@@ -8,7 +8,7 @@
  * @param {integer} dx - The x translation since the last event
  * @param {integer} dy - The y translation since the last event
  */
- 
+
 /**
  * A callback to be called when the mouse is clicked on an item
  * @callback onClick
