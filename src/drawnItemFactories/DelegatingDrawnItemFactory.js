@@ -11,9 +11,9 @@
  * @param {Object.<string, DrawnItemFactory>} drawnItemFactoryMap - The map of factories
  */
 module.exports = function DelegatingDrawnItemFactory(drawnItemFactoryMap) {
-    //Author's note: I learned with java, so this is a map of objects.
-    // It could be a map of functions or closures. Is there any benefit to doing it that way other than a different type of thinking?
-    this.drawnItemFactoryMap = drawnItemFactoryMap;
+  //Author's note: I learned with java, so this is a map of objects.
+  // It could be a map of functions or closures. Is there any benefit to doing it that way other than a different type of thinking?
+  this.drawnItemFactoryMap = drawnItemFactoryMap;
 };
 
 /**
@@ -25,8 +25,8 @@ module.exports = function DelegatingDrawnItemFactory(drawnItemFactoryMap) {
  * @implements {DrawnItemFactory#getDrawnItem}
  */
 module.exports.prototype.getDrawnItem = function(item, scene) {
-    if (this.drawnItemFactoryMap.hasOwnProperty(item.type)) {
-        return this.drawnItemFactoryMap[item.type].getDrawnItem(item, scene);
-    }
-    return;
+  if (this.drawnItemFactoryMap.hasOwnProperty(item.type)) {
+    return this.drawnItemFactoryMap[item.type].getDrawnItem(item, scene);
+  }
+  return;
 };

@@ -4,7 +4,6 @@
  * The class and module are the same thing, the contructor comment takes precedence.
  * @module HexToRGB
  */
-var babylon = require('babylonjs');
 
 /**
  * Utility method for converting Hex (prefered! All hail the glorious Hex!) colors to RGB (Yeah yeah, Babylon.js needs RGB)
@@ -12,10 +11,12 @@ var babylon = require('babylonjs');
  * @param {Color} hex - The color in hex format
  */
 module.exports = function(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
         r: parseInt(result[1], 16),
         g: parseInt(result[2], 16),
         b: parseInt(result[3], 16)
-    } : null;
+      }
+    : null;
 };
