@@ -6,6 +6,7 @@
  */
 
 var babylon = require("babylonjs/babylon.max.js");
+var hexToRgb = require("../HexToRGB.js");
 /*
  * Defines an isometric hexagonal board for web games
  */
@@ -14,12 +15,11 @@ var babylon = require("babylonjs/babylon.max.js");
  * Pretty much the controller of a hexagonal map scene using the provided canvas and context objects
  * @constructor
  * @param { external:cartesian-hexagonal } hexDimension - The DTO defining the hex <--> cartesian relation
- * @param canvas - The canvas element to initialize with paper.js
- * @param { Context[] } contexts - An array of contexts used to control display and interaction with various layers of the map
- * @param { mouseClicked= } mouseClicked - A mouse clicked callback if no items were clicked
+ * @param canvas - The canvas element to initialize babylon.js with
+ * @param backgroundColor - the color to set the Babylon.js background
  * @example var hexMap = new (require(hexagonal-map))(hexDimension, canvas, contexts, mouseClicked);
  */
-module.exports = function HexBoard(canvas, window) {
+module.exports = function HexBoard(canvas, window, backgroundColor) {
   //Protect the constructor from being called as a normal method
   if (!(this instanceof HexBoard)) {
     return new HexBoard(canvas, window);
@@ -38,11 +38,53 @@ module.exports = function HexBoard(canvas, window) {
     }
   });
 
-  //Set up mouse interactions with the contexts
+
+    board.scene = new babylon.Scene(board.engine);
+
+    // Change the scene background color
+  var rgb = hexToRgb(backgroundColor);
+    board.scene.clearColor = = new babylon.Color3(
+    rgb.r / 256,
+    rgb.g / 256,
+    rgb.b / 256
+  );
+
+    // This creates and positions a free camera
+    //var camera = new babylon.FreeCamera("camera1", new babylon.Vector3(0, 0, 1000), scene);
+    //  Create an ArcRotateCamera aimed at 0,0,0, with no alpha, beta or radius, so be careful.  It will look broken.
+    board.camera = new babylon.ArcRotateCamera(
+      "ArcRotateCamera",
+      0,
+      0,
+      0,
+      babylon.Vector3.Zero(),
+      board.scene
+    );
+
+    board.camera.upVector = new babylon.Vector3(0, 0, 1);
+
+    board.camera.upperBetaLimit = Math.PI;
+    board.camera.allowUpsideDown = true;
+
+    //Make an invisible plane to hit test for the scene's X, Y co-ordinates (not the screens X, Y co-ordinates)
+    board.pickerPlane = new babylon.Plane.FromPositionAndNormal(
+      babylon.Vector3.Zero(),
+      new babylon.Vector3(0, 0, 1)
+    );
+
+    //Initialize variables
+    board.cameraTargetX = 0; //The X point on the Z = 0 plane the camera is pointed
+    board.cameraTargetY = 0; //The Y point on the Z = 0 plane the camera is pointed
+
+    board.camera.setPosition(new babylon.Vector3(0, 1000, 1000));
+    // This targets the camera to scene origin
+    board.camera.setTarget(babylon.Vector3.Zero());
+
+  // Delegate mouse interactions
   var down = false;
   var mousemoved = false;
   var mouseDownPickResult;
-  var mouseDownContext; //The context which has "claimed" the mouse down event
+  var clickedItem; //The item which has "claimed" the mouse down event
   var initialDownX;
   var initialDownY;
 
@@ -50,10 +92,6 @@ module.exports = function HexBoard(canvas, window) {
   if (window) {
     window.addEventListener("resize", function() {
       board.engine.resize();
-      //Call each context with redraw, followed by updatePosition
-      board.contexts.forEach(function(context) {
-        context.reDraw(true, false, false);
-      });
 
       //recenter
       //Figure out what the old U, V in the middle was for our original size
@@ -66,6 +104,7 @@ module.exports = function HexBoard(canvas, window) {
     });
   }
 
+  
   canvas.onmousedown = function(e) {
     e.preventDefault();
     down = true;
@@ -90,12 +129,13 @@ module.exports = function HexBoard(canvas, window) {
       board.camera
     );
     mouseDownPickResult = board.intersectRayPlane(tRay, board.pickerPlane);
-    //Iterate through the contexts in reverse z-index order to see if any of them claim the click event
-    for (var i = board.contexts.length - 1; i >= 0; i--) {
-      if (board.contexts[i].mouseDown(relativeX, relativeY)) {
-        mouseDownContext = board.contexts[i];
-        break;
-      }
+    var mousePickResult = board.scene.pick(relativeX, relativeY, function(
+      mesh
+    ) {
+      return !!mesh.data && !!mesh.data.hasMouseInteraction;
+    });
+    if (mousePickResult.hit) {
+      clickedItem = mousePickResult.pickedMesh;
     }
   };
 
@@ -134,9 +174,9 @@ module.exports = function HexBoard(canvas, window) {
     );
     var pickResult = board.intersectRayPlane(tRay, board.pickerPlane);
 
-    if (mouseDownContext) {
-      //A context has claimed further mouse drag
-      mouseDownContext.mouseDragged(
+    if (clickedItem) {
+      //An item has claimed further mouse drag
+      clickedItem.mouseDragged(
         relativeX,
         relativeY,
         pickResult.x,
@@ -203,8 +243,8 @@ module.exports = function HexBoard(canvas, window) {
     );
     var pickResult = board.intersectRayPlane(tRay, board.pickerPlane);
 
-    if (mouseDownContext) {
-      mouseDownContext.mouseReleased(
+    if (clickedItem) {
+      clickedItem.mouseReleased(
         relativeX,
         relativeY,
         pickResult.x,
@@ -232,7 +272,7 @@ module.exports = function HexBoard(canvas, window) {
         mousemoved
       );
     }
-    mouseDownContext = null;
+    clickedItem = null;
     mousemoved = false;
   };
   canvas.onmouseup = canvas.onmouseleave;
@@ -249,42 +289,6 @@ module.exports = function HexBoard(canvas, window) {
      * Initializes the groups and objects from the contexts, plus the drag variables
      */
   this.init = function() {
-    board.gridLineWidth = board.hexDimensions.edgeWidth;
-
-    board.scene = new babylon.Scene(board.engine);
-
-    // Change the scene background color to black.
-    board.scene.clearColor = new babylon.Color3(0, 0, 0);
-
-    // This creates and positions a free camera
-    //var camera = new babylon.FreeCamera("camera1", new babylon.Vector3(0, 0, 1000), scene);
-    //  Create an ArcRotateCamera aimed at 0,0,0, with no alpha, beta or radius, so be careful.  It will look broken.
-    board.camera = new babylon.ArcRotateCamera(
-      "ArcRotateCamera",
-      0,
-      0,
-      0,
-      babylon.Vector3.Zero(),
-      board.scene
-    );
-
-    board.camera.upVector = new babylon.Vector3(0, 0, 1);
-
-    board.camera.upperBetaLimit = Math.PI;
-    board.camera.allowUpsideDown = true;
-
-    //We use our external canvas controls to control the camera
-    // This attaches the camera to the canvas
-    //camera.attachControl(canvas, false);
-
-    /*
-       camera.mode = babylon.Camera.ORTHOGRAPHIC_CAMERA;
-       
-       this.camera.orthoTop = 500;
-       this.camera.orthoBottom = -500;
-       this.camera.orthoLeft = -500;
-       this.camera.orthoRight = 500;
-       */
     // This creates a light, aiming 0,1,0 - to the sky.
     var light = new babylon.HemisphericLight(
       "light1",
@@ -294,33 +298,6 @@ module.exports = function HexBoard(canvas, window) {
 
     // Dim the light a small amount
     light.intensity = 0.5;
-
-    //Make an invisible plane to hit test for the scene's X, Y co-ordinates (not the screens X, Y co-ordinates)
-    board.pickerPlane = new babylon.Plane.FromPositionAndNormal(
-      babylon.Vector3.Zero(),
-      new babylon.Vector3(0, 0, 1)
-    );
-
-    //Initialize variables
-    board.cameraTargetX = 0; //The X point on the Z = 0 plane the camera is pointed
-    board.cameraTargetY = 0; //The Y point on the Z = 0 plane the camera is pointed
-
-    board.camera.setPosition(new babylon.Vector3(0, 1000, 1000));
-    // This targets the camera to scene origin
-    board.camera.setTarget(babylon.Vector3.Zero());
-
-    //Initialize each context with with the scene
-    board.contexts.forEach(function(context) {
-      context.init(board.scene);
-    });
-  };
-
-  /**
-     * Set the context objects which control layer views and interactions
-     * @param { Context[] } contexts - An array of contexts used to control display and interaction with various layers of the map, should be in Z index order
-     */
-  this.setContexts = function(contexts) {
-    board.contexts = contexts;
   };
 
   /**
