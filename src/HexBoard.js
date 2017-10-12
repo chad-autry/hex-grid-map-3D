@@ -251,7 +251,8 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
         pickResult.y,
         mousemoved
       );
-      //Call the final global mouse clicked, but pass true to say it was claimed
+      //Emit a mouseUp event, with the clickable item
+      board.emit('mouseUp', {canvasX:relativeX, canvasY,relativeY,mapX:pickResult.x,mapY:pickResult.y,clickedItem:clickItem,mousemoved:mousemoved});
       if (board.mouseClicked) {
         board.mouseClicked(
           relativeX,
@@ -308,33 +309,24 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     board.hexDimensions = hexDimensions;
   };
 
-  /**
-     * Set the function to be called when no context claims a mouse/touch interaction
-     * @param { mouseClicked= } mouseClicked - A global mouse clicked callback, with parameter if an item was clicked
-     */
-  this.setMouseClicked = function(mouseClicked) {
-    board.mouseClicked = mouseClicked;
-  };
 
   /**
-     * Set the function to be called when no context claims a mouse/touch interaction
-     * @param { mouseDragged= } mouseDragged - A global mouse dragged, with a parameter if an item was dragged
-     */
-  this.setMouseDragged = function(mouseDragged) {
-    board.mouseDragged = mouseDragged;
-  };
-
-  /**
-     * Update x/y positions based on the current dx and dy
-     * Will call into the background and foreground update functions
+     * Internal shared functionallity of paning, updates the camera and emits an event
      */
   this.updatePostion = function() {
     board.camera.target.x = board.cameraTargetX;
     board.camera.target.y = board.cameraTargetY;
-    board.contexts.forEach(function(context) {
-      context.updatePosition(board.cameraTargetX, board.cameraTargetY);
-    });
+    this.emitEvent('pan', {x:board.cameraTargetX, y:board.cameraTargetY});
   };
+
+/**
+ * Pans the camera to the given position on the plane of interest
+ */
+this.pan = function(x, y) {
+board.cameraTargetX = x;
+board.cameraTargetY = y;
+this.updatePosition();
+};
 
   /**
       * Utility function to center the board on a cell
@@ -362,3 +354,6 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     return tIsecPoint;
   };
 };
+
+let EventEmitter = require('wolfy87-eventemitter');
+module.exports.prototype = new EventEmitter();
