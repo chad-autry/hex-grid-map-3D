@@ -6,10 +6,7 @@
  */
 
 var babylon = require("babylonjs/babylon.max.js");
-var hexToRgb = require("../HexToRGB.js");
-/*
- * Defines an isometric hexagonal board for web games
- */
+var hexToRgb = require("./HexToRGB.js");
 
 /**
  * Initializes the Babylon.js scene, delegates mouse control, provides an API to control the camera relative to the X/Y plane
@@ -245,13 +242,15 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     let pickResult = board.intersectRayPlane(tRay, board.pickerPlane);
 
     if (clickedItem) {
-      clickedItem.mouseReleased(
-        relativeX,
-        relativeY,
-        pickResult.x,
-        pickResult.y,
-        mousemoved
-      );
+      clickedItem.emit("mouseUp", {
+        canvasX: relativeX,
+        canvasY: relativeY,
+        mapX: pickResult.x,
+        mapY: pickResult.y,
+        clickedItem: clickedItem,
+        mousemoved: mousemoved
+      });
+}
       //Emit a mouseUp event, with the clickable item
       board.emit("mouseUp", {
         canvasX: relativeX,
@@ -261,26 +260,6 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
         clickedItem: clickedItem,
         mousemoved: mousemoved
       });
-      if (board.mouseClicked) {
-        board.mouseClicked(
-          relativeX,
-          relativeY,
-          pickResult.x,
-          pickResult.y,
-          true,
-          mousemoved
-        );
-      }
-    } else if (board.mouseClicked) {
-      board.mouseClicked(
-        relativeX,
-        relativeY,
-        pickResult.x,
-        pickResult.y,
-        false,
-        mousemoved
-      );
-    }
     clickedItem = null;
     mousemoved = false;
   };

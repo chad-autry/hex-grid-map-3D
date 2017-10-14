@@ -6,90 +6,73 @@
  */
 
 var babylon = require("babylonjs");
+var hexToRgb = require("../HexToRGB.js");
 /**
- * This is the context object for creating and managing the grid layer of a board
- * @implements {Context}
+ * This context (item factory + manager) creates a visible grid for the board.
+ * This particular grid is composed of semi-transparent hexagons.
+ * Instead of inifinitely tiling the plain, only a finite number are shown that fade in and out as the view moves
  * @constructor
  * @param {external:cartesian-hexagonal} hexDimensions - The DTO defining the hex <--> cartesian relation
  */
-module.exports = function InverseGridContext(hexDimensions) {
+module.exports = function InverseGridContext(hexDimensions, board, color) {
   //Protect the constructor from being called as a normal method
   if (!(this instanceof InverseGridContext)) {
-    return new InverseGridContext();
+    return new InverseGridContext(hexDimensions, board, color);
   }
   var context = this;
   context.hexDimensions = hexDimensions;
+  this.scene = board.scene;
+  this.color = hexToRgb(color);
 
-  // Documentation inherited from Context#init
-  this.init = function(scene) {
-    context.gridColor = "silver";
-    context.scene = scene;
-    //Create the Hex item
+  let positionArray = createPositionArray(hexDimensions);
 
-    var positionArray = createPositionArray(hexDimensions);
-    ///////////////////
-
-    var hexToRgb = function(hex) {
-      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return result
-        ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
-          }
-        : null;
-    };
-
-    var rgb = hexToRgb("#15b01a");
-
-    var nb = positionArray.length; // nb of triangles
-    // custom position function for SPS creation
-    var myPositionFunction = function(particle, i) {
-      particle.position.x = positionArray[i].x; //(Math.random() - 0.5) * fact;
-      particle.position.y = positionArray[i].y; //(Math.random() - 0.5) * fact;
-      particle.position.z = 0; //(Math.random() - 0.5) * fact;
-      //particle.rotation.x = Math.random() * 3.15;
-      //particle.rotation.y = Math.random() * 3.15;
-      particle.rotation.z = Math.PI / 2;
-      particle.color = new babylon.Color4(0.5, 0.5, 0.5, 0.5);
-    };
-
-    // model : triangle
-    var triangle = babylon.MeshBuilder.CreateDisc(
-      "t",
-      {
-        radius: hexDimensions.hexagon_half_wide_width - 2,
-        tessellation: 6,
-        sideOrientation: babylon.Mesh.DOUBLESIDE
-      },
-      scene
-    );
-
-    // SPS creation : Immutable {updatable: false}
-    var SPS = new babylon.SolidParticleSystem("SPS", scene, {
-      updatable: false,
-      pickable: false
-    });
-    SPS.addShape(triangle, nb, { positionFunction: myPositionFunction });
-    var mesh = SPS.buildMesh();
-    mesh.hasVertexAlpha = true;
-    //var mat = new babylon.StandardMaterial("grid", scene);
-    //mat.alpha = 0.5;
-    //mesh.material = mat;
-    //mat.emissiveColor = new babylon.Color3(rgb.r/256, rgb.g/256, rgb.b/256);
-    triangle.rotation.z = Math.PI / 2;
-    triangle.color = new babylon.Color4(
-      rgb.r / 256,
-      rgb.g / 256,
-      rgb.b / 256,
+  var nb = positionArray.length; // nb of hexagons
+  // custom position function for SPS creation
+  var myPositionFunction = (particle, i) => {
+    particle.position.x = positionArray[i].x; //(Math.random() - 0.5) * fact;
+    particle.position.y = positionArray[i].y; //(Math.random() - 0.5) * fact;
+    particle.position.z = 0; //(Math.random() - 0.5) * fact;
+    //particle.rotation.x = Math.random() * 3.15;
+    //particle.rotation.y = Math.random() * 3.15;
+    particle.rotation.z = Math.PI / 2;
+    particle.color = new babylon.Color4(
+      this.color.r / 256,
+      this.color.g / 256,
+      this.color.b / 256,
       0.5
     );
-    this.gridParent = mesh;
-    triangle.dispose();
   };
 
+  var hexagon = babylon.MeshBuilder.CreateDisc(
+    "t",
+    {
+      radius: hexDimensions.hexagon_half_wide_width - 2,
+      tessellation: 6,
+      sideOrientation: babylon.Mesh.DOUBLESIDE
+    },
+    this.scene
+  );
+
+  // SPS creation : Immutable {updatable: false}
+  var SPS = new babylon.SolidParticleSystem("SPS", this.scene, {
+    updatable: false,
+    pickable: false
+  });
+  SPS.addShape(hexagon, nb, { positionFunction: myPositionFunction });
+  var mesh = SPS.buildMesh();
+  mesh.hasVertexAlpha = true;
+  hexagon.rotation.z = Math.PI / 2;
+  hexagon.color = new babylon.Color4(
+    this.color.r / 256,
+    this.color.g / 256,
+    this.color.b / 256,
+    0.5
+  );
+  this.gridParent = mesh;
+  hexagon.dispose();
+
   // Documentation inherited from Context#updatePosition
-  this.updatePosition = function(middleX, middleY) {
+  this.updatePosition = (middleX, middleY) => {
     //Convert the middle point to U, V
     var hexCoordinates = this.hexDimensions.getReferencePoint(middleX, middleY);
 
@@ -103,8 +86,6 @@ module.exports = function InverseGridContext(hexDimensions) {
     context.gridParent.position.x = centerHexPixelCoordinates.x;
     context.gridParent.position.y = centerHexPixelCoordinates.y;
   };
-
-  this.reDraw = function() {};
 };
 
 /**
@@ -163,20 +144,4 @@ var createPositionArray = function(hexDimensions) {
   }
 
   return positionArray;
-};
-
-// Documentation inherited from Context#mouseDown
-module.exports.prototype.mouseDown = function() {
-  //This is nothing to click, always return false
-  return false;
-};
-
-// Documentation inherited from Context#mouseDragged
-module.exports.prototype.mouseDragged = function() {
-  //We never claim mouseDown, so this actually will never be called
-};
-
-// Documentation inherited from Context#mouseReleased
-module.exports.prototype.mouseReleased = function() {
-  //We never claim mouseDown, so this actually will never be called
 };
