@@ -197,7 +197,7 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     var pickResult = board.intersectRayPlane(tRay, board.pickerPlane);
 
     if (clickedItem) {
-      clickedItem.emit("mouseMoved", {
+      clickedItem.emit("mouseDragged", {
         canvasX: relativeX,
         canvasY: relativeY,
         mapX: pickResult.x,
@@ -205,7 +205,7 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
         clickedItem: clickedItem
       });
     }
-    board.emit("mouseMoved", {
+    board.emit("mouseDragged", {
       canvasX: relativeX,
       canvasY: relativeY,
       mapX: pickResult.x,
@@ -302,15 +302,15 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
   this.updatePosition = function() {
     board.camera.target.x = board.cameraTargetX;
     board.camera.target.y = board.cameraTargetY;
-    this.emitEvent("pan", { middleX: board.cameraTargetX, middleY: board.cameraTargetY });
+    this.emitEvent("pan", [{ middleX: board.cameraTargetX, middleY: board.cameraTargetY }]);
   };
 
   /**
-   * Pans the camera to the given position on the plane of interest
+   * Pans the camera along the plane of interest by the given amounts
    */
-  this.pan = function(x, y) {
-    board.cameraTargetX = x;
-    board.cameraTargetY = y;
+  this.pan = function(dx, dy) {
+    board.cameraTargetX = board.cameraTargetX + dx;
+    board.cameraTargetY = board.cameraTargetY + dy;
     this.updatePosition();
   };
 
