@@ -3,6 +3,7 @@ import React from "react"; // eslint-disable-line no-unused-vars
 import ReactDom from "react-dom"; // eslint-disable-line no-unused-vars
 import HexDefinition from "cartesian-hexagonal";
 import GridContext from "../../../src/contexts/InverseGridContext.js";
+import CameraControllingMouseListener from "../../../src/listeners/CameraControlingMouseListener.js";
 
 /**
  * Factory function, returns a React component given the required params
@@ -75,6 +76,9 @@ const Map = class Map extends React.Component {
     let hexDimensions = new HexDefinition(55, 1, 0, 3);
     this.hexBoard.setHexDimensions(hexDimensions);
     this.gridContext = new GridContext(hexDimensions, this.hexBoard, "#808080");
+    this.cameraControllingMouseListener = new CameraControllingMouseListener(
+      this.hexBoard
+    );
     this.hexBoard.init();
   }
 

@@ -21,6 +21,7 @@ module.exports = function InverseGridContext(hexDimensions, board, color) {
   }
   var context = this;
   context.hexDimensions = hexDimensions;
+  this.board = board;
   this.scene = board.scene;
   this.color = hexToRgb(color);
 
@@ -70,11 +71,12 @@ module.exports = function InverseGridContext(hexDimensions, board, color) {
   );
   this.gridParent = mesh;
   hexagon.dispose();
-
-  // Documentation inherited from Context#updatePosition
-  this.updatePosition = (middleX, middleY) => {
+  this.board.addListener("pan", e => {
     //Convert the middle point to U, V
-    var hexCoordinates = this.hexDimensions.getReferencePoint(middleX, middleY);
+    var hexCoordinates = this.hexDimensions.getReferencePoint(
+      e.middleX,
+      e.middleY
+    );
 
     //Find the center of the hex in cartesian co-ordinates
     var centerHexPixelCoordinates = this.hexDimensions.getPixelCoordinates(
@@ -85,7 +87,7 @@ module.exports = function InverseGridContext(hexDimensions, board, color) {
     //Center our grid there
     context.gridParent.position.x = centerHexPixelCoordinates.x;
     context.gridParent.position.y = centerHexPixelCoordinates.y;
-  };
+  });
 };
 
 /**

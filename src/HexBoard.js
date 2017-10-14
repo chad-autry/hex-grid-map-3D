@@ -299,10 +299,10 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
   /**
      * Internal shared functionallity of paning, updates the camera and emits an event
      */
-  this.updatePostion = function() {
+  this.updatePosition = function() {
     board.camera.target.x = board.cameraTargetX;
     board.camera.target.y = board.cameraTargetY;
-    this.emitEvent("pan", { x: board.cameraTargetX, y: board.cameraTargetY });
+    this.emitEvent("pan", { middleX: board.cameraTargetX, middleY: board.cameraTargetY });
   };
 
   /**
@@ -321,7 +321,7 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     var pixelCoordinates = board.hexDimensions.getPixelCoordinates(u, v);
     board.cameraTargetX = pixelCoordinates.x;
     board.cameraTargetY = pixelCoordinates.y;
-    this.updatePostion();
+    this.updatePosition();
   };
 
   /**
