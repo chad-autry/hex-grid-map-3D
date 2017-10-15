@@ -72,7 +72,11 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
   board.cameraTargetX = 0; //The X point on the Z = 0 plane the camera is pointed
   board.cameraTargetY = 0; //The Y point on the Z = 0 plane the camera is pointed
 
-  board.camera.setPosition(new babylon.Vector3(0, 1000, 1000));
+  board.cameraAlpha = Math.PI/4; //The camera angle above the XY plane
+  board.cameraBeta = 0; //The camera angle rotated around the Z axis
+  board.cameraRadius = Math.sqrt(1000*1000, 1000,1000);//The distance from the camera target
+  
+  //board.camera.setPosition(new babylon.Vector3(0, 1000, 1000));
   // This targets the camera to scene origin
   board.camera.setTarget(babylon.Vector3.Zero());
 
@@ -306,6 +310,17 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
   };
 
   /**
+   * Updates the camera's position (not the target) based on alpha, beta, and radius
+   */
+  this.updateCameraPosition = () => {
+  	let cpX = this.cameraTargetX + Math.sin(this.cameraBeta)*Math.cos(this.cameraAlpha)*this.cameraRadius;
+  	let cpY = this.cameraTargetY + Math.cos(this.cameraBeta)*Math.cos(this.cameraAlpha)*this.cameraRadius;
+  	let cpZ = Math.sin(this.cameraAlpha)*this.cameraRadius;
+  	this.camera.setPosition(new babylon.Vector3(cpX, cpY, cpZ));
+  };
+  //Call the function to set the camera's position now the function is defined
+  this.updateCameraPosition();
+  /**
    * Pans the camera along the plane of interest by the given amounts
    */
   this.pan = function(dx, dy) {
@@ -314,6 +329,32 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     this.updatePosition();
   };
 
+  /**
+   * Tilts the camera over the plane of interest
+   */
+  this.tilt = dAlpha => {
+  	this.cameraAlpha = this.cameraAlpha + dAlpha;
+  	this.cameraAlpha = Math.max(this.cameraAlpha, Math.PI / 12); // Min 15 degrees
+  	this.cameraAlpha = Math.min(this.cameraAlpha, Math.PI/2);// Max 90 looking straight down
+  	this.updateCameraPosition();
+  };
+  
+  /**
+   * Rotates the camera around the Z axis
+   */
+  this.rotate = dBeta => {
+  	this.cameraBeta = this.cameraBeta + dBeta;
+  	this.updateCameraPosition();
+  };
+  
+  /**
+   * Zooms the camera towards and away from the target point
+   */
+  this.zoom = dRadius => {
+  	this.cameraRadius = this.cameraRadius + dRadius;
+  	this.cameraRadius = Math.max(this.cameraRadius, 0); // Don't go negative
+  	this.updateCameraPosition();
+  };
   /**
    * Utility function to center the board on a cell
    */

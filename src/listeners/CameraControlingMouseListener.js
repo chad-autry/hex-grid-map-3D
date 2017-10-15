@@ -10,17 +10,48 @@ module.exports = function CameraControllingMouseListener(board) {
   this.board = board;
   this.board.addListener("mouseDown", e => {
     if (!e.clickedItem) {
-      this.mouseDownX = e.mapX;
-      this.mouseDownY = e.mapY;
+      this.priorMapX = e.mapX;
+      this.priorMapY = e.mapY;
+      this.priorCanvasX = e.canvasX;
+      this.priorCanvasY = e.canvasY;
     }
   });
+  this.mode = "rotate";
   this.board.addListener("mouseDragged", e => {
     if (!e.clickedItem) {
-      //Find how the camera needs to move, in order to keep the mouse over the same point on the plane
-      let dx = this.mouseDownX - e.mapX;
-      let dy = this.mouseDownY - e.mapY;
+      let dx = 0;
+      let dy = 0;
+      if (this.mode === "pan") {
+        //Find how the camera needs to move, in order to keep the mouse over the same point on the plane
+        dx = this.priorMapX - e.mapX;
+        dy = this.priorMapY - e.mapY;
+        //this.priorMapX = e.mapX;
+        //this.priorMapY = e.mapY;
+        this.board.pan(dx, dy);
+      } else if (this.mode === "tilt") {
+      	dx = this.priorCanvasX - e.canvasX;
+        dy = this.priorCanvasY - e.canvasY;
+        this.priorCanvasX = e.canvasX;
+        this.priorCanvasY = e.canvasY;
+        this.board.tilt(Math.PI*(dx+dy)/500);
+      } else if (this.mode === "rotate") {
+      	let dx = this.priorCanvasX - e.canvasX;
+        let dy = this.priorCanvasY - e.canvasY;
+        this.priorCanvasX = e.canvasX;
+        this.priorCanvasY = e.canvasY;
+      	this.board.rotate(Math.PI*(dx+dy)/500);
+      } else if (this.mode === "zoom") {
+      	dx = this.priorCanvasX - e.canvasX;
+        dy = this.priorCanvasY - e.canvasY;
+        this.priorCanvasX = e.canvasX;
+        this.priorCanvasY = e.canvasY;
+        this.board.zoom(dx+dy);
+      }
 
-      this.board.pan(dx, dy);
     }
   });
+  
+  this.setMode = mode => {
+  	this.mode = mode;
+  };
 };
