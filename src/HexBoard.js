@@ -75,6 +75,9 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
   board.cameraAlpha = Math.PI/4; //The camera angle above the XY plane
   board.cameraBeta = 0; //The camera angle rotated around the Z axis
   board.cameraRadius = Math.sqrt(1000*1000, 1000,1000);//The distance from the camera target
+  const radiusMin = 100;
+  const alphaMax = Math.PI/2-Math.PI/360;
+  const alphaMin = Math.PI/6;
   
   //board.camera.setPosition(new babylon.Vector3(0, 1000, 1000));
   // This targets the camera to scene origin
@@ -132,6 +135,10 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     );
     let pickResult = board.intersectRayPlane(tRay, board.pickerPlane);
 
+    if (!Boolean(pickResult)) {
+    	return;
+    }
+  
     var mousePickResult = board.scene.pick(relativeX, relativeY, function(
       mesh
     ) {
@@ -200,6 +207,10 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     );
     var pickResult = board.intersectRayPlane(tRay, board.pickerPlane);
 
+    if (!Boolean(pickResult)) {
+    	return;
+    }
+    
     if (clickedItem) {
       clickedItem.emit("mouseDragged", {
         canvasX: relativeX,
@@ -244,6 +255,10 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
       board.camera
     );
     let pickResult = board.intersectRayPlane(tRay, board.pickerPlane);
+    
+    if (!Boolean(pickResult)) {
+    	return;
+    }
 
     if (clickedItem) {
       clickedItem.emit("mouseUp", {
@@ -334,8 +349,8 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
    */
   this.tilt = dAlpha => {
   	this.cameraAlpha = this.cameraAlpha + dAlpha;
-  	this.cameraAlpha = Math.max(this.cameraAlpha, Math.PI / 12); // Min 15 degrees
-  	this.cameraAlpha = Math.min(this.cameraAlpha, Math.PI/2);// Max 90 looking straight down
+  	this.cameraAlpha = Math.max(this.cameraAlpha, alphaMin);
+  	this.cameraAlpha = Math.min(this.cameraAlpha, alphaMax);
   	this.updateCameraPosition();
   };
   
@@ -352,7 +367,7 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
    */
   this.zoom = dRadius => {
   	this.cameraRadius = this.cameraRadius + dRadius;
-  	this.cameraRadius = Math.max(this.cameraRadius, 0); // Don't go negative
+  	this.cameraRadius = Math.max(this.cameraRadius, radiusMin); // Don't go negative
   	this.updateCameraPosition();
   };
   /**
