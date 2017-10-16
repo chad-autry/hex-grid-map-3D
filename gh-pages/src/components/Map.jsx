@@ -15,25 +15,67 @@ import CameraControllingMouseListener from "../../../src/listeners/CameraControl
 const Map = class Map extends React.Component {
   constructor(props) {
     super(props);
+    this.state = { mode: "pan" };
     // This line is important!
     this.setComponentState = this.setComponentState.bind(this);
+    this.setMode = this.setMode.bind(this);
     this.baseDataLink = props.dataLink;
   }
 
   render() {
     return (
-      <canvas
-        ref={canvasRef => (this.canvasRef = canvasRef)}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          backgroundColor: "green",
-          width: "100%",
-          height: "100%",
-          zIndex: 200
-        }}
-      />
+      <div>
+        <canvas
+          ref={canvasRef => (this.canvasRef = canvasRef)}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            backgroundColor: "green",
+            width: "100%",
+            height: "100%",
+            zIndex: 200
+          }}
+        />
+        <div
+          className="btn-group-vertical"
+          style={{
+            zIndex: 300
+          }}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              this.setMode("pan");
+            }}>
+            Pan
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              this.setMode("tilt");
+            }}>
+            Tilt
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              this.setMode("spin");
+            }}>
+            Spin
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              this.setMode("zoom");
+            }}>
+            Zoom
+          </button>
+        </div>
+      </div>
     );
   }
 
@@ -56,6 +98,13 @@ const Map = class Map extends React.Component {
     //Now make the canvas draw at the display size multiplied by the ratio
     canvas.width = displayWidth * ratio;
     canvas.height = displayHeight * ratio;
+  }
+
+  setMode(mode) {
+    this.setState({
+      mode: mode
+    });
+    this.cameraControllingMouseListener.setMode(mode);
   }
 
   componentDidMount() {

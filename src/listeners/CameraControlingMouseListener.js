@@ -16,7 +16,7 @@ module.exports = function CameraControllingMouseListener(board) {
       this.priorCanvasY = e.canvasY;
     }
   });
-  this.mode = "rotate";
+  this.mode = "pan";
   this.board.addListener("mouseDragged", e => {
     if (!e.clickedItem) {
       let dx = 0;
@@ -29,29 +29,28 @@ module.exports = function CameraControllingMouseListener(board) {
         //this.priorMapY = e.mapY;
         this.board.pan(dx, dy);
       } else if (this.mode === "tilt") {
-      	dx = this.priorCanvasX - e.canvasX;
+        dx = this.priorCanvasX - e.canvasX;
         dy = this.priorCanvasY - e.canvasY;
         this.priorCanvasX = e.canvasX;
         this.priorCanvasY = e.canvasY;
-        this.board.tilt(Math.PI*(dx+dy)/500);
-      } else if (this.mode === "rotate") {
-      	let dx = this.priorCanvasX - e.canvasX;
+        this.board.tilt(Math.PI * (dx + dy) / 500);
+      } else if (this.mode === "spin") {
+        let dx = this.priorCanvasX - e.canvasX;
         let dy = this.priorCanvasY - e.canvasY;
         this.priorCanvasX = e.canvasX;
         this.priorCanvasY = e.canvasY;
-      	this.board.rotate(Math.PI*(dx+dy)/500);
+        this.board.spin(Math.PI * (dx + dy) / 500);
       } else if (this.mode === "zoom") {
-      	dx = this.priorCanvasX - e.canvasX;
+        dx = this.priorCanvasX - e.canvasX;
         dy = this.priorCanvasY - e.canvasY;
         this.priorCanvasX = e.canvasX;
         this.priorCanvasY = e.canvasY;
-        this.board.zoom(dx+dy);
+        this.board.zoom(dx + dy);
       }
-
     }
   });
-  
+
   this.setMode = mode => {
-  	this.mode = mode;
+    this.mode = mode;
   };
 };

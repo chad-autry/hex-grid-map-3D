@@ -340,9 +340,9 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
   };
   
   /**
-   * Rotates the camera around the Z axis
+   * Spins the camera around the Z axis
    */
-  this.rotate = dBeta => {
+  this.spin = dBeta => {
   	this.cameraBeta = this.cameraBeta + dBeta;
   	this.updateCameraPosition();
   };
