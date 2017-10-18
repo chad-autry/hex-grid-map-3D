@@ -24,7 +24,8 @@ module.exports = function InverseGridContext(hexDimensions, board, color) {
   this.board = board;
   this.scene = board.scene;
   this.color = hexToRgb(color);
-
+  	this.middleX = 0;
+  	this.middleY = 0;
   let positionArray = createPositionArray(hexDimensions);
 
   var nb = positionArray.length; // nb of hexagons
@@ -36,12 +37,7 @@ module.exports = function InverseGridContext(hexDimensions, board, color) {
     //particle.rotation.x = Math.random() * 3.15;
     //particle.rotation.y = Math.random() * 3.15;
     particle.rotation.z = Math.PI / 2;
-    particle.color = new babylon.Color4(
-      this.color.r / 256,
-      this.color.g / 256,
-      this.color.b / 256,
-      0.5
-    );
+
   };
 
   var hexagon = babylon.MeshBuilder.CreateDisc(
@@ -56,22 +52,40 @@ module.exports = function InverseGridContext(hexDimensions, board, color) {
 
   // SPS creation : Immutable {updatable: false}
   var SPS = new babylon.SolidParticleSystem("SPS", this.scene, {
-    updatable: false,
+    updatable: true,
     pickable: false
   });
-  SPS.addShape(hexagon, nb, { positionFunction: myPositionFunction });
-  var mesh = SPS.buildMesh();
-  mesh.hasVertexAlpha = true;
-  hexagon.rotation.z = Math.PI / 2;
-  hexagon.color = new babylon.Color4(
-    this.color.r / 256,
+  SPS.addShape(hexagon, nb);
+  
+    SPS.initParticles = function () {
+	  for (var p = 0; p < SPS.nbParticles; p++) {
+		  myPositionFunction(SPS.particles[p], p);
+		    SPS.particles[p].rotation.z = Math.PI / 2;
+	  }
+  };
+  SPS.updateParticle = particle => {
+  	let distanceFromViewPoint = Math.sqrt(Math.pow(particle.position.x - this.middleX, 2) + Math.pow(particle.position.y - this.middleY, 2));
+  	let alpha = .5;
+  	if (distanceFromViewPoint > 500 && distanceFromViewPoint < 1000) {
+  		alpha = (500 - distanceFromViewPoint)/1000 + .5;
+  	} else if (distanceFromViewPoint >= 1000) {
+  		alpha = 0;
+  	}
+  	particle.color = new babylon.Color4(
+  	    this.color.r / 256,
     this.color.g / 256,
     this.color.b / 256,
-    0.5
-  );
+    alpha
+  	);
+  };
+  var mesh = SPS.buildMesh();
+  mesh.hasVertexAlpha = true;
+  SPS.initParticles();
+  SPS.setParticles();
   this.gridParent = mesh;
   hexagon.dispose();
   this.board.addListener("pan", e => {
+
     //Convert the middle point to U, V
     var hexCoordinates = this.hexDimensions.getReferencePoint(
       e.middleX,
@@ -87,6 +101,11 @@ module.exports = function InverseGridContext(hexDimensions, board, color) {
     //Center our grid there
     context.gridParent.position.x = centerHexPixelCoordinates.x;
     context.gridParent.position.y = centerHexPixelCoordinates.y;
+    
+    //Put the relative middleX and middleY onto the board for figuring transparency
+  	this.middleX = e.middleX - centerHexPixelCoordinates.x;
+  	this.middleY = e.middleY - centerHexPixelCoordinates.y;
+    SPS.setParticles();
   });
 };
 
