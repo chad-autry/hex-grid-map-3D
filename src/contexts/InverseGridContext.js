@@ -87,12 +87,16 @@ module.exports = function InverseGridContext(
       distanceFromViewPoint >
         this.radius * this.hexDimensions.hexagon_narrow_width &&
       distanceFromViewPoint <
-        (this.radius + this.fadeRadius) * this.hexDimensions.hexagon_narrow_width
+        (this.radius + this.fadeRadius) *
+          this.hexDimensions.hexagon_narrow_width
     ) {
-    	//Linearlly scale from baseAlpha --> 0 y = mx + b   (x is distanceFromViewPoint - rad*hnw, b = baseAlpha)
-    	// m = -b/(fadeRadius+radius-radius)
+      //Linearlly scale from baseAlpha --> 0 y = mx + b   (x is distanceFromViewPoint - rad*hnw, b = baseAlpha)
+      // m = -b/(fadeRadius+radius-radius)
       alpha =
-        (-this.baseAlpha/((this.fadeRadius)*this.hexDimensions.hexagon_narrow_width))*(distanceFromViewPoint-this.radius * this.hexDimensions.hexagon_narrow_width) +
+        -this.baseAlpha /
+          (this.fadeRadius * this.hexDimensions.hexagon_narrow_width) *
+          (distanceFromViewPoint -
+            this.radius * this.hexDimensions.hexagon_narrow_width) +
         this.baseAlpha;
     } else if (
       distanceFromViewPoint >=
