@@ -115,16 +115,18 @@ const Map = class Map extends React.Component {
     };
     this.resizeListener = resizeFunction;
     window.addEventListener("resize", this.resizeListener);
-    //babylon.js is controlling the size, force it to resize using our container size when opened
-    //            this.props.glContainer.on('open', resizeFunction);
-
-    //babylon.js is controlling the size, force it to resize using our container size on golden-layout resize
-    //           this.props.glContainer.on('resize', resizeFunction);
 
     this.hexBoard = new HexBoard(this.canvasRef, window, "#000000");
     let hexDimensions = new HexDefinition(55, 1, 0, 3);
     this.hexBoard.setHexDimensions(hexDimensions);
-    this.gridContext = new GridContext(hexDimensions, this.hexBoard, "#808080");
+    this.gridContext = new GridContext(
+      hexDimensions,
+      this.hexBoard,
+      "#808080",
+      15,
+      15,
+      0.5
+    );
     this.cameraControllingMouseListener = new CameraControllingMouseListener(
       this.hexBoard
     );

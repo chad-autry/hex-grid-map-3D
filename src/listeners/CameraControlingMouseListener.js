@@ -18,7 +18,7 @@ module.exports = function CameraControllingMouseListener(board) {
   });
   this.mode = "pan";
   this.zoomMultiplier = 5;
-  this.rotateMultiplier = 1/500;//should externally set this based on screen size for consistency
+  this.rotateMultiplier = 1 / 500; //should externally set this based on screen size for consistency
   this.board.addListener("mouseDragged", e => {
     if (!e.clickedItem) {
       let dx = 0;
@@ -47,7 +47,7 @@ module.exports = function CameraControllingMouseListener(board) {
         dy = this.priorCanvasY - e.canvasY;
         this.priorCanvasX = e.canvasX;
         this.priorCanvasY = e.canvasY;
-        this.board.zoom((dx + dy)*this.zoomMultiplier);
+        this.board.zoom((dx + dy) * this.zoomMultiplier);
       }
     }
   });

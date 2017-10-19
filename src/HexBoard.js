@@ -45,6 +45,8 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     rgb.b / 256
   );
 
+  // And give it an ambient color
+  board.scene.ambientColor = new babylon.Color3(0.3, 0.3, 0.3);
   // This creates and positions a free camera
   //var camera = new babylon.FreeCamera("camera1", new babylon.Vector3(0, 0, 1000), scene);
   //  Create an ArcRotateCamera aimed at 0,0,0, with no alpha, beta or radius, so be careful.  It will look broken.

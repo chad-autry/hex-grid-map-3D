@@ -14,30 +14,44 @@ var hexToRgb = require("../HexToRGB.js");
  * @constructor
  * @param {external:cartesian-hexagonal} hexDimensions - The DTO defining the hex <--> cartesian relation
  */
-module.exports = function InverseGridContext(hexDimensions, board, color) {
+module.exports = function InverseGridContext(
+  hexDimensions,
+  board,
+  color,
+  radius,
+  fadeRadius,
+  baseAlpha
+) {
   //Protect the constructor from being called as a normal method
   if (!(this instanceof InverseGridContext)) {
-    return new InverseGridContext(hexDimensions, board, color);
+    return new InverseGridContext(
+      hexDimensions,
+      board,
+      color,
+      radius,
+      fadeRadius,
+      baseAlpha
+    );
   }
   var context = this;
   context.hexDimensions = hexDimensions;
   this.board = board;
   this.scene = board.scene;
   this.color = hexToRgb(color);
-  	this.middleX = 0;
-  	this.middleY = 0;
-  let positionArray = createPositionArray(hexDimensions);
+  this.middleX = 0;
+  this.middleY = 0;
+  this.radius = radius;
+  this.fadeRadius = fadeRadius;
+  this.baseAlpha = baseAlpha;
+  let positionArray = createPositionArray(hexDimensions, radius + fadeRadius);
 
   var nb = positionArray.length; // nb of hexagons
   // custom position function for SPS creation
   var myPositionFunction = (particle, i) => {
-    particle.position.x = positionArray[i].x; //(Math.random() - 0.5) * fact;
-    particle.position.y = positionArray[i].y; //(Math.random() - 0.5) * fact;
-    particle.position.z = 0; //(Math.random() - 0.5) * fact;
-    //particle.rotation.x = Math.random() * 3.15;
-    //particle.rotation.y = Math.random() * 3.15;
+    particle.position.x = positionArray[i].x;
+    particle.position.y = positionArray[i].y;
+    particle.position.z = 0;
     particle.rotation.z = Math.PI / 2;
-
   };
 
   var hexagon = babylon.MeshBuilder.CreateDisc(
@@ -56,27 +70,42 @@ module.exports = function InverseGridContext(hexDimensions, board, color) {
     pickable: false
   });
   SPS.addShape(hexagon, nb);
-  
-    SPS.initParticles = function () {
-	  for (var p = 0; p < SPS.nbParticles; p++) {
-		  myPositionFunction(SPS.particles[p], p);
-		    SPS.particles[p].rotation.z = Math.PI / 2;
-	  }
+
+  SPS.initParticles = function() {
+    for (var p = 0; p < SPS.nbParticles; p++) {
+      myPositionFunction(SPS.particles[p], p);
+      SPS.particles[p].rotation.z = Math.PI / 2;
+    }
   };
   SPS.updateParticle = particle => {
-  	let distanceFromViewPoint = Math.sqrt(Math.pow(particle.position.x - this.middleX, 2) + Math.pow(particle.position.y - this.middleY, 2));
-  	let alpha = .5;
-  	if (distanceFromViewPoint > 500 && distanceFromViewPoint < 1000) {
-  		alpha = (500 - distanceFromViewPoint)/1000 + .5;
-  	} else if (distanceFromViewPoint >= 1000) {
-  		alpha = 0;
-  	}
-  	particle.color = new babylon.Color4(
-  	    this.color.r / 256,
-    this.color.g / 256,
-    this.color.b / 256,
-    alpha
-  	);
+    let distanceFromViewPoint = Math.sqrt(
+      Math.pow(particle.position.x - this.middleX, 2) +
+        Math.pow(particle.position.y - this.middleY, 2)
+    );
+    let alpha = this.baseAlpha;
+    if (
+      distanceFromViewPoint >
+        this.radius * this.hexDimensions.hexagon_narrow_width &&
+      distanceFromViewPoint <
+        (this.radius + this.fadeRadius) * this.hexDimensions.hexagon_narrow_width
+    ) {
+    	//Linearlly scale from baseAlpha --> 0 y = mx + b   (x is distanceFromViewPoint - rad*hnw, b = baseAlpha)
+    	// m = -b/(fadeRadius+radius-radius)
+      alpha =
+        (-this.baseAlpha/((this.fadeRadius)*this.hexDimensions.hexagon_narrow_width))*(distanceFromViewPoint-this.radius * this.hexDimensions.hexagon_narrow_width) +
+        this.baseAlpha;
+    } else if (
+      distanceFromViewPoint >=
+      (this.radius + this.fadeRadius) * this.hexDimensions.hexagon_narrow_width
+    ) {
+      alpha = 0;
+    }
+    particle.color = new babylon.Color4(
+      this.color.r / 256,
+      this.color.g / 256,
+      this.color.b / 256,
+      alpha
+    );
   };
   var mesh = SPS.buildMesh();
   mesh.hasVertexAlpha = true;
@@ -85,7 +114,6 @@ module.exports = function InverseGridContext(hexDimensions, board, color) {
   this.gridParent = mesh;
   hexagon.dispose();
   this.board.addListener("pan", e => {
-
     //Convert the middle point to U, V
     var hexCoordinates = this.hexDimensions.getReferencePoint(
       e.middleX,
@@ -101,10 +129,10 @@ module.exports = function InverseGridContext(hexDimensions, board, color) {
     //Center our grid there
     context.gridParent.position.x = centerHexPixelCoordinates.x;
     context.gridParent.position.y = centerHexPixelCoordinates.y;
-    
+
     //Put the relative middleX and middleY onto the board for figuring transparency
-  	this.middleX = e.middleX - centerHexPixelCoordinates.x;
-  	this.middleY = e.middleY - centerHexPixelCoordinates.y;
+    this.middleX = e.middleX - centerHexPixelCoordinates.x;
+    this.middleY = e.middleY - centerHexPixelCoordinates.y;
     SPS.setParticles();
   });
 };
@@ -113,19 +141,18 @@ module.exports = function InverseGridContext(hexDimensions, board, color) {
  * Creates a full grid from the single mesh
  * @private
  */
-var createPositionArray = function(hexDimensions) {
+var createPositionArray = function(hexDimensions, radius) {
   var positionArray = [];
   var pixelCoordinates;
 
   //For every hex, place an instance of the original mesh. The symbol fills in 3 of the 6 lines, the other 3 being shared with an adjacent hex
 
   //Make a hexagonal grid of hexagons since it is approximately circular.
-  //The radius should be a bit larger than our max viewing distance
   var u = 0;
   var v = 0;
   //For each radius
   positionArray.push({ y: 0, x: 0 });
-  for (var i = 1; i < 31; i++) {
+  for (var i = 1; i < radius + 1; i++) {
     //Hold u constant as the radius, add an instance for each v
     for (v = -i; v <= 0; v++) {
       pixelCoordinates = hexDimensions.getPixelCoordinates(i, v);
