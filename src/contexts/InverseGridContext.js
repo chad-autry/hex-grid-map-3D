@@ -116,6 +116,9 @@ module.exports = function InverseGridContext(
   SPS.initParticles();
   SPS.setParticles();
   this.gridParent = mesh;
+  let material = new babylon.StandardMaterial("texture1", this.scene);
+  material.emissiveColor = new babylon.Color3(1, 1, 1);
+  mesh.material = material;
   hexagon.dispose();
   this.board.addListener("pan", e => {
     //Convert the middle point to U, V

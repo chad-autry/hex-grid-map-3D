@@ -3,6 +3,7 @@ import React from "react"; // eslint-disable-line no-unused-vars
 import ReactDom from "react-dom"; // eslint-disable-line no-unused-vars
 import HexDefinition from "cartesian-hexagonal";
 import GridContext from "../../../src/contexts/InverseGridContext.js";
+import StarryContext from "../../../src/contexts/StarryContext.js";
 import CameraControllingMouseListener from "../../../src/listeners/CameraControlingMouseListener.js";
 
 /**
@@ -116,9 +117,14 @@ const Map = class Map extends React.Component {
     this.resizeListener = resizeFunction;
     window.addEventListener("resize", this.resizeListener);
 
+    //Make the HexBoard which wraps Babylon.js instantiation and mouse handleing
     this.hexBoard = new HexBoard(this.canvasRef, window, "#000000");
+    //The pixel dimensions, and cartesion/hexagonal coordinate helper
     let hexDimensions = new HexDefinition(55, 1, 0, 3);
     this.hexBoard.setHexDimensions(hexDimensions);
+
+    //Setup a new grid context to draw and manage a hexagonal grid
+    //It'll control transforming the grid as the camera focus changes position
     this.gridContext = new GridContext(
       hexDimensions,
       this.hexBoard,
@@ -127,9 +133,23 @@ const Map = class Map extends React.Component {
       15,
       0.5
     );
+
+    //Setup a starry field context
+    this.starryContext = new StarryContext(hexDimensions, this.hexBoard, 2000);
+
+    // Next we need a way to draw the rest of the scene.
+    // We could manage each item individually, but lets set up a transformation pipeline
+
+    // First Draw an item for the object
+    // Then reposition the item based on the object's hex coordinates
+    // Next translate it up or down to stack items within the same cell
+
+    //Setup a camera controlling mouse listener, buttons we set up hook into the different modes
     this.cameraControllingMouseListener = new CameraControllingMouseListener(
       this.hexBoard
     );
+
+    //Temp setup a basic light
     this.hexBoard.init();
   }
 

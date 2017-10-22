@@ -321,8 +321,9 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
      * Internal shared functionallity of paning, updates the camera and emits an event
      */
   this.updatePosition = function() {
-    board.camera.target.x = board.cameraTargetX;
+  	board.camera.target.x = board.cameraTargetX;
     board.camera.target.y = board.cameraTargetY;
+    this.updateCameraPosition();
     this.emitEvent("pan", [{ middleX: board.cameraTargetX, middleY: board.cameraTargetY }]);
   };
 
@@ -334,6 +335,8 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
   	let cpY = this.cameraTargetY + Math.cos(this.cameraBeta)*Math.cos(this.cameraAlpha)*this.cameraRadius;
   	let cpZ = Math.sin(this.cameraAlpha)*this.cameraRadius;
   	this.camera.setPosition(new babylon.Vector3(cpX, cpY, cpZ));
+  	
+    this.emitEvent("camera", [{ cameraX: cpX, cameraY: cpY, cameraZ: cpZ }]);
   };
   //Call the function to set the camera's position now the function is defined
   this.updateCameraPosition();
