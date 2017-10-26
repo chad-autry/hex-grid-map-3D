@@ -5,7 +5,10 @@ import HexDefinition from "cartesian-hexagonal";
 import GridContext from "../../../src/contexts/InverseGridContext.js";
 import StarryContext from "../../../src/contexts/StarryContext.js";
 import CameraControllingMouseListener from "../../../src/listeners/CameraControlingMouseListener.js";
-
+import EmittingDataSource from "data-chains/src/EmittingDataSource.js";
+import SphereDrawnItemFactory from "../../../src/drawnItemFactories/SphereDrawnItemFactory";
+import ItemMappingPipelineNode from "../../../src/pipeline/ItemMappingPipelineNode";
+import PlanarPositioningPipelineNode from "../../../src/pipeline/PlanarPositioningPipelineNode";
 /**
  * Factory function, returns a React component given the required params
  * Injecting all dependencies (instead of just using require) since some modules are dynamically loaded
@@ -109,6 +112,7 @@ const Map = class Map extends React.Component {
   }
 
   componentDidMount() {
+    // Mess with sizing the canvas
     this.resizeCanvas(this.canvasRef);
     let resizeFunction = () => {
       this.resizeCanvas(this.canvasRef);
@@ -138,10 +142,60 @@ const Map = class Map extends React.Component {
     this.starryContext = new StarryContext(hexDimensions, this.hexBoard, 2000);
 
     // Next we need a way to draw the rest of the scene.
-    // We could manage each item individually, but lets set up a transformation pipeline
+    // We could manage each item individually, but lets set up a transformation pipeline like a game would
 
-    // First Draw an item for the object
-    // Then reposition the item based on the object's hex coordinates
+    //An emitting datasource lets us add (or modifiy or remove) items, which can then be reacted to by listeners
+    let pipelineStart = new EmittingDataSource();
+
+    // Next up make the drawn item factories
+    let sphereDrawnItemFactory = new SphereDrawnItemFactory(hexDimensions);
+    //let arrowDrawnItemFactory = new ArrowDrawnItemFactory(hexDimensions);
+
+    // And then add a pipeline node to use the appropriate factory for each business object
+    let itemMap = {};
+    itemMap.planet = itemMap.moon = itemMap.star = (item, scene) => {
+      // Proxy the more basic sphereDrawnItemFactory getDrawnItems function, with various hard coded things our DTO won't have
+      let getMeshParams = {
+        size: item.size,
+        lineWidth: item.lineWidth,
+        greatCircleAngles: [0, Math.PI / 3, -Math.PI / 3],
+        latitudeAngles: [
+          0,
+          Math.PI / 6,
+          Math.PI / 3,
+          -Math.PI / 6,
+          -Math.PI / 3
+        ],
+        lineColor: item.lineColor,
+        backgroundColor: item.backgroundColor
+      };
+      if (item.type === "star") {
+        getMeshParams.borderStar = {
+          radius1: 3,
+          radius2: 6,
+          points: 20,
+          borderColor: item.lineColor
+        };
+      } else {
+        getMeshParams.borderWidth = 2;
+        getMeshParams.borderColor = item.borderColor;
+      }
+      let mesh = sphereDrawnItemFactory.getDrawnItem(getMeshParams, scene);
+      mesh.data.item = item;
+      return mesh;
+    };
+    let itemMappingPipelineNode = ItemMappingPipelineNode(
+      itemMap,
+      this.hexBoard.scene
+    );
+    itemMappingPipelineNode.setDataSource(pipelineStart);
+
+    // Next a pipeline node to reposition the item based on object's hex coordinate
+    let planarPositioningPipelineNode = new PlanarPositioningPipelineNode(
+      hexDimensions
+    );
+    planarPositioningPipelineNode.setDataSource(itemMappingPipelineNode);
+
     // Next translate it up or down to stack items within the same cell
 
     //Setup a camera controlling mouse listener, buttons we set up hook into the different modes
@@ -149,6 +203,52 @@ const Map = class Map extends React.Component {
       this.hexBoard
     );
 
+    // Add our items to the base datasource. Game logic or a server fetch would do this
+
+    // Add the sun
+    pipelineStart.addItems([
+      {
+        id: "sun",
+        type: "star",
+        size: 100,
+        lineWidth: 5,
+        lineColor: "#f97306",
+        backgroundColor: "#ffff14",
+        u: 0,
+        v: 0
+      }
+    ]);
+
+    //Add the earth
+    pipelineStart.addItems([
+      {
+        id: "earth",
+        type: "planet",
+        size: 66,
+        lineWidth: 5,
+        lineColor: "#653700",
+        backgroundColor: "#0343df",
+        borderColor: "#ffffff",
+        u: 5,
+        v: 5
+      }
+    ]);
+
+    //Add the moon
+    pipelineStart.addItems([
+      {
+        id: "moon",
+        type: "moon",
+        size: 33,
+        lineWidth: 2.5,
+        lineColor: "#929591",
+        backgroundColor: "#e1e1d6",
+        borderWidth: 3,
+        borderColor: "black",
+        u: 3,
+        v: 8
+      }
+    ]);
     //Temp setup a basic light
     this.hexBoard.init();
   }

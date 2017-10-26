@@ -48,7 +48,7 @@ module.exports = function StarryContext(hexDimensions, board, density) {
     );
 
     // This scale works well for the default max draw distance
-    let scale = Math.random() * 0.5 + 0.5;
+    let scale = Math.random() * 0.2 + 0.2;
     particle.scaling = new babylon.Vector3(scale, scale, scale);
   };
 
