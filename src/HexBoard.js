@@ -87,7 +87,7 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
 
   // Delegate mouse interactions
   var down = false;
-  var mousemoved = false;
+  var mouseMoved = false;
   var clickedItem; //The item which has "claimed" the mouse down event
   var initialDownX;
   var initialDownY;
@@ -115,7 +115,7 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
   canvas.onmousedown = function(e) {
     e.preventDefault();
     down = true;
-    mousemoved = false;
+    mouseMoved = false;
 
     var pageX = e.pageX;
     var pageY = e.pageY;
@@ -229,7 +229,7 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
       mapY: pickResult.y,
       clickedItem: clickedItem
     });
-    mousemoved = true;
+    mouseMoved = true;
   };
 
   canvas.addEventListener("touchmove", canvas.onmousemove, false);
@@ -262,27 +262,17 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     	return;
     }
 
-    if (clickedItem) {
-      clickedItem.emit("mouseUp", {
+    //Emit a mouseUp event, with the clickable item
+    board.emit("mouseUp", {
         canvasX: relativeX,
         canvasY: relativeY,
         mapX: pickResult.x,
         mapY: pickResult.y,
         clickedItem: clickedItem,
-        mousemoved: mousemoved
-      });
-}
-      //Emit a mouseUp event, with the clickable item
-      board.emit("mouseUp", {
-        canvasX: relativeX,
-        canvasY: relativeY,
-        mapX: pickResult.x,
-        mapY: pickResult.y,
-        clickedItem: clickedItem,
-        mousemoved: mousemoved
+        mouseMoved: mouseMoved
       });
     clickedItem = null;
-    mousemoved = false;
+    mouseMoved = false;
   };
   canvas.onmouseup = canvas.onmouseleave;
   canvas.addEventListener("touchend", canvas.onmouseup, false);

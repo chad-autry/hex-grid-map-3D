@@ -7,6 +7,7 @@ import StarryContext from "../../../src/contexts/StarryContext.js";
 import CameraControllingMouseListener from "../../../src/listeners/CameraControlingMouseListener.js";
 import EmittingDataSource from "data-chains/src/EmittingDataSource.js";
 import SphereDrawnItemFactory from "../../../src/drawnItemFactories/SphereDrawnItemFactory";
+import ArrowDrawnItemFactory from "../../../src/drawnItemFactories/ArrowDrawnItemFactory";
 import ItemMappingPipelineNode from "../../../src/pipeline/ItemMappingPipelineNode";
 import PlanarPositioningPipelineNode from "../../../src/pipeline/PlanarPositioningPipelineNode";
 /**
@@ -21,9 +22,7 @@ const Map = class Map extends React.Component {
     super(props);
     this.state = { mode: "pan" };
     // This line is important!
-    this.setComponentState = this.setComponentState.bind(this);
     this.setMode = this.setMode.bind(this);
-    this.baseDataLink = props.dataLink;
   }
 
   render() {
@@ -149,10 +148,11 @@ const Map = class Map extends React.Component {
 
     // Next up make the drawn item factories
     let sphereDrawnItemFactory = new SphereDrawnItemFactory(hexDimensions);
-    //let arrowDrawnItemFactory = new ArrowDrawnItemFactory(hexDimensions);
+    let arrowDrawnItemFactory = new ArrowDrawnItemFactory(hexDimensions);
 
     // And then add a pipeline node to use the appropriate factory for each business object
     let itemMap = {};
+    itemMap.arrow = (item, scene) => { return arrowDrawnItemFactory.getDrawnItem(item, scene);};
     itemMap.planet = itemMap.moon = itemMap.star = (item, scene) => {
       // Proxy the more basic sphereDrawnItemFactory getDrawnItems function, with various hard coded things our DTO won't have
       let getMeshParams = {
@@ -203,6 +203,24 @@ const Map = class Map extends React.Component {
       this.hexBoard
     );
 
+    this.hexBoard.addListener("mouseUp", e => {
+      if (!e.item && !e.mouseMoved) {
+        let hexagonalCoordinates = hexDimensions.getReferencePoint(
+          e.mapX,
+          e.mapY
+        );
+
+        this.props.addAlert({
+          type: "info",
+          text:
+            "Clicked U:" +
+            hexagonalCoordinates.u +
+            " V:" +
+            hexagonalCoordinates.v
+        });
+      }
+    });
+
     // Add our items to the base datasource. Game logic or a server fetch would do this
 
     // Add the sun
@@ -249,6 +267,259 @@ const Map = class Map extends React.Component {
         v: 8
       }
     ]);
+
+    //Add arrows to represent gravity
+    //Gravity around the sun
+    pipelineStart.addItems([
+      {
+        id: "sa1",
+        type: "arrow",
+        u: 0,
+        v: -1,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 180,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "sa2",
+        type: "arrow",
+        u: -1,
+        v: 0,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 240,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "sa3",
+        type: "arrow",
+        u: -1,
+        v: 1,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 300,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "sa4",
+        type: "arrow",
+        u: 0,
+        v: 1,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 0,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "sa5",
+        type: "arrow",
+        u: 1,
+        v: 0,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 60,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "sa6",
+        type: "arrow",
+        u: 1,
+        v: -1,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 120,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+
+    //gravity around the planet
+    pipelineStart.addItems([
+      {
+        id: "ea1",
+        type: "arrow",
+        u: 5,
+        v: 4,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 180,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "ea2",
+        type: "arrow",
+        u: 4,
+        v: 5,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 240,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "ea3",
+        type: "arrow",
+        u: 4,
+        v: 6,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 300,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "ea4",
+        type: "arrow",
+        u: 5,
+        v: 6,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 0,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "ea5",
+        type: "arrow",
+        u: 6,
+        v: 5,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 60,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "ea6",
+        type: "arrow",
+        u: 6,
+        v: 4,
+        fillColor: "#929591",
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 120,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+
+    //unfilled gravity around the moon
+    pipelineStart.addItems([
+      {
+        id: "ma1",
+        type: "arrow",
+        u: 3,
+        v: 7,
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 180,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "ma2",
+        type: "arrow",
+        u: 2,
+        v: 8,
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 240,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "ma3",
+        type: "arrow",
+        u: 2,
+        v: 9,
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 300,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "ma4",
+        type: "arrow",
+        u: 3,
+        v: 9,
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 0,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "ma5",
+        type: "arrow",
+        u: 4,
+        v: 8,
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 60,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "ma6",
+        type: "arrow",
+        u: 4,
+        v: 7,
+        lineWidth: 3,
+        lineColor: "#929591",
+        rotation: 120,
+        scaleLength: 0.75,
+        scaleWidth: 0.75
+      }
+    ]);
     //Temp setup a basic light
     this.hexBoard.init();
   }
@@ -256,17 +527,6 @@ const Map = class Map extends React.Component {
   componentWillUnmount() {
     //            this.props.glEventHub.off( 'map-state-changed', this.setComponentState );
     window.removeEventListener("resize", this.resizeListener);
-  }
-
-  setComponentState(mapState) {
-    this.baseDataLink.addItems(mapState);
-  }
-
-  componentWillUpdate(nextProps, nextState) {
-    // When a new state comes in, update the map component's baseDataLink
-    if (nextState) {
-      this.baseDataLink.addItems(nextState);
-    }
   }
 };
 
