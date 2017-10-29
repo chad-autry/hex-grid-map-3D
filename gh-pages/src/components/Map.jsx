@@ -10,6 +10,7 @@ import SphereDrawnItemFactory from "../../../src/drawnItemFactories/SphereDrawnI
 import ArrowDrawnItemFactory from "../../../src/drawnItemFactories/ArrowDrawnItemFactory";
 import ItemMappingPipelineNode from "../../../src/pipeline/ItemMappingPipelineNode";
 import PlanarPositioningPipelineNode from "../../../src/pipeline/PlanarPositioningPipelineNode";
+import FieldOfSquaresDrawnItemFactory from "../../../src/drawnItemFactories/FieldOfSquaresDrawnItemFactory";
 /**
  * Factory function, returns a React component given the required params
  * Injecting all dependencies (instead of just using require) since some modules are dynamically loaded
@@ -149,10 +150,21 @@ const Map = class Map extends React.Component {
     // Next up make the drawn item factories
     let sphereDrawnItemFactory = new SphereDrawnItemFactory(hexDimensions);
     let arrowDrawnItemFactory = new ArrowDrawnItemFactory(hexDimensions);
+    let fieldOfSquaresDrawnItemFactory = new FieldOfSquaresDrawnItemFactory(
+      hexDimensions,
+      9,
+      20,
+      ["#8d8468", "#86775f", "#7a6a4f", "#7f7053"]
+    );
 
     // And then add a pipeline node to use the appropriate factory for each business object
     let itemMap = {};
-    itemMap.arrow = (item, scene) => { return arrowDrawnItemFactory.getDrawnItem(item, scene);};
+    itemMap.arrow = (item, scene) => {
+      return arrowDrawnItemFactory.getDrawnItem(item, scene);
+    };
+    itemMap.asteroids = (item, scene) => {
+      return fieldOfSquaresDrawnItemFactory.getDrawnItem(item, scene);
+    };
     itemMap.planet = itemMap.moon = itemMap.star = (item, scene) => {
       // Proxy the more basic sphereDrawnItemFactory getDrawnItems function, with various hard coded things our DTO won't have
       let getMeshParams = {
@@ -518,6 +530,77 @@ const Map = class Map extends React.Component {
         rotation: 120,
         scaleLength: 0.75,
         scaleWidth: 0.75
+      }
+    ]);
+    //A small asteroid field. Double asteroids in the middle
+    let EventEmitter = require("wolfy87-eventemitter");
+    let asteroidEmitter = new EventEmitter();
+    asteroidEmitter.addListener("mouseUp", e => {
+      if (!e.mouseMoved) {
+        this.props.addAlert({ type: "success", text: "Asteroids" });
+      }
+    });
+
+    pipelineStart.addItems([
+      {
+        id: "asteroids1",
+        type: "asteroids",
+        u: -1,
+        v: 10,
+        emitter: asteroidEmitter
+      },
+      {
+        id: "asteroids2",
+        type: "asteroids",
+        u: -2,
+        v: 10,
+        emitter: asteroidEmitter
+      },
+      {
+        id: "asteroids3",
+        type: "asteroids",
+        u: -3,
+        v: 10,
+        emitter: asteroidEmitter
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "asteroids4",
+        type: "asteroids",
+        u: -3,
+        v: 11,
+        emitter: asteroidEmitter
+      },
+      {
+        id: "asteroids5",
+        type: "asteroids",
+        u: -2,
+        v: 11,
+        emitter: asteroidEmitter
+      },
+      {
+        id: "asteroids6",
+        type: "asteroids",
+        u: -2,
+        v: 10,
+        emitter: asteroidEmitter
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "asteroids7",
+        type: "asteroids",
+        u: -1,
+        v: 9,
+        emitter: asteroidEmitter
+      },
+      {
+        id: "asteroids8",
+        type: "asteroids",
+        u: -2,
+        v: 9,
+        emitter: asteroidEmitter
       }
     ]);
     //Temp setup a basic light
