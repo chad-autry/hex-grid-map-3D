@@ -77,13 +77,13 @@ module.exports.prototype.getDrawnItem = function(item, scene) {
     scene
   );
 
-  var parent = babylon.Mesh.CreateBox("Box1", 0, scene);
-  parent.visibility = 0;
-  cube1.parent = cube2.parent = cube3.parent = cube4.parent = parent;
+  let parentMesh = babylon.Mesh.CreateBox("Box1", 0, scene);
+  parentMesh.data = {};
+  parentMesh.data.item = item;
+  parentMesh.visibility = 0;
+  cube1.parent = cube2.parent = cube3.parent = cube4.parent = parentMesh;
 
-  parent.data = {};
-  parent.data.item = item;
-  return parent;
+  return parentMesh;
 };
 
 /**

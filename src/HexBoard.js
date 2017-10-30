@@ -144,14 +144,19 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     var mousePickResult = board.scene.pick(relativeX, relativeY, function(
       mesh
     ) {
-      return !!mesh.data && !!mesh.data.item && !!mesh.data.item.emitter;
+      return (Boolean(mesh.data) && Boolean(mesh.data.item) && Boolean(mesh.data.item.emitter)) || (
+      Boolean(mesh.parent) && Boolean(mesh.parent.data) && Boolean(mesh.parent.data.item) && Boolean(mesh.parent.data.item.emitter));
     });
-
+		
     if (mousePickResult.hit) {
+
       clickedItem = mousePickResult.pickedMesh;
+          	if (Boolean(clickedItem.parent)) {
+    		clickedItem = clickedItem.parent;
+    	}
     }
 
-    if (clickedItem) {
+    if (Boolean(clickedItem)) {
       clickedItem.data.item.emitter.emit("mouseDown", {
         canvasX: relativeX,
         canvasY: relativeY,
@@ -213,7 +218,7 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     	return;
     }
     
-    if (clickedItem) {
+    if (Boolean(clickedItem)) {
       clickedItem.data.item.emitter.emit("mouseDragged", {
         canvasX: relativeX,
         canvasY: relativeY,
@@ -263,7 +268,7 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     }
 
     //Emit a mouseUp event, with the clickable item
-        if (clickedItem) {
+        if (Boolean(clickedItem)) {
       clickedItem.data.item.emitter.emit("mouseUp", {
         canvasX: relativeX,
         canvasY: relativeY,

@@ -216,7 +216,7 @@ const Map = class Map extends React.Component {
     );
 
     this.hexBoard.addListener("mouseUp", e => {
-      if (!e.item && !e.mouseMoved) {
+      if (!e.clickedItem && !e.mouseMoved) {
         let hexagonalCoordinates = hexDimensions.getReferencePoint(
           e.mapX,
           e.mapY
