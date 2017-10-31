@@ -11,7 +11,7 @@ var babylon = require("babylonjs");
  * @constructor
  * @param {external:cartesian-hexagonal} hexDefinition - The DTO defining the hex <--> cartesian relation
  */
-module.exports = function SphereDrawnItemFactory(hexDefinition) {
+module.exports = function SphereMeshFactory(hexDefinition) {
   this.hexDefinition = hexDefinition;
 };
 
@@ -33,7 +33,7 @@ module.exports.prototype.hexToRgb = require("../HexToRGB.js");
  * @returns {external:Mesh} The babylon.js Mesh representing the item
  * @implements {DrawnItemFactory#getDrawnItem}
  */
-module.exports.prototype.getDrawnItem = function(item, scene) {
+module.exports.prototype.getMesh = function(item, scene) {
   var diameter =
     item.size * this.hexDefinition.hexagon_edge_to_edge_width / 100;
   var sphere = babylon.Mesh.CreateSphere(item.id, 16, diameter, scene);

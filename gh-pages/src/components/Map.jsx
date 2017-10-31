@@ -6,11 +6,11 @@ import GridContext from "../../../src/contexts/InverseGridContext.js";
 import StarryContext from "../../../src/contexts/StarryContext.js";
 import CameraControllingMouseListener from "../../../src/listeners/CameraControlingMouseListener.js";
 import EmittingDataSource from "data-chains/src/EmittingDataSource.js";
-import SphereDrawnItemFactory from "../../../src/drawnItemFactories/SphereDrawnItemFactory";
-import ArrowDrawnItemFactory from "../../../src/drawnItemFactories/ArrowDrawnItemFactory";
+import SphereMeshFactory from "../../../src/meshFactories/SphereMeshFactory";
+import ArrowMeshFactory from "../../../src/meshFactories/ArrowMeshFactory";
 import ItemMappingPipelineNode from "../../../src/pipeline/ItemMappingPipelineNode";
 import PlanarPositioningPipelineNode from "../../../src/pipeline/PlanarPositioningPipelineNode";
-import FieldOfSquaresDrawnItemFactory from "../../../src/drawnItemFactories/FieldOfSquaresDrawnItemFactory";
+import FieldOfSquaresMeshFactory from "../../../src/meshFactories/FieldOfSquaresMeshFactory";
 /**
  * Factory function, returns a React component given the required params
  * Injecting all dependencies (instead of just using require) since some modules are dynamically loaded
@@ -148,9 +148,9 @@ const Map = class Map extends React.Component {
     let pipelineStart = new EmittingDataSource();
 
     // Next up make the drawn item factories
-    let sphereDrawnItemFactory = new SphereDrawnItemFactory(hexDimensions);
-    let arrowDrawnItemFactory = new ArrowDrawnItemFactory(hexDimensions);
-    let fieldOfSquaresDrawnItemFactory = new FieldOfSquaresDrawnItemFactory(
+    let sphereMeshFactory = new SphereMeshFactory(hexDimensions);
+    let arrowMeshFactory = new ArrowMeshFactory(hexDimensions);
+    let fieldOfSquaresMeshFactory = new FieldOfSquaresMeshFactory(
       hexDimensions,
       9,
       20,
@@ -160,13 +160,13 @@ const Map = class Map extends React.Component {
     // And then add a pipeline node to use the appropriate factory for each business object
     let itemMap = {};
     itemMap.arrow = (item, scene) => {
-      return arrowDrawnItemFactory.getDrawnItem(item, scene);
+      return arrowMeshFactory.getMesh(item, scene);
     };
     itemMap.asteroids = (item, scene) => {
-      return fieldOfSquaresDrawnItemFactory.getDrawnItem(item, scene);
+      return fieldOfSquaresMeshFactory.getMesh(item, scene);
     };
     itemMap.planet = itemMap.moon = itemMap.star = (item, scene) => {
-      // Proxy the more basic sphereDrawnItemFactory getDrawnItems function, with various hard coded things our DTO won't have
+      // Proxy the more basic sphereMeshFactory getMesh function, with various hard coded things our DTO won't have
       let getMeshParams = {
         size: item.size,
         lineWidth: item.lineWidth,
@@ -192,7 +192,7 @@ const Map = class Map extends React.Component {
         getMeshParams.borderWidth = 2;
         getMeshParams.borderColor = item.borderColor;
       }
-      let mesh = sphereDrawnItemFactory.getDrawnItem(getMeshParams, scene);
+      let mesh = sphereMeshFactory.getMesh(getMeshParams, scene);
       mesh.data.item = item;
       return mesh;
     };

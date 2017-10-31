@@ -16,7 +16,7 @@ var babylon = require("babylonjs");
  * @param {integer} maxSize - The maximum size of the squares
  * @param {colors} colors - An array of color strings the squares can be
  */
-module.exports = function FieldOfSquaresDrawnItemFactory(
+module.exports = function FieldOfSquaresMeshFactory(
   hexDefinition,
   minSize,
   maxSize,
@@ -39,7 +39,7 @@ module.exports.prototype.hexToRgb = require("../HexToRGB.js");
  * @implements {DrawnItemFactory#getDrawnItem}
  * @todo Make the random numbers seeded, so the same field is produced each time
  */
-module.exports.prototype.getDrawnItem = function(item, scene) {
+module.exports.prototype.getMesh = function(item, scene) {
   //Make our group
 
   //Create 4 random cubes, each located in 1 quarter of the hex

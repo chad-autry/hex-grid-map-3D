@@ -12,7 +12,7 @@ var babylon = require("babylonjs");
  * @constructor
  * @param {external:cartesian-hexagonal} hexDefinition - The DTO defining the hex <--> cartesian relation
  */
-module.exports = function VectorDrawnItemFactory(hexDefinition) {
+module.exports = function VectorMeshFactory(hexDefinition) {
   this.hexDefinition = hexDefinition;
 };
 
@@ -33,7 +33,7 @@ module.exports.prototype.hexToRgb = require("../HexToRGB.js");
  * @returns {external:Item} The paper.js Item representing the vector
  * @implements {DrawnItemFactory#getDrawnItem}
  */
-module.exports.prototype.getDrawnItem = function(item, scene) {
+module.exports.prototype.getMesh = function(item, scene) {
   //Get the x, y for the vector
   var sourcePixelCoordinates = this.hexDefinition.getPixelCoordinates(
     item.sourceU,
