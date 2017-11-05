@@ -10,7 +10,9 @@ import SphereMeshFactory from "../../../src/meshFactories/SphereMeshFactory";
 import ArrowMeshFactory from "../../../src/meshFactories/ArrowMeshFactory";
 import ItemMappingPipelineNode from "../../../src/pipeline/ItemMappingPipelineNode";
 import PlanarPositioningPipelineNode from "../../../src/pipeline/PlanarPositioningPipelineNode";
+import ZStackingPipelineNode from "../../../src/pipeline/ZStackingPipelineNode";
 import FieldOfSquaresMeshFactory from "../../../src/meshFactories/FieldOfSquaresMeshFactory";
+import RegularPolygonMeshFactory from "../../../src/meshFactories/RegularPolygonMeshFactory";
 /**
  * Factory function, returns a React component given the required params
  * Injecting all dependencies (instead of just using require) since some modules are dynamically loaded
@@ -150,6 +152,9 @@ const Map = class Map extends React.Component {
     // Next up make the drawn item factories
     let sphereMeshFactory = new SphereMeshFactory(hexDimensions);
     let arrowMeshFactory = new ArrowMeshFactory(hexDimensions);
+    let regularPolygonMeshFactory = new RegularPolygonMeshFactory(
+      hexDimensions
+    );
     let fieldOfSquaresMeshFactory = new FieldOfSquaresMeshFactory(
       hexDimensions,
       9,
@@ -164,6 +169,10 @@ const Map = class Map extends React.Component {
     };
     itemMap.asteroids = (item, scene) => {
       return fieldOfSquaresMeshFactory.getMesh(item, scene);
+    };
+    itemMap.polygon = (item, scene) => {
+      // YOu could map ships or space stations or something game related to specific polygons
+      return regularPolygonMeshFactory.getMesh(item, scene);
     };
     itemMap.planet = itemMap.moon = itemMap.star = (item, scene) => {
       // Proxy the more basic sphereMeshFactory getMesh function, with various hard coded things our DTO won't have
@@ -209,6 +218,8 @@ const Map = class Map extends React.Component {
     planarPositioningPipelineNode.setDataSource(itemMappingPipelineNode);
 
     // Next translate it up or down to stack items within the same cell
+    let zStackingPipelineNode = new ZStackingPipelineNode(10);
+    zStackingPipelineNode.setDataSource(planarPositioningPipelineNode);
 
     //Setup a camera controlling mouse listener, buttons we set up hook into the different modes
     this.cameraControllingMouseListener = new CameraControllingMouseListener(
@@ -601,6 +612,275 @@ const Map = class Map extends React.Component {
         u: -2,
         v: 9,
         emitter: asteroidEmitter
+      }
+    ]);
+
+    let stationEmitter = new EventEmitter();
+    stationEmitter.addListener("mouseUp", e => {
+      if (!e.mouseMoved) {
+        this.props.addAlert({
+          type: "info",
+          text: "This could represent a space station"
+        });
+      }
+    });
+    
+    pipelineStart.addItems([
+      {
+        id: "station",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 5,
+        color: "#0343df",
+        u: 6,
+        v: 5,
+        emitter: stationEmitter
+      }
+    ]);
+
+//Add a fleet of red 'ships' (triangles) on the dark side of the moon, and a fleet of green ships at the sun
+// Mostly demonstrates the ZStacking pipeline node
+    pipelineStart.addItems([
+      {
+        id: "gs1",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#15b01a",
+        u: 1,
+        v: 0
+      },
+      {
+        id: "rs1",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#e50000",
+        u: 2,
+        v: 9
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "gs2",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#15b01a",
+        u: 1,
+        v: 0
+      },
+      {
+        id: "rs2",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#e50000",
+        u: 2,
+        v: 9
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "gs3",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#15b01a",
+        u: 1,
+        v: 0
+      },
+      {
+        id: "rs3",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#e50000",
+        u: 2,
+        v: 9
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "gs4",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#15b01a",
+        u: 1,
+        v: 0
+      },
+      {
+        id: "rs4",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#e50000",
+        u: 2,
+        v: 9
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "gs5",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#15b01a",
+        u: 1,
+        v: 0
+      },
+      {
+        id: "rs5",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#e50000",
+        u: 2,
+        v: 9
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "gs6",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#15b01a",
+        u: 1,
+        v: 0
+      },
+      {
+        id: "rs6",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#e50000",
+        u: 2,
+        v: 9
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "gs7",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#15b01a",
+        u: 1,
+        v: 0
+      },
+      {
+        id: "rs7",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#e50000",
+        u: 2,
+        v: 9
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "gs8",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#15b01a",
+        u: 1,
+        v: 0
+      },
+      {
+        id: "rs8",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#e50000",
+        u: 2,
+        v: 9
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "gs9",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#15b01a",
+        u: 1,
+        v: 0
+      },
+      {
+        id: "rs9",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#e50000",
+        u: 2,
+        v: 9
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "gs10",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#15b01a",
+        u: 1,
+        v: 0
+      },
+      {
+        id: "rs10",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#e50000",
+        u: 2,
+        v: 9
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "gs11",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#15b01a",
+        u: 1,
+        v: 0
+      },
+      {
+        id: "rs11",
+        type: "polygon",
+        diameter: 40,
+        thickness: 5,
+        sides: 3,
+        color: "#e50000",
+        u: 2,
+        v: 9
       }
     ]);
     //Temp setup a basic light
