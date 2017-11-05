@@ -1,6 +1,6 @@
 {
   "name": "hex-grid-map-3d",
-  "version": "0.37.0",
+  "version": "1.0.0",
   "description": "A customizeable html5 webGL hexagonally gridded interactive map",
   "main": "index.js",
   "scripts": {
@@ -42,7 +42,9 @@
   "dependencies": {
     "babylonjs": "2.4.1",
     "cartesian-hexagonal": "0.0.3",
-    "data-chains": "0.4.0"
+    "data-chains": "0.4.0",
+    "react-measure": "^1.4.7",
+    "wolfy87-eventemitter": "^5.2.3"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",

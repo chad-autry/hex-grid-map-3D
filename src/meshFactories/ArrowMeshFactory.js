@@ -11,7 +11,7 @@ var babylon = require("babylonjs");
  * @constructor
  * @param {external:cartesian-hexagonal} hexDefinition - The DTO defining the hex <--> cartesian relation
  */
-module.exports = function ArrowDrawnItemFactory(hexDefinition) {
+module.exports = function ArrowMeshFactory(hexDefinition) {
   this.hexDefinition = hexDefinition;
 };
 
@@ -31,7 +31,7 @@ module.exports.prototype.hexToRgb = require("../HexToRGB.js");
  * @returns {external:Item} The paper.js Item representing the arrow
  * @implements {DrawnItemFactory#getDrawnItem}
  */
-module.exports.prototype.getDrawnItem = function(item, scene) {
+module.exports.prototype.getMesh = function(item, scene) {
   //A cylinder for each segment, and a sphere to join them smoothly
   //left pointy point then up and right
   var segment1 = babylon.Mesh.CreateTube(

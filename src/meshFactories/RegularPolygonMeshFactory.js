@@ -13,7 +13,7 @@ var babylon = require("babylonjs/babylon.max.js");
  * @param {external:cartesian-hexagonal} hexDefinition - The DTO defining the hex <--> cartesian relation
  * @see {@link http://paperjs.org/reference/path/#path-regularpolygon-object | RegularPolygon }
  */
-module.exports = function RegularPolygonDrawnItemFactory(hexDefinition) {
+module.exports = function RegularPolygonMeshFactory(hexDefinition) {
   this.hexDefinition = hexDefinition;
   this.internalId = 0;
 };
@@ -33,7 +33,7 @@ module.exports.prototype.hexToRgb = require("../HexToRGB.js");
  * @implements {DrawnItemFactory#getDrawnItem}
  * @todo consider using symbols for performance
  */
-module.exports.prototype.getDrawnItem = function(item, scene) {
+module.exports.prototype.getMesh = function(item, scene) {
   //var cap = babylon.MeshBuilder.CreateDisc(item.id, {diameter: item.diameter - item.thickness, tessellation: item.sides,height:thickness, sideOrientation: babylon.Mesh.DOUBLESIDE}, scene);
   var cylinder = babylon.MeshBuilder.CreateCylinder(
     item.id,

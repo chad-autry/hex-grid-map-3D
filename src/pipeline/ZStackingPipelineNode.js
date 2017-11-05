@@ -2,7 +2,7 @@
 /**
  * Since only a single constructor is being exported as module.exports this comment isn't documented.
  * The class and module are the same thing, the contructor comment takes precedence.
- * @module ZStackingDataLink
+ * @module ZStackingPipelineNode
  */
 
 var makeDataLink = require("data-chains/src/DataLinkMixin");
@@ -12,10 +12,10 @@ var makeDataLink = require("data-chains/src/DataLinkMixin");
  * @constructor
  * @param {integer} stackStep - The distance in pixels to keep between items
  */
-module.exports = function ZStackingDataLink(stackStep) {
+module.exports = function ZStackingPipelineNode(stackStep) {
   //Protect the constructor from being called as a normal method
-  if (!(this instanceof ZStackingDataLink)) {
-    return new ZStackingDataLink(stackStep);
+  if (!(this instanceof ZStackingPipelineNode)) {
+    return new ZStackingPipelineNode(stackStep);
   }
   this.stackStep = stackStep;
   makeDataLink.call(this);

@@ -12,10 +12,10 @@ var makeDataLink = require("data-chains/src/DataLinkMixin");
  * @constructor
  * @param {external:cartesian-hexagonal} hexDimensions - The DTO defining the hex <--> cartesian relation
  */
-module.exports = function PlanarPositioningDataLink(hexDimensions) {
+module.exports = function PlanarPositioningPipelineNode(hexDimensions) {
   //Protect the constructor from being called as a normal method
-  if (!(this instanceof PlanarPositioningDataLink)) {
-    return new PlanarPositioningDataLink(hexDimensions);
+  if (!(this instanceof PlanarPositioningPipelineNode)) {
+    return new PlanarPositioningPipelineNode(hexDimensions);
   }
   this.hexDimensions = hexDimensions;
   makeDataLink.call(this);

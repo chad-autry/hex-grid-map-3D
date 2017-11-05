@@ -10,14 +10,14 @@ var makeDataLink = require("data-chains/src/DataLinkMixin");
 /**
  * This DataLink consumes events with item dtos and produces Babylon.js Meshes attached to the scene at 0, 0
  * @constructor
- * @param {DrawnItemFactory} drawnItemFactory - The factory which controls how items are drawn
  */
-module.exports = function DrawnItemDataLink(drawnItemFactory) {
+module.exports = function ItemMappingPipelineNode(meshFactoryMap, scene) {
   //Protect the constructor from being called as a normal method
-  if (!(this instanceof DrawnItemDataLink)) {
-    return new DrawnItemDataLink(drawnItemFactory);
+  if (!(this instanceof ItemMappingPipelineNode)) {
+    return new ItemMappingPipelineNode(meshFactoryMap, scene);
   }
-  this.drawnItemFactory = drawnItemFactory;
+  this.meshFactoryMap = meshFactoryMap;
+  this.scene = scene;
   makeDataLink.call(this);
   this.meshMap = {};
 };
@@ -45,17 +45,19 @@ module.exports.prototype.onDataChanged = function(event) {
       //Don't know what to do with an item which doesn't have an ID, or we already have an item with the given ID
       continue;
     }
-    mesh = this.drawnItemFactory.getDrawnItem(item, this.scene);
+
+    if (this.meshFactoryMap.hasOwnProperty(item.type)) {
+      mesh = this.meshFactoryMap[item.type](item, this.scene);
+    }
+
     if (!mesh) {
-      //Couldn't make a mesh out of the item, onther link should deal with it
-      added.push(event.added[i]);
+      //TODO Log that an unexpected object was encountered
       continue;
     }
     mesh.data = {};
     mesh.data.item = item;
     added.push(mesh);
     this.meshMap[item.id] = mesh;
-    mesh.isCellItem = true;
   }
   this.emitEvent("dataChanged", [
     { added: added, removed: removed, updated: event.updated }
