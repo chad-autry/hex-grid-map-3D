@@ -5,7 +5,7 @@
  * @module hexagonal-map
  */
 
-var babylon = require("babylonjs/babylon.max.js");
+var babylon = require("babylonjs");
 var hexToRgb = require("./HexToRGB.js");
 
 /**
@@ -39,12 +39,12 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
 
   // Change the scene background color
   var rgb = hexToRgb(backgroundColor);
-  board.scene.clearColor = new babylon.Color3(
+  board.scene.clearColor =new babylon.Color3(
     rgb.r / 256,
     rgb.g / 256,
     rgb.b / 256
   );
-
+  
   // And give it an ambient color
   board.scene.ambientColor = new babylon.Color3(0.3, 0.3, 0.3);
   // This creates and positions a free camera
@@ -58,7 +58,8 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     babylon.Vector3.Zero(),
     board.scene
   );
-
+  //Set up anti-aliasing (required in babylon.js 3.0+)
+  //board.postProcess = new babylon.FxaaPostProcess("fxaa", 1.0, board.camera);
   board.camera.upVector = new babylon.Vector3(0, 0, 1);
 
   board.camera.upperBetaLimit = Math.PI;
@@ -304,7 +305,7 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
    */
   this.init = function() {
     // This creates a light, aiming 0,1,0 - to the sky.
-    var light = new babylon.HemisphericLight(
+    var light = new babylon.PointLight(
       "light1",
       new babylon.Vector3(0, 0, 1),
       board.scene

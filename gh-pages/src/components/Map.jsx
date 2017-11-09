@@ -13,6 +13,8 @@ import PlanarPositioningPipelineNode from "../../../src/pipeline/PlanarPositioni
 import ZStackingPipelineNode from "../../../src/pipeline/ZStackingPipelineNode";
 import FieldOfSquaresMeshFactory from "../../../src/meshFactories/FieldOfSquaresMeshFactory";
 import RegularPolygonMeshFactory from "../../../src/meshFactories/RegularPolygonMeshFactory";
+//import UpdateableVectorMeshFactory from "../../../src/meshFactories/UpdateableVectorMeshFactory";
+import ImageMeshFactory from "../../../src/meshFactories/ImageMeshFactory";
 /**
  * Factory function, returns a React component given the required params
  * Injecting all dependencies (instead of just using require) since some modules are dynamically loaded
@@ -152,6 +154,7 @@ const Map = class Map extends React.Component {
     // Next up make the drawn item factories
     let sphereMeshFactory = new SphereMeshFactory(hexDimensions);
     let arrowMeshFactory = new ArrowMeshFactory(hexDimensions);
+    let imageMeshFactory = new ImageMeshFactory(hexDimensions);
     let regularPolygonMeshFactory = new RegularPolygonMeshFactory(
       hexDimensions
     );
@@ -169,6 +172,9 @@ const Map = class Map extends React.Component {
     };
     itemMap.asteroids = (item, scene) => {
       return fieldOfSquaresMeshFactory.getMesh(item, scene);
+    };
+    itemMap.ship = (item, scene) => {
+      return imageMeshFactory.getMesh(item, scene);
     };
     itemMap.polygon = (item, scene) => {
       // YOu could map ships or space stations or something game related to specific polygons
@@ -616,15 +622,28 @@ const Map = class Map extends React.Component {
     ]);
 
     let stationEmitter = new EventEmitter();
+    let vector = null;
     stationEmitter.addListener("mouseUp", e => {
       if (!e.mouseMoved) {
         this.props.addAlert({
           type: "info",
           text: "This could represent a space station"
         });
+      } else {
+        if (vector) {
+          // Snap to grid
+          // Remove the vector if in the same hex
+        }
       }
     });
-    
+    stationEmitter.addListener("mouseDragged", () => {
+      if (vector) {
+        // Update the position of the vector
+      } else {
+        // If the drag event is outside of the source hex, create a new vector
+      }
+    });
+
     pipelineStart.addItems([
       {
         id: "station",
@@ -639,8 +658,19 @@ const Map = class Map extends React.Component {
       }
     ]);
 
-//Add a fleet of red 'ships' (triangles) on the dark side of the moon, and a fleet of green ships at the sun
-// Mostly demonstrates the ZStacking pipeline node
+    pipelineStart.addItems([
+      {
+        id: "ship",
+        type: "ship",
+        size: 50,
+        u: 6,
+        v: 5,
+        img: "./test.svg",
+        emitter: stationEmitter
+      }
+    ]);
+    //Add a fleet of red 'ships' (triangles) on the dark side of the moon, and a fleet of green ships at the sun
+    // Mostly demonstrates the ZStacking pipeline node
     pipelineStart.addItems([
       {
         id: "gs1",

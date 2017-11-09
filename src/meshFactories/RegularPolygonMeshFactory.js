@@ -5,7 +5,7 @@
  * @module RegularPolygonDrawnItemFactory
  */
 
-var babylon = require("babylonjs/babylon.max.js");
+var babylon = require("babylonjs");
 
 /**
  * Factory which delegates to the paper.js RegularPoloygon constructor
@@ -56,6 +56,7 @@ module.exports.prototype.getMesh = function(item, scene) {
     rgb.g / 256,
     rgb.b / 256
   );
+  material.ambientColor = material.diffuseColor;
   cylinder.material = material;
 
   this.internalId++;

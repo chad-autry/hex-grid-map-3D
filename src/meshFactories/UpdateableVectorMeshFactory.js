@@ -12,7 +12,7 @@ var babylon = require("babylonjs");
  * @constructor
  * @param {external:cartesian-hexagonal} hexDefinition - The DTO defining the hex <--> cartesian relation
  */
-module.exports = function VectorMeshFactory(hexDefinition) {
+module.exports = function UpdateableVectorMeshFactory(hexDefinition) {
   this.hexDefinition = hexDefinition;
 };
 

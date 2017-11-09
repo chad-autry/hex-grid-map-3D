@@ -14,7 +14,7 @@
     "build": "mkdirp ./target/webapp/hex-grid-map-3D && npm run less && npm run copy:HTML && webpack --config ./webpack-prod.config.js",
     "eslint:fix": "eslint --fix ./src/**/*.js && eslint --fix ./gh-pages/**/*.js && eslint --fix ./gh-pages/**/*.jsx",
     "clean": "rimraf ./target",
-    "copy:HTML": "copyfiles -f ./gh-pages/src/index.html ./target/webapp/hex-grid-map-3D",
+    "copy:HTML": "copyfiles -f ./gh-pages/src/index.html ./target/webapp/hex-grid-map-3D && copyfiles -f ./gh-pages/src/test.svg ./target/webapp/hex-grid-map-3D",
     "less": "lessc ./gh-pages/src/less/main.less > ./target/webapp/hex-grid-map-3D/styles.css",
     "start": "webpack-dev-server --content-base ./target/webapp --port 8080",
     "precommit": "lint-staged"
@@ -40,7 +40,7 @@
   },
   "homepage": "https://github.com/chad-autry/hex-grid-map-3D",
   "dependencies": {
-    "babylonjs": "2.4.1",
+    "babylonjs": "3.0.7",
     "cartesian-hexagonal": "0.0.3",
     "data-chains": "0.4.0",
     "react-measure": "^1.4.7",
