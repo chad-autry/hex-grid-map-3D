@@ -24,3 +24,7 @@ The [hexagonal-map](http://chad-autry.github.io/hex-grid-map/#/jsdoc/module-hexa
 ## Demo
 
 Check out the [Demo](http://chad-autry.github.io/hex-grid-map-3D/#/demo). And then take a look at the [source of the demo](https://github.com/chad-autry/hex-grid-map-3D/blob/master/gh-pages/src/app/demo/demo.js) to see how everything was instantiated.
+
+
+## Special License Note
+gh-pages/src/test.svg comes from Font Awesome 5, currentlly in beta, to which I have a non-transferable license. I may use it in my demo, but you may not legally lift it for your own projects.
