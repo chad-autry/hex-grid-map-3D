@@ -666,6 +666,7 @@ const Map = class Map extends React.Component {
         u: 6,
         v: 5,
         img: "./test.svg",
+        isEmissive: true,
         emitter: stationEmitter
       }
     ]);
