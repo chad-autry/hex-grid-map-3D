@@ -106,6 +106,10 @@ module.exports.prototype.getMesh = function(item, scene) {
   square.rotation.x = Math.PI;
   square.material = myMaterial;
 
+  if (item.angle) {
+    square.rotation.z = item.angle;
+  }
+
   square.data = {};
   square.data.item = item;
   return square;

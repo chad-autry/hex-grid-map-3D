@@ -665,6 +665,7 @@ const Map = class Map extends React.Component {
         size: 50,
         u: 6,
         v: 5,
+        angle: Math.PI,
         img: "./test.svg",
         isEmissive: true,
         emitter: stationEmitter
