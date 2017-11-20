@@ -54,7 +54,10 @@ module.exports.prototype.onDataChanged = function(event) {
       //TODO Log that an unexpected object was encountered
       continue;
     }
-    mesh.data = {};
+    if (!mesh.data) {
+      mesh.data = {};
+    }
+
     mesh.data.item = item;
     added.push(mesh);
     this.meshMap[item.id] = mesh;

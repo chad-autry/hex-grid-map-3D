@@ -622,25 +622,13 @@ const Map = class Map extends React.Component {
     ]);
 
     let stationEmitter = new EventEmitter();
-    let vector = null;
+
     stationEmitter.addListener("mouseUp", e => {
       if (!e.mouseMoved) {
         this.props.addAlert({
           type: "info",
           text: "This could represent a space station"
         });
-      } else {
-        if (vector) {
-          // Snap to grid
-          // Remove the vector if in the same hex
-        }
-      }
-    });
-    stationEmitter.addListener("mouseDragged", () => {
-      if (vector) {
-        // Update the position of the vector
-      } else {
-        // If the drag event is outside of the source hex, create a new vector
       }
     });
 
@@ -658,6 +646,28 @@ const Map = class Map extends React.Component {
       }
     ]);
 
+    let shipEmitter = new EventEmitter();
+    let vector = null;
+    shipEmitter.addListener("mouseUp", e => {
+      if (!e.mouseMoved) {
+        this.props.addAlert({
+          type: "info",
+          text: "Notice clicks check alpha of the texture"
+        });
+      } else {
+        if (vector) {
+          // Snap to grid
+          // Remove the vector if in the same hex
+        }
+      }
+    });
+    shipEmitter.addListener("mouseDragged", () => {
+      if (vector) {
+        // Update the position of the vector
+      } else {
+        // If the drag event is outside of the source hex, create a new vector
+      }
+    });
     pipelineStart.addItems([
       {
         id: "ship",
@@ -668,7 +678,7 @@ const Map = class Map extends React.Component {
         angle: Math.PI,
         img: "./test.svg",
         isEmissive: true,
-        emitter: stationEmitter
+        emitter: shipEmitter
       }
     ]);
     //Add a fleet of red 'ships' (triangles) on the dark side of the moon, and a fleet of green ships at the sun

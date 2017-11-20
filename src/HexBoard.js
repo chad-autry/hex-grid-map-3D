@@ -145,8 +145,30 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     var mousePickResult = board.scene.pick(relativeX, relativeY, function(
       mesh
     ) {
-      return (Boolean(mesh.data) && Boolean(mesh.data.item) && Boolean(mesh.data.item.emitter)) || (
-      Boolean(mesh.parent) && Boolean(mesh.parent.data) && Boolean(mesh.parent.data.item) && Boolean(mesh.parent.data.item.emitter));
+      let getFurthestAncestor = (mesh) => {
+      	if (Boolean(mesh.parent)) {
+      		return getFurthestAncestor(mesh.parent);
+      	}
+      		return mesh;
+
+      };
+      let furthestAncestor = getFurthestAncestor(mesh);
+      if (Boolean(furthestAncestor.data) && Boolean(furthestAncestor.data.item) && Boolean(furthestAncestor.data.item.emitter)) {
+      	// Do we need to hit-check texture for alpha?
+      	if (Boolean(mesh.data) && Boolean(mesh.data.hitTestAlpha)) {
+
+      		let meshPickResult = board.scene.pick(relativeX, relativeY, function(predicateMesh) {
+    	return Boolean(predicateMesh.data) && Boolean(predicateMesh.data.item) && predicateMesh.data.item.id === mesh.data.item.id;
+	});
+
+      		if (Boolean(meshPickResult) && Boolean(meshPickResult.hit)) {
+      			let textureCoordinates = meshPickResult.getTextureCoordinates();
+      			return mesh.data.hitTestAlpha(textureCoordinates.x, textureCoordinates.y);
+      		}
+      	}
+      	return true;
+      }
+      return false;
     });
 		
     if (mousePickResult.hit) {

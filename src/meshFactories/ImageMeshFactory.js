@@ -38,7 +38,7 @@ module.exports.prototype.getMesh = function(item, scene) {
 
   //TODO Accept relative img tags (programmatic SVG)
 
-  let canvas = this.offScreenCanvasMap[item.img];
+  let imageHolder = this.offScreenCanvasMap[item.img];
   myMaterial.diffuseTexture = myMaterial.emissiveTexture = new babylon.DynamicTexture(
     "dynamic texture",
     512,
@@ -56,12 +56,12 @@ module.exports.prototype.getMesh = function(item, scene) {
   textureContext.fillRect(diameter / 2, 0, diameter, diameter / 2);
   textureContext.fillRect(0, diameter / 2, diameter / 2, diameter);
   myMaterial.diffuseTexture.update(true);
-  if (!canvas) {
+  if (!imageHolder) {
     let img = document.createElement("img");
     img.width = 512;
     img.height = 512;
     img.onload = () => {
-      canvas = document.createElement("canvas");
+      let canvas = document.createElement("canvas");
 
       canvas.width = 512;
       canvas.height = 512;
@@ -84,13 +84,18 @@ module.exports.prototype.getMesh = function(item, scene) {
         0,
         0
       );
-      this.offScreenCanvasMap[item.img] = canvas;
+      this.offScreenCanvasMap[item.img] = {
+        offscreenContext: offscreenContext
+      };
+      this.offScreenCanvasMap[
+        item.img
+      ].pixelArray = offscreenContext.getImageData(0, 0, 512, 512).data;
       myMaterial.diffuseTexture.update(true);
     };
     img.src = item.img;
   } else {
     //TODO Cache a texture along with the context
-    let offscreenContext = canvas.getContext("2d");
+    let offscreenContext = imageHolder.offscreenContext;
     textureContext.putImageData(
       offscreenContext.getImageData(0, 0, 512, 512),
       0,
@@ -111,6 +116,14 @@ module.exports.prototype.getMesh = function(item, scene) {
   }
 
   square.data = {};
+
+  //Always check for invislbe particles, could do something to skip this check if desired
+  square.data.hitTestAlpha = (x, y) => {
+    let pixelAlpha = this.offScreenCanvasMap[item.img].pixelArray[
+      (Math.floor((1 - y) * 512) * 512 + Math.floor(x * 512)) * 4 + 3
+    ];
+    return pixelAlpha !== 0;
+  };
   square.data.item = item;
   return square;
 };
