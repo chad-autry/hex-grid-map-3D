@@ -681,6 +681,34 @@ const Map = class Map extends React.Component {
         emitter: shipEmitter
       }
     ]);
+    pipelineStart.addItems([
+      {
+        id: "vertShip",
+        type: "ship",
+        size: 50,
+        u: 6,
+        v: 5,
+        angle: -Math.PI/4,
+        img: "./test.svg",
+        isEmissive: true,
+        emitter: shipEmitter,
+        vertical: true
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "vertShip2",
+        type: "ship",
+        size: 50,
+        u: 6,
+        v: 5,
+        angle: -Math.PI/4,
+        img: "./test.svg",
+        isEmissive: true,
+        emitter: shipEmitter,
+        vertical: true
+      }
+    ]);
     //Add a fleet of red 'ships' (triangles) on the dark side of the moon, and a fleet of green ships at the sun
     // Mostly demonstrates the ZStacking pipeline node
     pipelineStart.addItems([

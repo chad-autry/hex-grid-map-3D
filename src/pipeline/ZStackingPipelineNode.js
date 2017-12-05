@@ -53,6 +53,13 @@ module.exports.prototype.onDataChanged = function(event) {
       cellGroup.position.z = -1 * this.stackStep;
     }
     mesh.position.z = cellGroup.previousDrawnItem.position.z + this.stackStep;
+    if (Boolean(cellGroup.previousDrawnItem.data) && Boolean(cellGroup.previousDrawnItem.data.height)) {
+    	mesh.position.z = mesh.position.z + cellGroup.previousDrawnItem.data.height/2;
+    }
+    
+    if (Boolean(mesh.data) && Boolean(mesh.data.height)) {
+    	mesh.position.z = mesh.position.z + mesh.data.height/2;
+    }
 
     //Some circular logic here. Pun intended
     cellGroup.previousDrawnItem.nextDrawnItem = mesh;
