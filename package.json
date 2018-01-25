@@ -62,7 +62,6 @@
     "eslint-plugin-prettier": "^2.1.2",
     "eslint-plugin-react": "^7.2.0",
     "husky": "^0.14.3",
-    "jquery": "^2.2.3",
     "less": "^2.5.3",
     "lint-staged": "^4.0.3",
     "mkdirp": "^0.5.1",
