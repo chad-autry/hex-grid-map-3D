@@ -59,7 +59,7 @@ module.exports = function HexBoard(canvas, window, backgroundColor) {
     board.scene
   );
   //Set up anti-aliasing (required in babylon.js 3.0+)
-  //board.postProcess = new babylon.FxaaPostProcess("fxaa", 1.0, board.camera);
+  board.postProcess = new babylon.FxaaPostProcess("fxaa", 1.0, board.camera);
   board.camera.upVector = new babylon.Vector3(0, 0, 1);
 
   board.camera.upperBetaLimit = Math.PI;
