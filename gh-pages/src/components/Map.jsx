@@ -15,6 +15,7 @@ import FieldOfSquaresMeshFactory from "../../../src/meshFactories/FieldOfSquares
 import RegularPolygonMeshFactory from "../../../src/meshFactories/RegularPolygonMeshFactory";
 //import UpdateableVectorMeshFactory from "../../../src/meshFactories/UpdateableVectorMeshFactory";
 import ImageMeshFactory from "../../../src/meshFactories/ImageMeshFactory";
+import TwoDVectorMeshFactory from "../../../src/meshFactories/TwoDVectorMeshFactory";
 /**
  * Factory function, returns a React component given the required params
  * Injecting all dependencies (instead of just using require) since some modules are dynamically loaded
@@ -155,6 +156,7 @@ const Map = class Map extends React.Component {
     let sphereMeshFactory = new SphereMeshFactory(hexDimensions);
     let arrowMeshFactory = new ArrowMeshFactory(hexDimensions);
     let imageMeshFactory = new ImageMeshFactory(hexDimensions);
+    let twoDVectorMeshFactory = new TwoDVectorMeshFactory(hexDimensions);
     let regularPolygonMeshFactory = new RegularPolygonMeshFactory(
       hexDimensions
     );
@@ -179,6 +181,9 @@ const Map = class Map extends React.Component {
     itemMap.polygon = (item, scene) => {
       // YOu could map ships or space stations or something game related to specific polygons
       return regularPolygonMeshFactory.getMesh(item, scene);
+    };
+    itemMap.vector = (item, scene) => {
+      return twoDVectorMeshFactory.getMesh(item, scene);
     };
     itemMap.planet = itemMap.moon = itemMap.star = (item, scene) => {
       // Proxy the more basic sphereMeshFactory getMesh function, with various hard coded things our DTO won't have
@@ -707,6 +712,21 @@ const Map = class Map extends React.Component {
         isEmissive: true,
         emitter: shipEmitter,
         vertical: true
+      }
+    ]);
+    pipelineStart.addItems([
+      {
+        id: "vector1",
+        type: "vector",
+        size: 50,
+        u: 6,
+        v: 5,
+        vectorU: 1,
+        vectorV: 0,
+        lineColor: "#0343df",
+        lineWidth: 10,
+        isEmissive: true,
+        emitter: shipEmitter,
       }
     ]);
     //Add a fleet of red 'ships' (triangles) on the dark side of the moon, and a fleet of green ships at the sun

@@ -7,7 +7,7 @@
 
 var babylon = require("babylonjs");
 /**
- * A factory to create the paper.js item for Sphere
+ * A factory to create the Babylon.js mesh with an image textured on it
  * @constructor
  * @param {external:cartesian-hexagonal} hexDefinition - The DTO defining the hex <--> cartesian relation
  */
