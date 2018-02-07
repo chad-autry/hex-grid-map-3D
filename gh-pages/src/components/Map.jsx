@@ -16,6 +16,7 @@ import RegularPolygonMeshFactory from "../../../src/meshFactories/RegularPolygon
 //import UpdateableVectorMeshFactory from "../../../src/meshFactories/UpdateableVectorMeshFactory";
 import ImageMeshFactory from "../../../src/meshFactories/ImageMeshFactory";
 import TwoDVectorMeshFactory from "../../../src/meshFactories/TwoDVectorMeshFactory";
+import VectorDecoratingPipelineNode from "../../../src/pipeline/VectorDecoratingPipelineNode";
 /**
  * Factory function, returns a React component given the required params
  * Injecting all dependencies (instead of just using require) since some modules are dynamically loaded
@@ -232,6 +233,11 @@ const Map = class Map extends React.Component {
     let zStackingPipelineNode = new ZStackingPipelineNode(10);
     zStackingPipelineNode.setDataSource(planarPositioningPipelineNode);
 
+    let vectorDecoratingPipelineNode = new VectorDecoratingPipelineNode(
+      twoDVectorMeshFactory,
+      this.hexBoard.scene
+    );
+    vectorDecoratingPipelineNode.setDataSource(zStackingPipelineNode);
     //Setup a camera controlling mouse listener, buttons we set up hook into the different modes
     this.cameraControllingMouseListener = new CameraControllingMouseListener(
       this.hexBoard
@@ -683,7 +689,22 @@ const Map = class Map extends React.Component {
         angle: Math.PI,
         img: "./test.svg",
         isEmissive: true,
-        emitter: shipEmitter
+        emitter: shipEmitter,
+        vectors: [
+          {
+            id: "vector1",
+            type: "vector",
+            size: 50,
+            u: 0,
+            v: 1,
+            vectorU: 1,
+            vectorV: 0,
+            lineColor: "#0343df",
+            lineWidth: 10,
+            isEmissive: true,
+            emitter: shipEmitter
+          }
+        ]
       }
     ]);
     pipelineStart.addItems([
@@ -693,7 +714,7 @@ const Map = class Map extends React.Component {
         size: 50,
         u: 6,
         v: 5,
-        angle: -Math.PI/4,
+        //angle: -Math.PI/4,
         img: "./test.svg",
         isEmissive: true,
         emitter: shipEmitter,
@@ -707,11 +728,26 @@ const Map = class Map extends React.Component {
         size: 50,
         u: 6,
         v: 5,
-        angle: -Math.PI/4,
+        //angle: -Math.PI/4,
         img: "./test.svg",
         isEmissive: true,
         emitter: shipEmitter,
-        vertical: true
+        vertical: true,
+        vectors: [
+          {
+            id: "vector1",
+            type: "vector",
+            size: 50,
+            u: 0,
+            v: 1,
+            vectorU: 1,
+            vectorV: 0,
+            lineColor: "#0343df",
+            lineWidth: 10,
+            isEmissive: true,
+            emitter: shipEmitter
+          }
+        ]
       }
     ]);
     pipelineStart.addItems([
@@ -719,14 +755,14 @@ const Map = class Map extends React.Component {
         id: "vector1",
         type: "vector",
         size: 50,
-        u: 6,
-        v: 5,
+        u: 0,
+        v: 1,
         vectorU: 1,
         vectorV: 0,
         lineColor: "#0343df",
         lineWidth: 10,
         isEmissive: true,
-        emitter: shipEmitter,
+        emitter: shipEmitter
       }
     ]);
     //Add a fleet of red 'ships' (triangles) on the dark side of the moon, and a fleet of green ships at the sun

@@ -32,7 +32,6 @@ module.exports.prototype.getMesh = function(item, scene) {
     myMaterial.emissiveColor = new babylon.Color3(1, 1, 1);
   }
 
-
   //TODO Accept relative img tags (programmatic SVG)
 
   let imageHolder = this.offScreenCanvasMap[item.img];
@@ -104,30 +103,27 @@ module.exports.prototype.getMesh = function(item, scene) {
   myMaterial.diffuseTexture.hasAlpha = true;
   myMaterial.backFaceCulling = false;
 
-
   square.material = myMaterial;
 
   if (item.angle) {
     square.rotation.z = item.angle;
   }
-  
+
   square.data = {};
-    
+
   //My native co-ordinate system is flipped from babylon.js. Align texture Y to 3d Y
   square.rotation.x = Math.PI;
   if (item.vertical) {
-  	// Now flip it vertically
-  	square.rotation.y = -Math.PI/2;
-  	
-  	// Have it face the camera
-  	square.billboardMode = babylon.Mesh.BILLBOARDMODE_Z;
-  	
-  	// And have it not be halfway through the grid below
-  	//square.position.z = diameter/2;
+    // Now flip it vertically
+    square.rotation.y = -Math.PI / 2;
+
+    // Have it face the camera
+    square.billboardMode = babylon.Mesh.BILLBOARDMODE_Z;
+
+    // And have it not be halfway through the grid below
+    //square.position.z = diameter/2;
     square.data.height = diameter;
   }
-
-
 
   //Always check for invislbe particles, could do something to skip this check if desired
   square.data.hitTestAlpha = (x, y) => {
