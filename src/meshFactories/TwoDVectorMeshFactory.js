@@ -123,8 +123,8 @@ module.exports.prototype.getMesh = function(item, scene) {
   //Always check for invislbe particles, could do something to skip this check if desired
 
   parentMesh.data.hitTestAlpha = (x, y) => {
-    let pixelAlpha = this.pixelArray[
-      (Math.floor((1 - y) * this.imageDataHeight) * this.imageDataHeight +
+    let pixelAlpha = this.pixelArray.data[
+      (Math.floor((1 - y) * this.imageDataWidth) * this.imageDataHeight +
         Math.floor(x * this.imageDataWidth)) *
         4 +
         3
@@ -132,6 +132,7 @@ module.exports.prototype.getMesh = function(item, scene) {
     return pixelAlpha !== 0;
   };
 
+  square.data = parentMesh.data;
   parentMesh.data.item = item;
   parentMesh.visibility = 0;
   square.parent = parentMesh;
