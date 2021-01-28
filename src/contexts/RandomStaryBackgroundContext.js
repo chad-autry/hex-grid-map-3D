@@ -1,7 +1,7 @@
 "use strict";
 /**
  * Since only a single constructor is being exported as module.exports this comment isn't documented.
- * The class and module are the same thing, the contructor comment takes precedence.
+ * The class and module are the same thing, the constructor comment takes precedence.
  * @module RandomStaryBackgroundContext
  */
 
