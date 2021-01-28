@@ -10,7 +10,7 @@ var hexToRgb = require("../HexToRGB.js");
 /**
  * This context (item factory + manager) creates a visible grid for the board.
  * This particular grid is composed of semi-transparent hexagons.
- * Instead of inifinitely tiling the plain, only a finite number are shown that fade in and out as the view moves
+ * Instead of infinitely tiling the plain, only a finite number are shown that fade in and out as the view moves
  * @constructor
  * @param {external:cartesian-hexagonal} hexDimensions - The DTO defining the hex <--> cartesian relation
  */
