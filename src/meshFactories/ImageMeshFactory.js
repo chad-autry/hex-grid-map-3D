@@ -125,7 +125,7 @@ module.exports.prototype.getMesh = function(item, scene) {
     square.data.height = diameter;
   }
 
-  //Always check for invislbe particles, could do something to skip this check if desired
+  //Always check for invisible particles, could do something to skip this check if desired
   square.data.hitTestAlpha = (x, y) => {
     let pixelAlpha = this.offScreenCanvasMap[item.img].pixelArray[
       (Math.floor((1 - y) * 512) * 512 + Math.floor(x * 512)) * 4 + 3
