@@ -1,4 +1,4 @@
-//A place to define goball items
+//A place to define global items
 
 /**
  * A callback to be used for implementing the logic of dragging items
